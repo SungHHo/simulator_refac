@@ -1,0 +1,3 @@
+/home/nexuskang/FinalProject/LIGNex1/FinalProject/TempLc/build/CMakeFiles/lc_server.dir
+/home/nexuskang/FinalProject/LIGNex1/FinalProject/TempLc/build/CMakeFiles/edit_cache.dir
+/home/nexuskang/FinalProject/LIGNex1/FinalProject/TempLc/build/CMakeFiles/rebuild_cache.dir

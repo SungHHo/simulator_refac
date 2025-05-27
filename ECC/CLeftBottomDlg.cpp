@@ -112,6 +112,8 @@ void CLeftBottomDlg::UpdateLSModeUI()
 
 void CLeftBottomDlg::SetLSUI(const LSStatus& status)
 {
+	double posX = static_cast<double>(status.position.x) / 100000000.0;
+	double posY = static_cast<double>(status.position.y) / 100000000.0;
 	CString modeStr;
 	switch (status.mode) {
 	case LSStatus::STOP: modeStr = _T("정지"); break;
@@ -127,8 +129,8 @@ void CLeftBottomDlg::SetLSUI(const LSStatus& status)
 	GetDlgItem(IDC_STATIC_LS_ANGLE)->SetWindowText(angleStr);
 
 	CString xStr, yStr;
-	xStr.Format(_T("%lld"), status.position.x);
-	yStr.Format(_T("%lld"), status.position.y);
+	xStr.Format(_T("%.8f"), posX);
+	yStr.Format(_T("%.8f"), posY);
 	GetDlgItem(IDC_STATIC_LS_POSITION)->SetWindowText(xStr);
 	GetDlgItem(IDC_STATIC_LS_POSITION2)->SetWindowText(yStr);
 

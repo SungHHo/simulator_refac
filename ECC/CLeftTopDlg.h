@@ -54,4 +54,5 @@ public:
 	afx_msg void OnStnClickedStaticAngle();
 	afx_msg void OnStnClickedStaticPosition();
 	afx_msg void OnStnClickedStaticMfrMode();
+	afx_msg void OnStnClickedStaticMfrPosition2();
 };

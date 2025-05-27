@@ -31,6 +31,7 @@ BEGIN_MESSAGE_MAP(CLeftTopDlg, CDialogEx)
 	ON_STN_CLICKED(IDC_STATIC_ANGLE, &CLeftTopDlg::OnStnClickedStaticAngle)
 	ON_STN_CLICKED(IDC_STATIC_POSITION, &CLeftTopDlg::OnStnClickedStaticPosition)
 	ON_STN_CLICKED(IDC_STATIC_MFR_MODE, &CLeftTopDlg::OnStnClickedStaticMfrMode)
+	ON_STN_CLICKED(IDC_STATIC_MFR_POSITION2, &CLeftTopDlg::OnStnClickedStaticMfrPosition2)
 END_MESSAGE_MAP()
 
 BOOL CLeftTopDlg::OnInitDialog()
@@ -98,14 +99,15 @@ void CLeftTopDlg::UpdateRadarStatusFromSelection()
 // ✅ 레이더 상태 출력
 void CLeftTopDlg::SetRadarUI(const RadarStatus& status)
 {
-
+	double posX = static_cast<double>(status.position.x) / 100000000.0;
+	double posY = static_cast<double>(status.position.y) / 100000000.0;
 	CString modeStr = (status.mode == RadarStatus::ROTATE) ? _T("회전") : _T("정지");
 	CString angleStr;
 	angleStr.Format(_T("%.1f"), status.angle);
 
 	CString posXStr, posYStr;
-	posXStr.Format(_T("%lld"), status.position.x);
-	posYStr.Format(_T("%lld"), status.position.y);
+	posXStr.Format(_T("%.8f"), posX);
+	posYStr.Format(_T("%.8f"), posY);
 
 	GetDlgItem(IDC_STATIC_MFR_MODE)->SetWindowText(modeStr);
 	GetDlgItem(IDC_STATIC_MFR_ANGLE)->SetWindowText(angleStr);
@@ -152,3 +154,4 @@ void CLeftTopDlg::OnStnClickedStaticNetwork() {}
 void CLeftTopDlg::OnStnClickedStaticAngle() {}
 void CLeftTopDlg::OnStnClickedStaticPosition() {}
 void CLeftTopDlg::OnStnClickedStaticMfrMode() {}
+void CLeftTopDlg::OnStnClickedStaticMfrPosition2(){}

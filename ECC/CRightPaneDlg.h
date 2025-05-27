@@ -11,6 +11,7 @@ class CRightPaneDlg : public CDialogEx
 public:
 	CRightPaneDlg(CWnd* pParent = nullptr);
 	enum { IDD = IDD_RIGHT_PANE_DLG };
+	void SetLCStatus(const LCStatus& status);
 	virtual ~CRightPaneDlg();
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);

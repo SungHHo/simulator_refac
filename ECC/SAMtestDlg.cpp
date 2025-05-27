@@ -230,22 +230,8 @@ void CSAMtestDlg::receive(int len, const char* packet)
 {
 	if (len <= 0 || packet == nullptr) return;
 
-	// 1. 누적 버퍼에 추가
-	m_receiveBuffer.insert(m_receiveBuffer.end(), packet, packet + len);
-	std::cout << "[디버그] 누적된 수신 버퍼 크기: " << m_receiveBuffer.size() << "\n";
-
-	// 2. 고정 패킷 크기 도달 전이면 대기
-	constexpr size_t FIXED_PACKET_SIZE = 3072;
-	if (m_receiveBuffer.size() < FIXED_PACKET_SIZE)
-	{
-		std::cout << "[대기 중] 전체 수신 대기 (" << m_receiveBuffer.size() << "/" << FIXED_PACKET_SIZE << ")\n";
-		return;
-	}
-
 	try {
-		// 3. 패킷 파싱 시도
-		ParsedPacket parsed = PacketParser::Parse(reinterpret_cast<const char*>(m_receiveBuffer.data()), FIXED_PACKET_SIZE);
-		m_receiveBuffer.erase(m_receiveBuffer.begin(), m_receiveBuffer.begin() + FIXED_PACKET_SIZE);
+		ParsedPacket parsed = PacketParser::Parse(packet, static_cast<size_t>(len));
 
 		std::visit([&](auto&& msg) {
 			using T = std::decay_t<decltype(msg)>;
@@ -257,7 +243,7 @@ void CSAMtestDlg::receive(int len, const char* packet)
 					<< ", Target=" << msg.targetList.size()
 					<< ", Missile=" << msg.missileList.size() << "\n";
 
-				// 디버깅용 구조체 크기 출력 (한 번만)
+				// ✅ 구조체 크기 출력 (최초 1회)
 				static bool printed = false;
 				if (!printed) {
 					std::cout << "[DEBUG] sizeof(RadarStatus)   = " << sizeof(RadarStatus) << "\n";
@@ -267,28 +253,23 @@ void CSAMtestDlg::receive(int len, const char* packet)
 					std::cout << "[DEBUG] sizeof(MissileStatus) = " << sizeof(MissileStatus) << "\n";
 					printed = true;
 				}
-				// ✅ Radar
+
 				for (const auto& r : msg.radarList) {
 					std::cout << "  [Radar] ID=" << static_cast<int>(r.id)
 						<< ", Pos=(" << r.position.x << "," << r.position.y << ")"
 						<< ", Mode=" << (int)r.mode
 						<< ", Angle=" << r.angle << "\n";
 				}
-
-				// ✅ LC
 				for (const auto& lc : msg.lcList) {
 					std::cout << "  [LC] ID=" << static_cast<int>(lc.id)
 						<< ", Pos=(" << lc.position.x << "," << lc.position.y << ")\n";
 				}
-
-				// ✅ LS
 				for (const auto& ls : msg.lsList) {
 					std::cout << "  [LS] ID=" << static_cast<int>(ls.id)
 						<< ", Pos=(" << ls.position.x << "," << ls.position.y << ")"
 						<< ", Mode=" << (int)ls.mode
 						<< ", Angle=" << ls.angle << "\n";
 				}
-				// 미사일 리스트 디버그 출력
 				for (const auto& m : msg.missileList) {
 					std::cout << "  [Missile] ID=" << (int)m.id
 						<< ", Pos=(" << m.position.x << "," << m.position.y << ")"
@@ -298,7 +279,6 @@ void CSAMtestDlg::receive(int len, const char* packet)
 						<< ", PredictedTime=" << m.predicted_time
 						<< ", Hit=" << static_cast<int>(m.hit) << "\n";
 				}
-				// ✅ 타겟 리스트 디버깅
 				for (const auto& t : msg.targetList) {
 					std::cout << "  [Target] ID=" << (int)t.id
 						<< ", Pos=(" << t.position.x << "," << t.position.y << ")"
@@ -310,22 +290,24 @@ void CSAMtestDlg::receive(int len, const char* packet)
 						<< ", Hit=" << static_cast<int>(t.hit) << "\n";
 				}
 
-				// UI 갱신
+				// UI 반영
 				m_leftTop.SetRadarList(msg.radarList);
+				m_leftTop.SetTargetList(msg.targetList);
 				m_leftBottom.SetLSList(msg.lsList);
 				m_leftBottom.SetTargetList(msg.targetList);
+				if (!msg.lcList.empty())
+					m_rightPane.SetLCStatus(msg.lcList[0]);
 			}
 			else {
 				std::cout << "[수신] ACK or 기타 패킷 수신됨\n";
 			}
-
 			}, parsed);
 	}
 	catch (const std::exception& ex) {
 		std::cerr << "[에러] 패킷 파싱 실패: " << ex.what() << "\n";
-		m_receiveBuffer.clear(); // 오류 발생 시 버퍼 정리
 	}
 }
+
 
 
 

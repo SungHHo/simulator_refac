@@ -77,7 +77,10 @@ BOOL CRightPaneDlg::OnInitDialog()
 }
 
 
-
+// CRightPaneDlg.cpp
+void CRightPaneDlg::SetLCStatus(const LCStatus& status) {
+	m_launchDlg.SetLCStatus(status);
+}
 
 void CRightPaneDlg::OnBnClickedCheckLaunchCtrl()
 {

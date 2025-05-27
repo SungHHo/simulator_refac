@@ -5,7 +5,7 @@
 #pragma pack(push, 1)
 
 struct TargetStatus {
-    uint8_t id;
+    uint32_t id;
     Pos2D position;
     int64_t height;
     int64_t speed;

@@ -3,6 +3,7 @@
 #include "CMissileInfoDlg.h"
 #include "CTargetInfoDlg.h"
 #include "afxdialogex.h"
+#include "resource.h"
 class CRightPaneDlg : public CDialogEx
 {
 	DECLARE_DYNAMIC(CRightPaneDlg)

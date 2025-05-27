@@ -24,6 +24,7 @@
     <Keyword>MFCProj</Keyword>
     <RootNamespace>SAMtest</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>ECC</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -184,39 +185,52 @@
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="AckMessageTypes.h" />
     <ClInclude Include="CLaunchControlDlg.h" />
     <ClInclude Include="CLeftBottomDlg.h" />
     <ClInclude Include="CLeftTopDlg.h" />
+    <ClInclude Include="CLSLaunchDlg.h" />
+    <ClInclude Include="CLSMoveDlg.h" />
+    <ClInclude Include="CMFRModeSelectDlg.h" />
     <ClInclude Include="CMissileInfoDlg.h" />
-    <ClInclude Include="CommonMessage.h" />
-    <ClInclude Include="CommonTypes.h" />
     <ClInclude Include="CRightPaneDlg.h" />
     <ClInclude Include="CTargetInfoDlg.h" />
-    <ClInclude Include="CTestReceiverDlg.h" />
+    <ClInclude Include="Deserializer.h" />
+    <ClInclude Include="ECC_TCP.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="IReceiver.h" />
-    <ClInclude Include="LCMessage.h" />
-    <ClInclude Include="LSMessage.h" />
-    <ClInclude Include="MessageDeserializer.h" />
-    <ClInclude Include="MFRMessage.h" />
-    <ClInclude Include="MissileMessage.h" />
+    <ClInclude Include="LCStatus.h" />
+    <ClInclude Include="LSStatus.h" />
+    <ClInclude Include="MessageCommon.h" />
+    <ClInclude Include="MissileStatus.h" />
+    <ClInclude Include="PacketParser.h" />
+    <ClInclude Include="ParsedPacket.h" />
+    <ClInclude Include="ParseStatusResponse.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="RadarStatus.h" />
+    <ClInclude Include="ReceiveMessageTypes.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="SAMtest.h" />
     <ClInclude Include="SAMtestDlg.h" />
-    <ClInclude Include="TargetMessage.h" />
+    <ClInclude Include="SendMessageTypes.h" />
+    <ClInclude Include="Serializer.h" />
+    <ClInclude Include="TargetStatus.h" />
     <ClInclude Include="targetver.h" />
-    <ClInclude Include="TcpClient.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CLaunchControlDlg.cpp" />
     <ClCompile Include="CLeftBottomDlg.cpp" />
     <ClCompile Include="CLeftTopDlg.cpp" />
+    <ClCompile Include="CLSLaunchDlg.cpp" />
+    <ClCompile Include="CLSMoveDlg.cpp" />
+    <ClCompile Include="CMFRModeSelectDlg.cpp" />
     <ClCompile Include="CMissileInfoDlg.cpp" />
     <ClCompile Include="CRightPaneDlg.cpp" />
     <ClCompile Include="CTargetInfoDlg.cpp" />
-    <ClCompile Include="CTestReceiverDlg.cpp" />
-    <ClCompile Include="MessageDeserializer.cpp" />
+    <ClCompile Include="Deserializer.cpp" />
+    <ClCompile Include="ECC_TCP.cpp" />
+    <ClCompile Include="PacketParser.cpp" />
+    <ClCompile Include="ParseStatusResponse.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -225,7 +239,7 @@
     </ClCompile>
     <ClCompile Include="SAMtest.cpp" />
     <ClCompile Include="SAMtestDlg.cpp" />
-    <ClCompile Include="TcpClient.cpp" />
+    <ClCompile Include="Serializer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="SAMtest.rc" />

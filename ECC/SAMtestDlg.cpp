@@ -7,7 +7,13 @@
 #include "SAMtest.h"
 #include "SAMtestDlg.h"
 #include "afxdialogex.h"
-#include "MessageDeserializer.h"
+#include "SendMessageTypes.h"
+#include "Serializer.h"
+#include "ReceiveMessageTypes.h"
+#include "Deserializer.h"
+#include "PacketParser.h"
+#include <iostream>
+#include <variant>
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
@@ -108,15 +114,63 @@ BOOL CSAMtestDlg::OnInitDialog()
 	m_rightPane.MoveWindow(leftWidth + centerWidth, 0, rightWidth, height);
 	m_rightPane.ShowWindow(SW_SHOW);
 
-	// ✅ 테스트 다이얼로그 생성 및 실행 (모델리스)
-	m_pTestReceiverDlg = new CTestReceiverDlg;
-	m_pTestReceiverDlg->Create(IDD_TEST_RECEIVER_DLG, this);  // Create 먼저
-	m_pTestReceiverDlg->ShowWindow(SW_SHOW);                  // 그런 다음 보여주기
+	m_leftTop.SetParentDlg(this); // CLeftTopDlg에게 부모 다이얼로그를 전달
+	m_leftBottom.SetParentDlg(this); // CLeftBottomDlg에게 부모 다이얼로그를 전달
 
-	m_tcp.SetReceiver(m_pTestReceiverDlg);
-	m_tcp.Connect(_T("127.0.0.1"), 9000);
-	m_tcp.StartReceiving();
-	SetTimer(TIMER_ID_REQUEST, 1000, nullptr);
+	////임시 레이더 더미 시작
+	//std::vector<RadarStatus> dummyRadarList;
+
+	//for (int i = 1; i <= 3; ++i) {
+	//	RadarStatus radar{};
+	//	radar.id = i;                         // ✅ 임시 레이더 ID
+	//	radar.mode = RadarStatus::ROTATE;    // ✅ 임시 모드: 회전
+	//	radar.angle = 123.4 + i;             // 임의의 탐지 각
+	//	radar.position = { 1000 * i, 2000 * i };  // 임의의 좌표
+
+	//	dummyRadarList.push_back(radar);
+	//}
+
+	//m_leftTop.SetRadarList(dummyRadarList);
+	//
+	//// ✅ 더미 표적 리스트 설정
+	//std::vector<TargetStatus> dummyTargets;
+	//for (int i = 0; i < 5; ++i) {
+	//	TargetStatus target{};
+	//	target.id = 200 + i;
+	//	target.position = { 10000 + i * 500, 15000 + i * 500 };
+	//	target.angle = 45.0 + i * 5;
+	//	target.speed = 300.0 + i * 10;
+	//	dummyTargets.push_back(target);
+	//}
+	//m_leftTop.SetTargetList(dummyTargets);
+	//m_leftBottom.SetTargetList(dummyTargets);
+	////임시 레이더 더미 끝
+
+	//// ✅ 더미 LSStatus 생성
+	//std::vector<LSStatus> dummyLSList;
+	//LSStatus dummyLS;
+	//dummyLS.id = 1;
+	//dummyLS.mode = 0;  // STOP
+	//dummyLS.angle = 75.5;
+	//dummyLS.position = { 1000 , 2000 };
+	//dummyLSList.push_back(dummyLS);
+
+	//// ✅ 발사대 UI에 전달
+	//m_leftBottom.SetLSList(dummyLSList);
+
+
+
+	m_tcp = std::make_unique<ECC_TCP>();
+	if (!m_tcp->connect("192.168.0.51", 9000)) {
+		AfxMessageBox(_T("서버 연결 실패"));
+		return FALSE;
+	}
+
+	m_tcp->registerReceiver(this);
+	m_tcp->startReceiving();
+
+	// 2. 주기적 상태 요청 타이머 시작
+	SetTimer(TIMER_ID_REQUEST, 100, nullptr); // 100ms 주기
 
 	return TRUE;
 }
@@ -170,45 +224,161 @@ HCURSOR CSAMtestDlg::OnQueryDragIcon()
 	return static_cast<HCURSOR>(m_hIcon);
 }
 
+
+
 void CSAMtestDlg::receive(int len, const char* packet)
 {
-	//CString msg(packet, len);
-	//SetDlgItemText(IDC_STATIC_DATA, msg);
-	CommonMessage msg = DeserializeCommonMessage((uint8_t*)packet, len);
-	HandleParsedMessage(msg);
+	if (len <= 0 || packet == nullptr) return;
+
+	// 1. 누적 버퍼에 추가
+	m_receiveBuffer.insert(m_receiveBuffer.end(), packet, packet + len);
+	std::cout << "[디버그] 누적된 수신 버퍼 크기: " << m_receiveBuffer.size() << "\n";
+
+	// 2. 고정 패킷 크기 도달 전이면 대기
+	constexpr size_t FIXED_PACKET_SIZE = 3072;
+	if (m_receiveBuffer.size() < FIXED_PACKET_SIZE)
+	{
+		std::cout << "[대기 중] 전체 수신 대기 (" << m_receiveBuffer.size() << "/" << FIXED_PACKET_SIZE << ")\n";
+		return;
+	}
+
+	try {
+		// 3. 패킷 파싱 시도
+		ParsedPacket parsed = PacketParser::Parse(reinterpret_cast<const char*>(m_receiveBuffer.data()), FIXED_PACKET_SIZE);
+		m_receiveBuffer.erase(m_receiveBuffer.begin(), m_receiveBuffer.begin() + FIXED_PACKET_SIZE);
+
+		std::visit([&](auto&& msg) {
+			using T = std::decay_t<decltype(msg)>;
+
+			if constexpr (std::is_same_v<T, ParsedStatusResponse>) {
+				std::cout << "[수신] 상태 패킷: Radar=" << msg.radarList.size()
+					<< ", LS=" << msg.lsList.size()
+					<< ", LC=" << msg.lcList.size()
+					<< ", Target=" << msg.targetList.size()
+					<< ", Missile=" << msg.missileList.size() << "\n";
+
+				// 디버깅용 구조체 크기 출력 (한 번만)
+				static bool printed = false;
+				if (!printed) {
+					std::cout << "[DEBUG] sizeof(RadarStatus)   = " << sizeof(RadarStatus) << "\n";
+					std::cout << "[DEBUG] sizeof(LCStatus)      = " << sizeof(LCStatus) << "\n";
+					std::cout << "[DEBUG] sizeof(LSStatus)      = " << sizeof(LSStatus) << "\n";
+					std::cout << "[DEBUG] sizeof(TargetStatus)  = " << sizeof(TargetStatus) << "\n";
+					std::cout << "[DEBUG] sizeof(MissileStatus) = " << sizeof(MissileStatus) << "\n";
+					printed = true;
+				}
+				// ✅ Radar
+				for (const auto& r : msg.radarList) {
+					std::cout << "  [Radar] ID=" << static_cast<int>(r.id)
+						<< ", Pos=(" << r.position.x << "," << r.position.y << ")"
+						<< ", Mode=" << (int)r.mode
+						<< ", Angle=" << r.angle << "\n";
+				}
+
+				// ✅ LC
+				for (const auto& lc : msg.lcList) {
+					std::cout << "  [LC] ID=" << static_cast<int>(lc.id)
+						<< ", Pos=(" << lc.position.x << "," << lc.position.y << ")\n";
+				}
+
+				// ✅ LS
+				for (const auto& ls : msg.lsList) {
+					std::cout << "  [LS] ID=" << static_cast<int>(ls.id)
+						<< ", Pos=(" << ls.position.x << "," << ls.position.y << ")"
+						<< ", Mode=" << (int)ls.mode
+						<< ", Angle=" << ls.angle << "\n";
+				}
+				// 미사일 리스트 디버그 출력
+				for (const auto& m : msg.missileList) {
+					std::cout << "  [Missile] ID=" << (int)m.id
+						<< ", Pos=(" << m.position.x << "," << m.position.y << ")"
+						<< ", Height=" << m.height
+						<< ", Speed=" << m.speed
+						<< ", Angle=" << m.angle
+						<< ", PredictedTime=" << m.predicted_time
+						<< ", Hit=" << static_cast<int>(m.hit) << "\n";
+				}
+				// ✅ 타겟 리스트 디버깅
+				for (const auto& t : msg.targetList) {
+					std::cout << "  [Target] ID=" << (int)t.id
+						<< ", Pos=(" << t.position.x << "," << t.position.y << ")"
+						<< ", Height=" << t.height
+						<< ", Speed=" << t.speed
+						<< ", Angle=" << t.angle
+						<< ", FirstDetected=" << t.first_detect_time
+						<< ", Priority=" << t.priority
+						<< ", Hit=" << static_cast<int>(t.hit) << "\n";
+				}
+
+				// UI 갱신
+				m_leftTop.SetRadarList(msg.radarList);
+				m_leftBottom.SetLSList(msg.lsList);
+				m_leftBottom.SetTargetList(msg.targetList);
+			}
+			else {
+				std::cout << "[수신] ACK or 기타 패킷 수신됨\n";
+			}
+
+			}, parsed);
+	}
+	catch (const std::exception& ex) {
+		std::cerr << "[에러] 패킷 파싱 실패: " << ex.what() << "\n";
+		m_receiveBuffer.clear(); // 오류 발생 시 버퍼 정리
+	}
 }
 
-void CSAMtestDlg::HandleParsedMessage(const CommonMessage& msg)
-{
-//	if (msg.messageType != MessageType::RESPONSE)
-//		return;
-//
-//	for (const auto& item : msg.payload)
-//	{
-//		std::visit([this](auto&& typedMsg) {
-//			using T = std::decay_t<decltype(typedMsg)>;
-//
-//			if constexpr (std::is_same_v<T, LS::Message>)
-//				m_gui->UpdateLS(typedMsg);
-//			else if constexpr (std::is_same_v<T, MFR::Message>)
-//				m_gui->UpdateMFR(typedMsg);
-//			else if constexpr (std::is_same_v<T, LC::Message>)
-//				m_gui->UpdateLC(typedMsg);
-//			else if constexpr (std::is_same_v<T, Target::Message>)
-//				m_gui->UpdateTarget(typedMsg);
-//			else if constexpr (std::is_same_v<T, Missile::Message>)
-//				m_gui->UpdateMissile(typedMsg);
-//			}, item);
-//	}
+
+
+
+
+
+
+
+void CSAMtestDlg::sendStatusRequest() {
+	StatusRequest msg{};
+	auto data = SerializeStatusRequest(msg);
+	std::cout << "[클라이언트] STATUS_REQUEST 전송 (0x01)\n";
+	m_tcp->send(reinterpret_cast<const char*>(data.data()), static_cast<int>(data.size()));
 }
+
+void CSAMtestDlg::sendRadarModeChange(uint8_t radar_id, uint8_t mode, uint8_t target_id) {
+	RadarModeChange msg{ CommandType::RADAR_MODE_CHANGE, radar_id, mode, target_id };
+	auto data = SerializeRadarModeChange(msg);
+	m_tcp->send(reinterpret_cast<const char*>(data.data()), static_cast<int>(data.size()));
+}
+
+void CSAMtestDlg::sendLSModeChange(uint8_t ls_id, uint8_t mode) {
+	LSModeChange msg{ CommandType::LS_MODE_CHANGE, ls_id, mode };
+	auto data = SerializeLSModeChange(msg);
+	m_tcp->send(reinterpret_cast<const char*>(data.data()), static_cast<int>(data.size()));
+}
+
+void CSAMtestDlg::sendMissileLaunch(uint8_t ls_id, uint8_t target_id) {
+	MissileLaunch msg{ CommandType::MISSILE_LAUNCH, ls_id, target_id };
+	auto data = SerializeMissileLaunch(msg);
+	m_tcp->send(reinterpret_cast<const char*>(data.data()), static_cast<int>(data.size()));
+}
+void CSAMtestDlg::sendLSMove(uint8_t ls_id, Pos2D pos) {
+	LSMove msg{ CommandType::LS_MOVE, ls_id, pos };
+	auto data = SerializeLSMove(msg);
+	m_tcp->send(reinterpret_cast<const char*>(data.data()), static_cast<int>(data.size()));
+}
+
 
 void CSAMtestDlg::OnTimer(UINT_PTR nIDEvent)
 {
-	if (nIDEvent == TIMER_ID_REQUEST)
-	{
-		m_tcp.SendData(_T("GET"));
-		OutputDebugString(L"[TIMER] 'GET' 요청 전송\n");
+	if (nIDEvent == TIMER_ID_REQUEST) {
+		sendStatusRequest();  // 주기적 상태 요청
 	}
-
 	CDialogEx::OnTimer(nIDEvent);
+}
+
+void CSAMtestDlg::OnDestroy()
+{
+	CDialogEx::OnDestroy();
+
+	KillTimer(TIMER_ID_REQUEST);  // 타이머 해제
+	if (m_tcp) {
+		m_tcp->stop();  // 수신 스레드 종료
+	}
 }

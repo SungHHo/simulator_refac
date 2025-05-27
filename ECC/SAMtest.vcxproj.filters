@@ -54,38 +54,62 @@
     <ClInclude Include="CTargetInfoDlg.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="CMFRModeSelectDlg.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="CLSMoveDlg.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="CLSLaunchDlg.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="MessageCommon.h">
+      <Filter>Commprotocol</Filter>
+    </ClInclude>
+    <ClInclude Include="SendMessageTypes.h">
+      <Filter>Commprotocol</Filter>
+    </ClInclude>
+    <ClInclude Include="Serializer.h">
+      <Filter>Commprotocol</Filter>
+    </ClInclude>
+    <ClInclude Include="Deserializer.h">
+      <Filter>Commprotocol</Filter>
+    </ClInclude>
+    <ClInclude Include="ECC_TCP.h">
+      <Filter>Commprotocol</Filter>
+    </ClInclude>
+    <ClInclude Include="ReceiveMessageTypes.h">
+      <Filter>Commprotocol</Filter>
+    </ClInclude>
+    <ClInclude Include="RadarStatus.h">
+      <Filter>Commprotocol</Filter>
+    </ClInclude>
+    <ClInclude Include="LSStatus.h">
+      <Filter>Commprotocol</Filter>
+    </ClInclude>
+    <ClInclude Include="LCStatus.h">
+      <Filter>Commprotocol</Filter>
+    </ClInclude>
+    <ClInclude Include="TargetStatus.h">
+      <Filter>Commprotocol</Filter>
+    </ClInclude>
+    <ClInclude Include="MissileStatus.h">
+      <Filter>Commprotocol</Filter>
+    </ClInclude>
+    <ClInclude Include="AckMessageTypes.h">
+      <Filter>Commprotocol</Filter>
+    </ClInclude>
+    <ClInclude Include="ParsedPacket.h">
+      <Filter>Commprotocol</Filter>
+    </ClInclude>
+    <ClInclude Include="PacketParser.h">
+      <Filter>Commprotocol</Filter>
+    </ClInclude>
+    <ClInclude Include="ParseStatusResponse.h">
+      <Filter>Commprotocol</Filter>
+    </ClInclude>
     <ClInclude Include="IReceiver.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="TcpClient.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="CommonTypes.h">
       <Filter>Commprotocol</Filter>
-    </ClInclude>
-    <ClInclude Include="LSMessage.h">
-      <Filter>Commprotocol</Filter>
-    </ClInclude>
-    <ClInclude Include="MFRMessage.h">
-      <Filter>Commprotocol</Filter>
-    </ClInclude>
-    <ClInclude Include="LCMessage.h">
-      <Filter>Commprotocol</Filter>
-    </ClInclude>
-    <ClInclude Include="TargetMessage.h">
-      <Filter>Commprotocol</Filter>
-    </ClInclude>
-    <ClInclude Include="MissileMessage.h">
-      <Filter>Commprotocol</Filter>
-    </ClInclude>
-    <ClInclude Include="CommonMessage.h">
-      <Filter>Commprotocol</Filter>
-    </ClInclude>
-    <ClInclude Include="MessageDeserializer.h">
-      <Filter>Commprotocol</Filter>
-    </ClInclude>
-    <ClInclude Include="CTestReceiverDlg.h">
-      <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -116,14 +140,29 @@
     <ClCompile Include="CTargetInfoDlg.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="TcpClient.cpp">
+    <ClCompile Include="CMFRModeSelectDlg.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="MessageDeserializer.cpp">
+    <ClCompile Include="CLSMoveDlg.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="CLSLaunchDlg.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="ECC_TCP.cpp">
       <Filter>Commprotocol</Filter>
     </ClCompile>
-    <ClCompile Include="CTestReceiverDlg.cpp">
-      <Filter>소스 파일</Filter>
+    <ClCompile Include="Deserializer.cpp">
+      <Filter>Commprotocol</Filter>
+    </ClCompile>
+    <ClCompile Include="Serializer.cpp">
+      <Filter>Commprotocol</Filter>
+    </ClCompile>
+    <ClCompile Include="PacketParser.cpp">
+      <Filter>Commprotocol</Filter>
+    </ClCompile>
+    <ClCompile Include="ParseStatusResponse.cpp">
+      <Filter>Commprotocol</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

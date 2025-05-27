@@ -1,20 +1,16 @@
-﻿// CLeftTopDlg.cpp: 구현 파일
-//
-
-#include "pch.h"
-#include "SAMtest.h"
-#include "afxdialogex.h"
+﻿#include "pch.h"
 #include "CLeftTopDlg.h"
-
-
-// CLeftTopDlg 대화 상자
+#include "afxdialogex.h"
+#include "resource.h"
+#include "CMFRModeSelectDlg.h"
+#include "SAMtestDlg.h"  // 부모 다이얼로그 포인터 호출용
+#include <iostream>
 
 IMPLEMENT_DYNAMIC(CLeftTopDlg, CDialogEx)
 
 CLeftTopDlg::CLeftTopDlg(CWnd* pParent /*=nullptr*/)
 	: CDialogEx(IDD_LEFT_TOP_DLG, pParent)
 {
-
 }
 
 CLeftTopDlg::~CLeftTopDlg()
@@ -24,87 +20,135 @@ CLeftTopDlg::~CLeftTopDlg()
 void CLeftTopDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
+	DDX_Control(pDX, IDC_COMBO_RADAR_ID, m_comboRadarID);
 }
-
 
 BEGIN_MESSAGE_MAP(CLeftTopDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BTN_MODE_SWITCH, &CLeftTopDlg::OnBnClickedBtnModeSwitch)
-    ON_CBN_SELCHANGE(IDC_COMBO_RADAR_ID, &CLeftTopDlg::OnCbnSelchangeComboRadarId)
-    ON_STN_CLICKED(IDC_STATIC_MODE, &CLeftTopDlg::OnStnClickedStaticMode)
-    ON_STN_CLICKED(IDC_STATIC_NETWORK, &CLeftTopDlg::OnStnClickedStaticNetwork)
-    ON_STN_CLICKED(IDC_STATIC_ANGLE, &CLeftTopDlg::OnStnClickedStaticAngle)
-    ON_STN_CLICKED(IDC_STATIC_POSITION, &CLeftTopDlg::OnStnClickedStaticPosition)
- 
-
+	ON_CBN_SELCHANGE(IDC_COMBO_RADAR_ID, &CLeftTopDlg::OnCbnSelchangeComboRadarId)
+	ON_STN_CLICKED(IDC_STATIC_MODE, &CLeftTopDlg::OnStnClickedStaticMode)
+	ON_STN_CLICKED(IDC_STATIC_NETWORK, &CLeftTopDlg::OnStnClickedStaticNetwork)
+	ON_STN_CLICKED(IDC_STATIC_ANGLE, &CLeftTopDlg::OnStnClickedStaticAngle)
+	ON_STN_CLICKED(IDC_STATIC_POSITION, &CLeftTopDlg::OnStnClickedStaticPosition)
+	ON_STN_CLICKED(IDC_STATIC_MFR_MODE, &CLeftTopDlg::OnStnClickedStaticMfrMode)
 END_MESSAGE_MAP()
-
-
-// CLeftTopDlg 메시지 처리기
 
 BOOL CLeftTopDlg::OnInitDialog()
 {
-    CDialogEx::OnInitDialog();
-
-
-
-    // 초기화 코드 추가 가능
-
-    return TRUE;
+	CDialogEx::OnInitDialog();
+	return TRUE;
 }
 
-
-void CLeftTopDlg::OnBnClickedBtnModeSwitch()
+// ✅ 부모 다이얼로그 등록
+void CLeftTopDlg::SetParentDlg(CSAMtestDlg* parent)
 {
-    // 모드 전환 로직 예시
-    static bool isRotateMode = true;
-    
-    if (isRotateMode)
-    {
-        AfxMessageBox(_T("정지 모드로 전환됩니다."));
-    }
-    else
-    {
-        AfxMessageBox(_T("회전 모드로 전환됩니다."));
-    }
-
-    isRotateMode = !isRotateMode;
+	m_parent = parent;
 }
 
-
-void CLeftTopDlg::OnCbnSelchangeCombo1()
+// ✅ 외부에서 레이더 리스트 설정
+void CLeftTopDlg::SetRadarList(const std::vector<RadarStatus>& radarList)
 {
-    // TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	std::cout << "[UI] SetRadarList 호출됨, 개수: " << radarList.size() << "\n";
+	m_radarList = radarList;
+	m_comboRadarID.ResetContent();
+
+	for (const auto& radar : m_radarList) { // 시험 끝나면 const 다시 넣기
+		CString str;
+		str.Format(_T("%d"), radar.id);
+		m_comboRadarID.AddString(str);
+	}
+
+	if (!m_radarList.empty()) {
+		m_comboRadarID.SetCurSel(0);
+		UpdateRadarStatusFromSelection();
+	}
 }
 
+// ✅ 표적 리스트 설정
+void CLeftTopDlg::SetTargetList(const std::vector<TargetStatus>& targetList)
+{
+	m_targetList = targetList;
+}
 
+// ✅ 콤보박스 선택 변경 시
 void CLeftTopDlg::OnCbnSelchangeComboRadarId()
 {
-    // TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	UpdateRadarStatusFromSelection();
 }
 
-
-void CLeftTopDlg::OnStnClickedStaticMode()
+// ✅ 선택한 레이더 상태 UI로 출력
+void CLeftTopDlg::UpdateRadarStatusFromSelection()
 {
-    // TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	int sel = m_comboRadarID.GetCurSel();
+	if (sel == CB_ERR || sel >= static_cast<int>(m_radarList.size())) return;
+
+	CString strID;
+	m_comboRadarID.GetLBText(sel, strID);
+	int radarID = _ttoi(strID);
+
+	for (const auto& radar : m_radarList) {
+		if (radar.id == radarID) {
+			m_currentRadarStatus = radar;
+			SetRadarUI(radar);
+			break;
+		}
+	}
 }
 
-
-void CLeftTopDlg::OnStnClickedStaticNetwork()
+// ✅ 레이더 상태 출력
+void CLeftTopDlg::SetRadarUI(const RadarStatus& status)
 {
-    // TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+
+	CString modeStr = (status.mode == RadarStatus::ROTATE) ? _T("회전") : _T("정지");
+	CString angleStr;
+	angleStr.Format(_T("%.1f"), status.angle);
+
+	CString posXStr, posYStr;
+	posXStr.Format(_T("%lld"), status.position.x);
+	posYStr.Format(_T("%lld"), status.position.y);
+
+	GetDlgItem(IDC_STATIC_MFR_MODE)->SetWindowText(modeStr);
+	GetDlgItem(IDC_STATIC_MFR_ANGLE)->SetWindowText(angleStr);
+	GetDlgItem(IDC_STATIC_MFR_POSITION)->SetWindowText(posXStr);
+	GetDlgItem(IDC_STATIC_MFR_POSITION2)->SetWindowText(posYStr);
+	GetDlgItem(IDC_STATIC_MFR_NETWORK)->SetWindowText(_T("연결됨"));
 }
 
-
-void CLeftTopDlg::OnStnClickedStaticAngle()
+// ✅ 모드 전환 버튼 클릭 시
+void CLeftTopDlg::OnBnClickedBtnModeSwitch()
 {
-    // TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	uint8_t radarId = static_cast<uint8_t>(m_currentRadarStatus.id);
+
+	if (m_currentRadarStatus.mode == RadarStatus::ROTATE)
+	{
+		CMFRModeSelectDlg dlg;
+		dlg.SetTargetList(m_targetList);
+		dlg.SetContext(m_parent, static_cast<uint8_t>(m_currentRadarStatus.id));  // ✅ 서버 접근을 위한 context 전달
+		if (dlg.DoModal() == IDOK)
+		{
+			int selectedTargetId = dlg.GetSelectedTargetID();
+			
+		}
+	}
+	else if (m_currentRadarStatus.mode == RadarStatus::STOP)
+	{
+		if (m_parent)
+		{
+			m_parent->sendRadarModeChange(radarId, RadarStatus::ROTATE, 0);
+		}
+	}
 }
 
-
-void CLeftTopDlg::OnStnClickedStaticPosition()
+// ✅ ACK 수신 후 모드 갱신
+void CLeftTopDlg::OnRadarModeChangeSuccess(RadarStatus::Mode newMode)
 {
-    // TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	m_currentRadarStatus.mode = newMode;
+	SetRadarUI(m_currentRadarStatus); // UI 업데이트
 }
 
-
-
+// 나머지 클릭 핸들러 (필요 시 확장 가능)
+void CLeftTopDlg::OnStnClickedStaticMode() {}
+void CLeftTopDlg::OnStnClickedStaticNetwork() {}
+void CLeftTopDlg::OnStnClickedStaticAngle() {}
+void CLeftTopDlg::OnStnClickedStaticPosition() {}
+void CLeftTopDlg::OnStnClickedStaticMfrMode() {}

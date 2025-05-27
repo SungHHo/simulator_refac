@@ -5,9 +5,9 @@
 #include <string>
 #include <cstring>
 #include "SendMessageTypes.h"
+#include <ws2tcpip.h>
 
-#pragma comment(lib, "ws2_32.lib")
-#define PORT 9000
+#pragma comment(lib, "ws2_32.lib")  // Winsock 라이브러리 링크
 
 std::string ReadIni(const std::string& section, const std::string& key, const std::string& path) {
     char buffer[256] = {};
@@ -17,6 +17,12 @@ std::string ReadIni(const std::string& section, const std::string& key, const st
 
 int ReadInt(const std::string& section, const std::string& key, const std::string& path) {
     return GetPrivateProfileIntA(section.c_str(), key.c_str(), 0, path.c_str());
+}
+
+long long ReadLongLong(const std::string& section, const std::string& key,
+                       const std::string& path) {
+  std::string str = ReadIni(section, key, path);
+  return str.empty() ? 0LL : std::stoll(str);
 }
 
 double ReadDouble(const std::string& section, const std::string& key, const std::string& path) {
@@ -45,7 +51,8 @@ void SendSystemStatus(SOCKET client, const std::string& iniPath) {
 
     MissileStatus missile;
     missile.id = (uint8_t)ReadInt("Missile", "missileId", iniPath);
-    missile.position = { ReadInt("Missile", "posX", iniPath), ReadInt("Missile", "posY", iniPath) };
+    missile.position = {ReadLongLong("Missile", "posX", iniPath),
+                        ReadLongLong("Missile", "posY", iniPath)};
     missile.height = ReadInt("Missile", "height", iniPath);
     missile.speed = ReadInt("Missile", "speed", iniPath);
     missile.angle = ReadDouble("Missile", "degree", iniPath);
@@ -105,9 +112,9 @@ void SendSystemStatus(SOCKET client, const std::string& iniPath) {
     append(&missile, sizeof(missile));
 
     // 4. 고정 크기 3072 바이트 패딩
-    if (buffer.size() < 3072) {
-        buffer.resize(3072, 0);  // 0으로 채움
-    }
+    //if (buffer.size() < 3072) {
+    //    buffer.resize(3072, 0);  // 0으로 채움
+    //}
 
     // 5. 전송
     send(client, reinterpret_cast<const char*>(buffer.data()), buffer.size(), 0);
@@ -123,33 +130,54 @@ void SendSystemStatus(SOCKET client, const std::string& iniPath) {
 
 
 int main() {
-    std::string iniPath = "C:\\tcptest\\config.ini";
+    std::string iniPath = "C:\\Users\\user\\Desktop\\Surface-to-air-missiles\\Test\\ECC\\MOCK_CREATE\\config.ini";
 
-    WSADATA wsa;
-    WSAStartup(MAKEWORD(2, 2), &wsa);
-    SOCKET server = socket(AF_INET, SOCK_STREAM, 0);
-    sockaddr_in addr{};
-    addr.sin_family = AF_INET;
-    addr.sin_port = htons(PORT);
-    addr.sin_addr.s_addr = INADDR_ANY;
-    bind(server, (sockaddr*)&addr, sizeof(addr));
-    listen(server, 1);
-    std::cout << "[MockServer] Waiting...\n";
+    WSADATA wsaData;
+    SOCKET sock;
+    sockaddr_in serverAddr;
+    const char* serverIP = "127.0.0.1";  // 서버 IP (로컬호스트 예제)
+    int serverPort = 9001;               // 서버 포트
 
-    SOCKET client = accept(server, NULL, NULL);
-    std::cout << "[MockServer] Client connected.\n";
+    // Winsock 초기화
+    if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
+      std::cerr << "WSAStartup failed!" << std::endl;
+      return 1;
+    }
+
+    // 소켓 생성
+    sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    if (sock == INVALID_SOCKET) {
+      std::cerr << "Socket creation failed!" << std::endl;
+      WSACleanup();
+      return 1;
+    }
+
+    // 서버 주소 설정
+    serverAddr.sin_family = AF_INET;
+    serverAddr.sin_port = htons(serverPort);
+    InetPtonA(AF_INET, serverIP, &serverAddr.sin_addr);
+
+    // 서버에 연결
+    if (connect(sock, (sockaddr*)&serverAddr, sizeof(serverAddr)) ==
+        SOCKET_ERROR) {
+      std::cerr << "Connection failed!" << std::endl;
+      closesocket(sock);
+      WSACleanup();
+      return 1;
+    }
 
     while (true) {
         char buffer[1];
-        int len = recv(client, buffer, sizeof(buffer), 0);
-        if (len <= 0) break;
-        if ((uint8_t)buffer[0] == (uint8_t)CommandType::STATUS_REQUEST) {
-            SendSystemStatus(client, iniPath);
-        }
+        SendSystemStatus(sock, iniPath);
+        Sleep(1000);
+
+      //int len = recv(sock, buffer, sizeof(buffer), 0);
+      //  if (len <= 0) break;
+      //  if ((uint8_t)buffer[0] == (uint8_t)CommandType::STATUS_REQUEST) {
+      //  }
     }
 
-    closesocket(client);
-    closesocket(server);
+    closesocket(sock);
     WSACleanup();
     return 0;
 }

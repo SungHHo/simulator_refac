@@ -111,6 +111,9 @@
     <ClInclude Include="IReceiver.h">
       <Filter>Commprotocol</Filter>
     </ClInclude>
+    <ClInclude Include="MAP_TCP.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="SAMtest.cpp">
@@ -163,6 +166,9 @@
     </ClCompile>
     <ClCompile Include="ParseStatusResponse.cpp">
       <Filter>Commprotocol</Filter>
+    </ClCompile>
+    <ClCompile Include="MAP_TCP.cpp">
+      <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

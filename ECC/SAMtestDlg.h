@@ -18,7 +18,7 @@ private:
 	CRightPaneDlg m_rightPane;
 	CStatic m_mapArea; // 지도
 	HICON m_hIcon;
-	std::unique_ptr<ECC_TCP> m_tcp;  // ✅ 스마트 포인터로 변경
+    std::unique_ptr<ECC_TCP> m_tcp;  // ✅ 스마트 포인터로 변경
 	std::vector<uint8_t> m_receiveBuffer;
 public:
 	CSAMtestDlg(CWnd* pParent = nullptr);

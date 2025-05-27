@@ -201,6 +201,7 @@
     <ClInclude Include="IReceiver.h" />
     <ClInclude Include="LCStatus.h" />
     <ClInclude Include="LSStatus.h" />
+    <ClInclude Include="MAP_TCP.h" />
     <ClInclude Include="MessageCommon.h" />
     <ClInclude Include="MissileStatus.h" />
     <ClInclude Include="PacketParser.h" />
@@ -229,6 +230,7 @@
     <ClCompile Include="CTargetInfoDlg.cpp" />
     <ClCompile Include="Deserializer.cpp" />
     <ClCompile Include="ECC_TCP.cpp" />
+    <ClCompile Include="MAP_TCP.cpp" />
     <ClCompile Include="PacketParser.cpp" />
     <ClCompile Include="ParseStatusResponse.cpp" />
     <ClCompile Include="pch.cpp">

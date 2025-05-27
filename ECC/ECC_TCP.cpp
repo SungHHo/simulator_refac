@@ -4,6 +4,8 @@
 #include <ws2tcpip.h>
 #include <process.h>
 #include <iostream>
+
+#include "MAP_TCP.h"
 ECC_TCP::ECC_TCP() {}
 
 ECC_TCP::~ECC_TCP() {
@@ -34,6 +36,13 @@ bool ECC_TCP::connect(const char* ip, int port)
         return false;
     }
 
+    // Map Connect
+    map_tcp = std::make_unique<MAP_TCP>();
+    if (map_tcp->connect("192.168.0.62", 9001))
+    {
+      std::cout << "success Map TCP Connect" << std::endl;
+    }
+
     return true;
 }
 
@@ -58,18 +67,21 @@ unsigned __stdcall ECC_TCP::recvThread(void* arg) {
     ECC_TCP* self = static_cast<ECC_TCP*>(arg);
     char buf[3072];
 
-    while (self->m_bRunning) {
-        int len = recv(self->m_sock, buf, sizeof(buf), 0);
+  while (self->m_bRunning) {
+    int len = recv(self->m_sock, buf, sizeof(buf), 0);
 
-        if (len > 0 && self->m_receiver) {
-            self->m_receiver->receive(len, buf);
-        }
-        else if (len == 0 || len == SOCKET_ERROR) {
-            break;  // 연결 종료 또는 에러 발생
-        }
+    if (len > 0 && self->m_receiver) {
+      self->m_receiver->receive(len, buf);
+      // 받은 buf를 그대로 map_tcp로 전송
+      if (self->map_tcp) {
+        self->map_tcp->send(buf, len);
+      }
+    } else if (len == 0 || len == SOCKET_ERROR) {
+      break;  // 연결 종료 또는 에러 발생
     }
+  }
 
-    return 0;
+  return 0;
 }
 
 void ECC_TCP::stop() {

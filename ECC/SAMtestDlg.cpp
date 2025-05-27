@@ -14,6 +14,7 @@
 #include "PacketParser.h"
 #include <iostream>
 #include <variant>
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
@@ -161,7 +162,7 @@ BOOL CSAMtestDlg::OnInitDialog()
 
 
 	m_tcp = std::make_unique<ECC_TCP>();
-	if (!m_tcp->connect("192.168.0.51", 9000)) {
+	if (!m_tcp->connect("127.0.0.1", 9000)) {
 		AfxMessageBox(_T("서버 연결 실패"));
 		return FALSE;
 	}

@@ -132,21 +132,21 @@
     </TypeIdentifier>
   </Struct>
   <Struct Name="LSStatus" Collapsed="true">
-    <Position X="3.75" Y="4.75" Width="1.5" />
+    <Position X="5.5" Y="3.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAACAAAAAIAAAAAAAAAAAAAAAAABAAgA=</HashCode>
       <FileName>LSStatus.h</FileName>
     </TypeIdentifier>
   </Struct>
   <Struct Name="MissileStatus" Collapsed="true">
-    <Position X="9" Y="4.75" Width="1.5" />
+    <Position X="9" Y="3.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAgQAAAAAIAAAgAAAAQAAAAAAAABAAgA=</HashCode>
       <FileName>MissileStatus.h</FileName>
     </TypeIdentifier>
   </Struct>
-  <Struct Name="RadarStatus">
-    <Position X="9" Y="5.75" Width="1.5" />
+  <Struct Name="RadarStatus" Collapsed="true">
+    <Position X="7.25" Y="3.75" Width="1.5" />
     <NestedTypes>
       <Enum Name="RadarStatus::Mode" Collapsed="true">
         <TypeIdentifier>
@@ -160,98 +160,98 @@
     </TypeIdentifier>
   </Struct>
   <Struct Name="TargetStatus" Collapsed="true">
-    <Position X="5.5" Y="6.75" Width="1.5" />
+    <Position X="10.75" Y="3.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAQAAgQAAAAAIAAAAAAAAQAAAAAAAABAAgA=</HashCode>
       <FileName>TargetStatus.h</FileName>
     </TypeIdentifier>
   </Struct>
   <Struct Name="RadarModeChangeAck" Collapsed="true">
-    <Position X="7.25" Y="5.75" Width="1.5" />
+    <Position X="7.5" Y="7.5" Width="2" />
     <TypeIdentifier>
       <HashCode>AAAAAEAAAIAAAAAAAAAAAAAAAAoAAAAAAAAAAAAAACA=</HashCode>
       <FileName>AckMessageTypes.h</FileName>
     </TypeIdentifier>
   </Struct>
   <Struct Name="LSModeChangeAck" Collapsed="true">
-    <Position X="7.25" Y="3.75" Width="1.5" />
+    <Position X="5.25" Y="7.5" Width="1.75" />
     <TypeIdentifier>
       <HashCode>AAAAAEAAAIAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAACQ=</HashCode>
       <FileName>AckMessageTypes.h</FileName>
     </TypeIdentifier>
   </Struct>
   <Struct Name="MissileLaunchAck" Collapsed="true">
-    <Position X="7.25" Y="4.75" Width="1.5" />
+    <Position X="12.25" Y="7.25" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAEAAAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACQ=</HashCode>
       <FileName>AckMessageTypes.h</FileName>
     </TypeIdentifier>
   </Struct>
   <Struct Name="LSMoveAck" Collapsed="true">
-    <Position X="10.75" Y="3.75" Width="1.5" />
+    <Position X="10.25" Y="7.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAEAAAJAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACQ=</HashCode>
       <FileName>AckMessageTypes.h</FileName>
     </TypeIdentifier>
   </Struct>
   <Struct Name="Pos2D" Collapsed="true">
-    <Position X="3.75" Y="5.75" Width="1.5" />
+    <Position X="7.25" Y="4.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABgAAAAAAA=</HashCode>
       <FileName>MessageCommon.h</FileName>
     </TypeIdentifier>
   </Struct>
   <Struct Name="StatusHeader" Collapsed="true">
-    <Position X="10.75" Y="5.75" Width="1.5" />
+    <Position X="3.75" Y="4.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAQAAAAIAAAAAAAAAAAAAAAAADAAAAAgAAAAAAAAA=</HashCode>
       <FileName>ReceiveMessageTypes.h</FileName>
     </TypeIdentifier>
   </Struct>
   <Struct Name="ParsedStatusResponse" Collapsed="true">
-    <Position X="10.75" Y="4.75" Width="1.5" />
+    <Position X="5.5" Y="4.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAIAAAAAAAAAAAAAAQQAAAAAAAAAAAACAAAAAQAA=</HashCode>
       <FileName>ReceiveMessageTypes.h</FileName>
     </TypeIdentifier>
   </Struct>
   <Struct Name="StatusRequest" Collapsed="true">
-    <Position X="3.75" Y="6.75" Width="1.5" />
+    <Position X="10.75" Y="5.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>SendMessageTypes.h</FileName>
     </TypeIdentifier>
   </Struct>
   <Struct Name="RadarModeChange" Collapsed="true">
-    <Position X="5.5" Y="5.75" Width="1.5" />
+    <Position X="3.5" Y="5.5" Width="1.75" />
     <TypeIdentifier>
       <HashCode>AAAAAACAAIAAAAAAAAAAAAAAAAoAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>SendMessageTypes.h</FileName>
     </TypeIdentifier>
   </Struct>
   <Struct Name="LSModeChange" Collapsed="true">
-    <Position X="5.5" Y="3.75" Width="1.5" />
+    <Position X="5.5" Y="5.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAIAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAQ=</HashCode>
       <FileName>SendMessageTypes.h</FileName>
     </TypeIdentifier>
   </Struct>
   <Struct Name="MissileLaunch" Collapsed="true">
-    <Position X="5.5" Y="4.75" Width="1.5" />
+    <Position X="7.25" Y="5.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAACAAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQ=</HashCode>
       <FileName>SendMessageTypes.h</FileName>
     </TypeIdentifier>
   </Struct>
   <Struct Name="LSMove" Collapsed="true">
-    <Position X="9" Y="3.75" Width="1.5" />
+    <Position X="9" Y="5.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAIAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAAAQ=</HashCode>
       <FileName>SendMessageTypes.h</FileName>
     </TypeIdentifier>
   </Struct>
   <Enum Name="CommandType" Collapsed="true">
-    <Position X="3.75" Y="8" Width="1.5" />
+    <Position X="9" Y="4.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAQABAAAAAgCAAAAE=</HashCode>
       <FileName>MessageCommon.h</FileName>

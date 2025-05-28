@@ -11,7 +11,7 @@ struct StatusRequest {
 // [0x02] 레이더 모드 변경 ? 4 byte
 struct RadarModeChange {
     CommandType commandType = CommandType::RADAR_MODE_CHANGE;
-    uint8_t radar_id;
+    unsigned int radar_id;
     uint8_t radar_mode;
     uint8_t target_id;
 };
@@ -19,20 +19,20 @@ struct RadarModeChange {
 // [0x03] 발사대 모드 변경 ? 19 byte
 struct LSModeChange {
     CommandType commandType = CommandType::LS_MODE_CHANGE;
-    uint8_t ls_id;
+    unsigned int ls_id;
     uint8_t ls_mode;
 };
 
 // [0x04] 유도탄 발사 ? 3 byte
 struct MissileLaunch {
     CommandType commandType = CommandType::MISSILE_LAUNCH;
-    uint8_t ls_id;
+    unsigned int ls_id;
     uint8_t target_id;
 };
 // [0x05] 발사대 이동 ? 18 byte
 struct LSMove {
 	CommandType commandType = CommandType::LS_MOVE;
-	uint8_t ls_id;
+	unsigned int ls_id;
 	Pos2D position;  // 16 byte (x + y)
 };
 

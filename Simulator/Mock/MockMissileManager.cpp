@@ -1,5 +1,6 @@
 #include <iostream>
 #include "MockMissileManager.h"
+#include "MessageType.h"
 #include "MissileInfo.h"
 #include "MockMissile.h"
 
@@ -23,14 +24,17 @@ void MockMissileManager::updateMissileID()
 	last_missile_id_++;
 
 	// 식별자 100을 앞에 추가하여 ID 생성
-	last_missile_info_.mockType = 1;
 	last_missile_info_.id = 102 * 1000 + last_missile_id_;
 }
 
 void MockMissileManager::flightMissile(const MissileInfo &MissileInfo)
 {
 	last_missile_info_ = MissileInfo;
+	last_missile_info_.cmd = recvPacketType::SIM_DATA;
+
 	updateMissileID();
+
+	std::cout << last_missile_info_.id << std::endl;
 
 	if (is_flight_)
 	{

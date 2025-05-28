@@ -1,4 +1,5 @@
 #include "MockTargetManager.h"
+#include "MessageType.h"
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -41,15 +42,18 @@ void MockTargetManager::RaedTargetIni()
 			try
 			{
 				unsigned int id = std::stoul(tokens[0]);
-				float x = std::stof(tokens[1]);
-				float y = std::stof(tokens[2]);
-				float z = std::stof(tokens[3]);
-				float angle = std::stof(tokens[4]);
+				long long x = std::stoul(tokens[1]);
+				std::cout << "x : " << x << std::endl;
+				long long y = std::stoul(tokens[2]);
+				std::cout << "y : " << y << std::endl;
+				long long z = std::stoul(tokens[3]);
+				std::cout << "z : " << z << std::endl;
+				double angle = std::stod(tokens[4]);
 				int speed = std::stoi(tokens[5]);
 
 				// TargetInfo 객체 생성 및 데이터 설정
 				TargetInfo targetInfo;
-				targetInfo.mockType = 0;
+				targetInfo.cmd = recvPacketType::SIM_DATA;
 				targetInfo.id = id;
 				targetInfo.x = x;
 				targetInfo.y = y;
@@ -93,7 +97,7 @@ void MockTargetManager::flitghtTarget()
 {
 	for (auto &target : targets)
 	{
-		std::cout << "update " << std::endl;
+		// std::cout << "update " << std::endl;
 		target->updatePos();
 	}
 }

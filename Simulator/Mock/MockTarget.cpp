@@ -27,8 +27,8 @@ void MockTarget::sendData()
 {
 	// 타겟 데이터를 전송
 	char buffer[1024];
-	std::cout << "target size : " << sizeof(target_info_) << std::endl;
+	// std::cout << "target size : " << sizeof(target_info_) << std::endl;
 	std::memcpy(buffer, &target_info_, sizeof(target_info_));
 	mfr_send_manager_->sendData(buffer, sizeof(target_info_));
-	std::cout << "Target data sent." << std::endl;
+	// std::cout << "Target data sent." << std::endl;
 }

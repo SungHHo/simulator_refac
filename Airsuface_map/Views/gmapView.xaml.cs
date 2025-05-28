@@ -27,7 +27,7 @@ namespace Airsuface_map.Views
             InitializeComponent();
 
             MapControl.MapProvider = GMap.NET.MapProviders.GoogleMapProvider.Instance;
-            GMap.NET.GMaps.Instance.Mode = GMap.NET.AccessMode.ServerOnly;
+            GMap.NET.GMaps.Instance.Mode = GMap.NET.AccessMode.ServerAndCache;
 
             MapControl.Position = new PointLatLng(37.5665, 126.9780);
             MapControl.Zoom = 12;

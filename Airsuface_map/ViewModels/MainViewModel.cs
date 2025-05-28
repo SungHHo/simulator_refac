@@ -109,6 +109,17 @@ namespace Airsuface_map.ViewModels
                 Angle = reader.ReadDouble()            // double
             };
 
+
+            // 4. LSStatus 파싱
+            var ls = new LS
+            {
+                Id = reader.ReadInt32(),                    // uint8_t
+                X = ConvertLongToDouble(ReadCustomInt64(reader)),                 // long long
+                Y = ConvertLongToDouble(ReadCustomInt64(reader)),                // long long
+                Mode = reader.ReadByte(),                  // uint8_t
+                Angle = reader.ReadDouble()               // double
+            };
+
             // 3. LCStatus 파싱
             var lc = new LC {
                 Id = reader.ReadInt32(),                   // uint8_t
@@ -116,14 +127,37 @@ namespace Airsuface_map.ViewModels
                 Y = ConvertLongToDouble(ReadCustomInt64(reader))                 // long long
             };
 
-            // 4. LSStatus 파싱
-            var ls = new LS {
-                Id = reader.ReadInt32(),                    // uint8_t
-                X = ConvertLongToDouble(ReadCustomInt64(reader)),                 // long long
-                Y= ConvertLongToDouble(ReadCustomInt64(reader)),                // long long
-                Mode = reader.ReadByte(),                  // uint8_t
-                Angle = reader.ReadDouble()               // double
-            };
+            MockMissile missile = null;
+            if (numMissile > 0)
+            {
+                // 6. MissileStatus 파싱
+                var missileId = reader.ReadInt32();               // uint8_t
+                var missilePosX = reader.ReadInt64();            // long long
+                var missilePosY = reader.ReadInt64();            // long long
+                var missileHeight = reader.ReadInt64();          // long long
+                var missileSpeed = reader.ReadInt32();           // long long
+                var missileAngle = reader.ReadDouble();          // double
+                var predicted_time = reader.ReadInt64();   // long long
+                var intercept_time = reader.ReadInt64();   // long long
+                var missileHit = reader.ReadByte();              // uint8_t
+
+                missile = new MockMissile
+                {
+                    Id = missileId,
+                    X = ConvertLongToDouble(missilePosX),
+                    Y = ConvertLongToDouble(missilePosY),
+                    Z = missileHeight,
+                    Angle = missileAngle,
+                    Speed = (int)missileSpeed
+                };
+
+                MissileMapVM.UpdateMissiles(new[] { missile });
+            }
+            else
+            {
+                // 미사일이 없으면 빈 배열 전달(또는 필요시 아무것도 하지 않음)
+                MissileMapVM.UpdateMissiles(Array.Empty<MockMissile>());
+            }
 
             // 5. TargetStatus 파싱 (numTarget 개)
             var targets = new List<MockTarget>();
@@ -133,10 +167,10 @@ namespace Airsuface_map.ViewModels
                 var tPosX = ReadCustomInt64(reader);              // long long
                 var tPosY = ReadCustomInt64(reader);              // long long
                 var tHeight = ReadCustomInt64(reader);            // long long
-                var tSpeed = reader.ReadInt64();             // long long
+                var tSpeed = reader.ReadInt32();             // long long
                 var tAngle = reader.ReadDouble();            // double
-                var tFirstDetectTime = reader.ReadInt64();   // long long
-                var tPriority = reader.ReadInt32();          // int
+                var first_detect_time = reader.ReadInt64();   // long long
+                var tPriority = reader.ReadByte();          // int
                 var tHit = reader.ReadByte();                // uint8_t
 
                 targets.Add(new MockTarget
@@ -150,28 +184,7 @@ namespace Airsuface_map.ViewModels
                 });
             }
 
-            // 6. MissileStatus 파싱
-            var missileId = reader.ReadInt32();               // uint8_t
-            var missilePosX = reader.ReadInt64();            // long long
-            var missilePosY = reader.ReadInt64();            // long long
-            var missileHeight = reader.ReadInt64();          // long long
-            var missileSpeed = reader.ReadInt64();           // long long
-            var missileAngle = reader.ReadDouble();          // double
-            var missilePredictedTime = reader.ReadInt64();   // long long
-            var missileHit = reader.ReadByte();              // uint8_t
-
-            var missile = new MockMissile
-            {
-                Id = missileId,
-                X = ConvertLongToDouble(missilePosX),
-                Y = ConvertLongToDouble(missilePosY),
-                Z = missileHeight,
-                Angle = missileAngle,
-                Speed = (int)missileSpeed
-            };
-
             // ViewModel에 데이터 전달
-            MissileMapVM.UpdateMissiles(new[] { missile });
             TargetMapVM.UpdateTargets(targets); // 주석 해제 필요
             LCMapVM.UpdateLC(lc);
             LSMapVM.UpdateLS(ls);

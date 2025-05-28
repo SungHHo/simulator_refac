@@ -9,7 +9,7 @@ struct LSStatus {
         MOVE = 1,
         WAR = 2
     };
-    uint8_t id;
+    unsigned int id;
     Pos2D position;
     uint8_t mode;
     double angle;

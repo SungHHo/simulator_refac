@@ -60,16 +60,12 @@ void SendSystemStatus(SOCKET client, const std::string& iniPath) {
     std::vector<TargetStatus> targets;
     for (int i = 0; i < 100; ++i) {
         std::string section = "Target_" + std::to_string(i);
-        int rawId = ReadInt(section, "targetId", iniPath);
+        unsigned int rawId = ReadInt(section, "targetId", iniPath);
         if (rawId == 0) break;
  
-        if (rawId < 0 || rawId > 255) {
-            std::cerr << "[경고] Target_" << i << ": ID(" << rawId << ")는 uint8_t 범위를 벗어났습니다. 건너뜁니다.\n";
-            continue;
-        }
  
         TargetStatus t{};
-        t.id = static_cast<uint8_t>(rawId);
+        t.id = rawId;
         t.position = {
             ReadLongLong(section, "posX", iniPath),
             ReadLongLong(section, "posY", iniPath)
@@ -80,7 +76,7 @@ void SendSystemStatus(SOCKET client, const std::string& iniPath) {
         t.first_detect_time = ReadInt(section, "first_detect_time", iniPath);
         t.priority = ReadInt(section, "priority", iniPath);
         t.hit = static_cast<uint8_t>(ReadInt(section, "hit", iniPath));
- 
+        std::cout << "[Send] Target ID: " << t.id << "\n";
         targets.push_back(t);
     }
  

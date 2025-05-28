@@ -82,6 +82,12 @@ void CRightPaneDlg::SetLCStatus(const LCStatus& status) {
 	m_launchDlg.SetLCStatus(status);
 }
 
+void CRightPaneDlg::SetMissileStatus(const std::vector<MissileStatus>& missiles)
+{
+	if (!missiles.empty())
+		m_missileDlg.SetMissileStatus(missiles[0]);  // 가장 첫 번째 미사일 정보 표시
+}
+
 void CRightPaneDlg::OnBnClickedCheckLaunchCtrl()
 {
 	BOOL checked = ((CButton*)GetDlgItem(IDC_CHECK_LAUNCH_CTRL))->GetCheck();

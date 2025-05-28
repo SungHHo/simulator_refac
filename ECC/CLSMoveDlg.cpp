@@ -51,8 +51,8 @@ void CLSMoveDlg::OnBnClickedButtonLsMove()
 	{
 		// 좌표를 long long으로 변환하여 정밀도 유지
 		Pos2D pos;
-		pos.x = static_cast<long long>(m_posX * 100000);  // 소수점 5자리
-		pos.y = static_cast<long long>(m_posY * 100000);
+		pos.x = static_cast<long long>(m_posX * 100000000);  // 소수점 5자리
+		pos.y = static_cast<long long>(m_posY * 100000000);
 
 		m_parent->sendLSMove(static_cast<uint8_t>(m_lsId), pos);
 

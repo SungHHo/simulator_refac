@@ -5,7 +5,7 @@
 #pragma pack(push, 1)
 
 struct MissileStatus {
-    uint8_t id;
+    unsigned int id;
     Pos2D position;
     int64_t height;
     int64_t speed;

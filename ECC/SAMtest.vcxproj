@@ -247,6 +247,7 @@
     <ResourceCompile Include="SAMtest.rc" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="ClassDiagram.cd" />
     <None Include="res\SAMtest.rc2" />
   </ItemGroup>
   <ItemGroup>

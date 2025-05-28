@@ -171,7 +171,7 @@ BOOL CSAMtestDlg::OnInitDialog()
 	m_tcp->startReceiving();
 
 	// 2. 주기적 상태 요청 타이머 시작
-	SetTimer(TIMER_ID_REQUEST, 100, nullptr); // 100ms 주기
+	SetTimer(TIMER_ID_REQUEST, 1000, nullptr); // 100ms 주기
 
 	return TRUE;
 }
@@ -298,7 +298,9 @@ void CSAMtestDlg::receive(int len, const char* packet)
 				m_leftBottom.SetTargetList(msg.targetList);
 				if (!msg.lcList.empty())
 					m_rightPane.SetLCStatus(msg.lcList[0]);
+				m_rightPane.SetMissileStatus(msg.missileList);
 			}
+
 			else {
 				std::cout << "[수신] ACK or 기타 패킷 수신됨\n";
 			}

@@ -54,7 +54,7 @@ struct MissileStatus {
 };
 
 struct TargetStatus {
-    uint32_t id;
+    unsigned int id;
     Pos2D position;
     int64_t height;
     int64_t speed;

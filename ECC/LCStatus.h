@@ -5,7 +5,7 @@
 #pragma pack(push, 1)
 
 struct LCStatus {
-    uint8_t id;
+    unsigned int id;
     Pos2D position;
 };
 

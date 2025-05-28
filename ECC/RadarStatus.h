@@ -9,7 +9,7 @@ struct RadarStatus {
         STOP = 0,
         ROTATE = 1
     };
-    uint8_t id;
+    unsigned int id;
     Pos2D position;
     uint8_t mode;
     double angle;

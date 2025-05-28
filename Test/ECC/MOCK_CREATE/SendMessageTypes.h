@@ -25,26 +25,26 @@ struct StatusHeader {
 };
 
 struct RadarStatus {
-    uint8_t id;
+    unsigned int id;
     Pos2D position;
     uint8_t mode;
     double angle;
 };
 
 struct LSStatus {
-    uint8_t id;
+    unsigned int id;
     Pos2D position;
     uint8_t mode;
     double angle;
 };
 
 struct LCStatus {
-    uint8_t id;
+    unsigned int id;
     Pos2D position;
 };
 
 struct MissileStatus {
-    uint8_t id;
+    unsigned int id;
     Pos2D position;
     int64_t height;
     int64_t speed;
@@ -54,7 +54,7 @@ struct MissileStatus {
 };
 
 struct TargetStatus {
-    uint8_t id;
+    uint32_t id;
     Pos2D position;
     int64_t height;
     int64_t speed;

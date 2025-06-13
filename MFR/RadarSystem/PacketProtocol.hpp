@@ -13,25 +13,40 @@ struct Pos2D
     long long y;
 };
 
-struct Pos3D
+struct EncodedPos3D
 {
-    long long x;
-    long long y;
-    long long z;
+    long long latitude;
+    long long longitude;
+    long long altitude;
 };
 
-struct SimData // 4 + (8*3) + 4 + 8 = 40 bytes
+struct Pos3D
+{
+    double latitude;
+    double longitude;
+    double altitude;
+};
+
+struct localSimData // 4 + (8*3) + 8 + 4 = 40 bytes
 {
     unsigned int mockId;
     Pos3D mockCoords;
-    int speed;
-    double angle;    
+    double angle;
+    int speed;    
+};
+
+struct SimData // 4 + (8*3) + 8 + 4 = 40 bytes
+{
+    unsigned int mockId;
+    EncodedPos3D mockCoords;
+    double angle;
+    int speed;    
 };
 
 struct MfrToLcMissileInfo   // 4 + (8*3) + 4 + 8 + 8 + 8 + 1 = 57 bytes
 {
     unsigned int id;
-    Pos3D missileCoords;
+    EncodedPos3D missileCoords;
     int missileSpeed;
     double missileAngle;
     unsigned long long firstDetectionTime;
@@ -42,7 +57,7 @@ struct MfrToLcMissileInfo   // 4 + (8*3) + 4 + 8 + 8 + 8 + 1 = 57 bytes
 struct MfrToLcTargetInfo    // 4 + (8*3) + 4 + 8 + 8 + 1 + 1 = 50 bytes
 {
     unsigned int id;       
-    Pos3D targetCoords;
+    EncodedPos3D targetCoords;
     int targetSpeed;
     double targetAngle;
     unsigned long long firstDetectionTime;
@@ -68,14 +83,20 @@ enum sendPacketType : uint8_t
 
 enum RadarMode : uint8_t 
 {
-    ROTATION_MODE = 0,
-    ANGLE_MODE
+    ANGLE_MODE = 0x01,
+    ROTATION_MODE = 0x02
+};
+
+enum isPriorityMode : uint8_t 
+{
+    PRIORITY_TARGET = 0x01,
+    CUSTOMIZE_TARGET = 0x02
 };
 
 struct MfrStatus 
 {
     unsigned int radarId;
-    Pos2D radarPos;
+    Pos3D radarPos;
     RadarMode radarMode;
     double radarAngle;    
 };
@@ -91,7 +112,7 @@ struct ReqLcInitData
     unsigned int radarId;
 };
 
-struct ModeCahngeData
+struct ModeCahngeData    // 4 + 1 + 1 + 4  = 10 bytes
 {
     unsigned int radarId;
     unsigned char modeData;

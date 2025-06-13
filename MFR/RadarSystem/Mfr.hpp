@@ -22,12 +22,15 @@ class Mfr : public IReceiver {
 private:
     /// MFR(다기능 레이더)의 고유 ID
     const unsigned int mfrId = 101001;
-    const Pos2D mfrCoords = { 3754811601, 12699611663 };
+
+    /// @brief  MFR 좌표
+    const Pos3D mfrCoords = { 37.54811601, 126.99611663, 244};
     RadarMode mfrMode;
     const unsigned int motorTargetRPM = 1;
     double goalMotorAngle;
 
-    const long long limitDetectionRange = 100;
+    const long long limitDetectionRange = 100000;
+    const long long maxLimitDetectionRange = 10000000;
     const double limitedFoV = 30.0;
     unsigned int goalTargetId;
     
@@ -44,13 +47,18 @@ private:
     std::shared_mutex detectedTargetMutex;
     std::shared_mutex detectedMissileMutex;
 
-    std::unordered_map<unsigned int, SimData> mockTargets;
-    std::unordered_map<unsigned int, SimData> mockMissile;
-    std::unordered_map<unsigned int, SimData> detectedTargets;
-    std::unordered_map<unsigned int, SimData> detectedMissile;
+    std::unordered_map<unsigned int, localSimData> mockTargets;
+    std::unordered_map<unsigned int, localSimData> mockMissile;
+    std::unordered_map<unsigned int, localSimData> detectedTargets;
+    std::unordered_map<unsigned int, localSimData> detectedMissile;
 
     std::thread detectionThread;
     std::atomic<bool> detectionThreadRunning{false};
+
+    static constexpr double EARTH_RADIUS_M = 6'371'000.0; // 지구 반지름 (m)
+    static double deg2rad(double deg) { return deg * M_PI / 180.0; }
+
+    static constexpr double SCALE = 1e8;
 
 public:
     /**
@@ -67,6 +75,26 @@ public:
     void callBackData(const std::vector<char>& packet) override;
     
 private:
+
+    static Pos3D decode(const EncodedPos3D& e) 
+    {                
+        return Pos3D
+        {
+            static_cast<double>(e.latitude)  / SCALE,
+            static_cast<double>(e.longitude) / SCALE,
+            static_cast<double>(e.altitude)  / SCALE
+        };
+    }
+
+    static EncodedPos3D encode(const Pos3D& p) 
+    {
+        EncodedPos3D e;
+        e.latitude  = std::llround(p.latitude  * SCALE);  // 37.67213612 → 3767213612
+        e.longitude = std::llround(p.longitude * SCALE);  // 127.23644256 → 12723644256
+        e.altitude  = std::llround(p.altitude  * SCALE);  // 9000.12345678 → 900012345678
+        return e;
+    }
+
     /**
      * 전달된 구조체 T를 직렬화하여 바이트 벡터로 변환
      *
@@ -139,14 +167,12 @@ private:
 
     /**
      * 두 좌표 간의 거리 값 계산
-     * 
-     * @param x1 첫 번째 좌표의 x값
-     * @param y1 첫 번째 좌표의 y값
-     * @param x2 두 번째 좌표의 x값
-     * @param y2 두 번째 좌표의 y값
+     * Haversine Formula 적용
+     * @param mfrCoord 레이더 3차원 좌표
+     * @param mockCoord 모의기 3차원 좌표
      * @return 거리 값 (long long)
      */
-    long long calcDistance(long long x1, long long y1, long long x2, long long y2);
+    double calcDistance(Pos3D mfrCoord, Pos3D mockCoord);
 
     /**
      * 기준 좌표(x1, y1)로부터 목표 좌표(x2, y2)까지의 각도를 계산합니다.
@@ -177,7 +203,7 @@ private:
      *
      * @param target 추가할 MockTarget
      */
-    void addMockTarget(const SimData& target);
+    void addMockTarget(const localSimData& target);
     
     /**
      * ID로 MockTarget을 검색
@@ -185,7 +211,7 @@ private:
      * @param id 해당 MockTarget의 고유 ID
      * @return 해당 ID를 가진 MockTarget 포인터 (없으면 nullptr)
      */
-    SimData* getMockTargetById(unsigned int id);
+    localSimData* getMockTargetById(unsigned int id);
 
     /**
      * 지정된 ID의 MockTarget을 목록에서 제거
@@ -204,7 +230,7 @@ private:
      *
      * @param target 추가할 MockMissile
      */
-    void addMockMissile(const SimData& missile);
+    void addMockMissile(const localSimData& missile);
 
     /**
      * ID로 MockMissile을 검색
@@ -212,7 +238,7 @@ private:
      * @param id 해당 MockMissile의 고유 ID
      * @return 해당 ID를 가진 MockMissile 포인터 (없으면 nullptr)
      */
-    SimData* getMockMissileById(unsigned int id);
+    localSimData* getMockMissileById(unsigned int id);
 
     /**
      * 지정된 ID의 MockMissile을 목록에서 제거

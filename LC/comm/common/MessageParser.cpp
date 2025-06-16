@@ -88,10 +88,13 @@ CommonMessage parseLSStatus(const std::vector<uint8_t>& data, CommonMessage& msg
     ls.lsId  = be32toh(&data[1]);
     ls.posX  = be64toh(&data[5]);
     ls.posY  = be64toh(&data[13]);
-    uint64_t angleBits = be64toh(&data[21]);
-    std::memcpy(&ls.angle, &angleBits, sizeof(double));
-    ls.speed = be32toh(&data[29]);
-    ls.mode  = static_cast<OperationMode>(data[33]);
+    ls.height = be64toh(&data[21]);  // ✅ height 추가
+
+    uint64_t angleBits = be64toh(&data[29]);           // 위치 주의: 기존 21 → 29
+    std::memcpy(&ls.launchAngle, &angleBits, sizeof(double));
+
+    ls.speed = be32toh(&data[37]);                     // 위치 주의: 기존 29 → 37
+    ls.mode  = static_cast<OperationMode>(data[41]);   // 위치 주의: 기존 33 → 41
 
     // LSReport 디버깅
     // {
@@ -159,7 +162,7 @@ CommonMessage parseMoveCommand(const std::vector<uint8_t>& data, CommonMessage& 
 }
 CommonMessage parseRadarStatus(const std::vector<uint8_t>& data, SenderType sender) {
     CommonMessage msg;
-    if (data.size() < 29) { // 4+16+1+8+1+1 = 31 → 최소 29는 필요
+    if (data.size() < 37) { // 4+8+8+8+1+8+4+4 = 최소 45, 넉넉히 잡아도 37 이상
         msg.ok = false;
         return msg;
     }
@@ -171,17 +174,16 @@ CommonMessage parseRadarStatus(const std::vector<uint8_t>& data, SenderType send
     std::memcpy(&rs.radarId,       &data[1], 4);
     std::memcpy(&rs.posX,          &data[5], 8);
     std::memcpy(&rs.posY,          &data[13], 8);
-    rs.radarMode     = data[21];
-    std::memcpy(&rs.radarAngle,    &data[22], 8);
-    std::memcpy(&rs.mockTargetId,  &data[30], 4);
-    std::memcpy(&rs.mockMissileId, &data[34], 4);
+    std::memcpy(&rs.height,        &data[21], 8);  
+    rs.radarMode     = data[29];
+    std::memcpy(&rs.radarAngle,    &data[30], 8);
 
     msg.payload = rs;
     msg.ok = true;
     return msg;
 }
 
-//0x21
+//0x22
 CommonMessage parseRadarDetection(const std::vector<uint8_t>& data, SenderType sender) {
     CommonMessage msg;
     msg.sender = sender;
@@ -192,8 +194,13 @@ CommonMessage parseRadarDetection(const std::vector<uint8_t>& data, SenderType s
     det.radarId = data[1];
     uint8_t numTargets = data[2];
     uint8_t numMissiles = data[3];
-    size_t offset = 4;
+    std::cout << "[Parser] CommandType: " << static_cast<int>(msg.commandType) << "\n";
+    std::cout << "[Parser] Radar ID: " << static_cast<int>(det.radarId) << "\n";
+    std::cout << "[Parser] Number of Targets: " << static_cast<int>(numTargets) << "\n";
+    std::cout << "[Parser] Number of Missiles: " << static_cast<int>(numMissiles) << "\n";
 
+    size_t offset = 4;
+    std::cout << std::dec; // 10진수 출력으로 설정
     for (int i = 0; i < numTargets && offset + 50 <= data.size(); ++i) {
         RadarDetection::Target t;
         std::memcpy(&t.id,         &data[offset],      4);
@@ -207,6 +214,9 @@ CommonMessage parseRadarDetection(const std::vector<uint8_t>& data, SenderType s
         t.hit = data[offset + 49];
         det.targets.push_back(t);
         offset += 50;
+        std::cout << "[Parser] Target ID: " << t.id << ", PosX: " << t.posX << ", PosY: " << t.posY << "\n";
+        std::cout << "[Parser] Target Altitude: " << t.altitude << ", Speed: " << t.speed << ", Angle: " << t.angle << "\n";
+        std::cout << "[Parser] Target Detect Time: " << t.detectTime << ", Priority: " << static_cast<int>(t.priority) << ", Hit: " << t.hit << "\n";
     }
 
     for (int i = 0; i < numMissiles && offset + 50 <= data.size(); ++i) {
@@ -229,6 +239,7 @@ CommonMessage parseRadarDetection(const std::vector<uint8_t>& data, SenderType s
     return msg;
 }
 
+
 } // anonymous namespace
 
 namespace Common {
@@ -242,7 +253,6 @@ CommonMessage MessageParser::parse(const std::vector<uint8_t>& data, SenderType 
         msg.ok = false;
         return msg;
     }
-
     // debug
     /*
     for (size_t i = 0; i < data.size(); ++i) {
@@ -276,7 +286,6 @@ CommonMessage MessageParser::parse(const std::vector<uint8_t>& data, SenderType 
 
     if (sender == SenderType::MFR) {
         msg.commandType = static_cast<CommandType>(cmd);
-
         switch (msg.commandType) {
             //0x21
         case CommandType::STATUS_RESPONSE_MFR_TO_LC: {

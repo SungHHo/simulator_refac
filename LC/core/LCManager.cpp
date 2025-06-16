@@ -17,9 +17,14 @@
 #include "LCCommandHandler.h"  
 
 
+#define LCIP "172.16.0.213"
+#define LCPORT 6000
+#define LOCALPORT 7000
+#define MFRPORT 9999
 
 void LCManager::run() {
     std::cout << "[LCManager::run] 디버그 루프 실행 준비\n";
+    this->startStatusPrintingLoop();  // 🔥 꼭 여기에 추가해야 함
 
     // std::thread radarLoop([this]() {
     //     // this->startRadarDebugLoop();
@@ -151,32 +156,36 @@ void LCManager::onMessage(const Common::CommonMessage& msg) {
 
 void LCManager::dispatch(const Common::CommonMessage& msg) {
     using namespace Common;
+    static int dispatchCounter = 0;
+    dispatchCounter++;
 
-    std::cout << "[dispatch] 수신됨: Sender=" << static_cast<int>(msg.sender)
-              << ", Command=" << static_cast<int>(msg.commandType)
-              << ", OK=" << msg.ok << "\n";
-
-    if (!msg.ok) {
-        std::cerr << "[dispatch] ⚠️ 파싱 실패 or 포맷 이상\n";
-        return;
+    if (dispatchCounter % 10 == 0) {
+        // std::cout << "[dispatch] 수신됨: Sender=" << static_cast<int>(msg.sender)
+                //   << ", Command=" << static_cast<int>(msg.commandType)
+                //   << ", OK=" << msg.ok << "\n";
     }
+
+    // if (!msg.ok) {
+    //     std::cerr << "[dispatch] ⚠️ 파싱 실패 or 포맷 이상\n";
+    //     return;
+    // }
 
     switch (msg.sender) {
     case SenderType::ECC:
         LCCommandHandler::handleECCCommand(msg, *this);
         break;
-    case SenderType::MFR: {
+    case SenderType::MFR:
         LCCommandHandler::handleMFRCommand(msg, *this);
         break;
-    }
     case SenderType::LS:
-        LCCommandHandler::handleLSCommand(msg, *this);  // [추가해야 함]
+        LCCommandHandler::handleLSCommand(msg, *this);
         break;
     default:
-        std::cerr << "[dispatch] ❌ 알 수 없는 송신자(SenderType=" << static_cast<int>(msg.sender) << ") 무시됨\n";
+        // std::cerr << "[dispatch] ❌ 알 수 없는 송신자(SenderType=" << static_cast<int>(msg.sender) << ") 무시됨\n";
         break;
     }
 }
+
 
 double LCManager::LaunchAngleCalc() {
     SystemStatus snapshot = getStatusCopy(); 
@@ -211,40 +220,61 @@ double LCManager::DetectionAngleCalc() {
 }
 
 void LCManager::sendStatus() {
+    static int sendCounter = 0;
+    sendCounter++;
+
     SystemStatus snapshot = getStatusCopy();  // 상태 스냅샷
 
-    std::cout << "[LCManager] 상태를 ECC로 전송 중...\n";
+    if (sendCounter % 10 == 0) {
+        
+        // std::cout << "[LCManager] 상태를 ECC로 전송 중...\n";
+        std::cout << std::dec;  
 
-    // MFR 상태 출력
-    std::cout << "- [MFR] ID: " << snapshot.mfr.mfrId
-              << ", Mode: " << static_cast<int>(snapshot.mfr.mode)
-              << ", Degree: " << snapshot.mfr.degree
-              << ", Pos: (" << snapshot.mfr.position.x << ", " << snapshot.mfr.position.y << ")\n";
+        // // MFR 상태 출력
+        // std::cout << "- [MFR] ID: " << snapshot.mfr.mfrId
+        //           << ", Mode: " << static_cast<int>(snapshot.mfr.mode)
+        //           << ", Degree: " << snapshot.mfr.degree
+        //           << ", Pos: (" << snapshot.mfr.position.x << ", " << snapshot.mfr.position.y
+        //           << ", " << snapshot.mfr.height << ")\n";  // ✅ height 출력도 추가 가능
 
-    // LS 상태 출력
-    std::cout << "- [LS] ID: " << snapshot.ls.launchSystemId
-              << ", Mode: " << static_cast<int>(snapshot.ls.mode)
-              << ", Angle: " << snapshot.ls.launchAngle
-              << ", Pos: (" << snapshot.ls.position.x << ", " << snapshot.ls.position.y << ")\n";
+        // // LS 상태 출력
+        // std::cout << "- [LS] ID: " << snapshot.ls.launchSystemId
+        //           << ", Mode: " << static_cast<int>(snapshot.ls.mode)
+        //           << ", Angle: " << snapshot.ls.launchAngle
+        //           << ", Pos: (" << snapshot.ls.position.x << ", " << snapshot.ls.position.y
+        //           << ", " << snapshot.ls.height << ")\n";
 
-    // LC 상태 출력
-    std::cout << "- [LC] ID: " << snapshot.lc.LCId
-              << ", Pos: (" << snapshot.lc.position.x << ", " << snapshot.lc.position.y << ")\n";
+        // // LC 상태 출력
+        // std::cout << "- [LC] ID: " << snapshot.lc.LCId
+        //           << ", Pos: (" << snapshot.lc.position.x << ", " << snapshot.lc.position.y
+        //           << ", " << snapshot.lc.height << ")\n";
 
-    // 미사일 / 타겟 수 출력
-    std::cout << "- 미사일 수: " << snapshot.missiles.size() << "\n";
-    std::cout << "- 타겟 수: " << snapshot.targets.size() << "\n";
+        // 미사일 / 타겟 수 출력
+        std::cout << "- 미사일 수: " << snapshot.missiles.size() << "\n";
+        std::cout << "- 타겟 수: " << snapshot.targets.size() << "\n";
+        std::cout << "- 미사일 수: " << snapshot.missiles.size() << "\n";
+        std::cout << "- 타겟 수: " << snapshot.targets.size() << "\n";
+        std::cout << "- 미사일 수: " << snapshot.missiles.size() << "\n";
+        std::cout << "- 타겟 수: " << snapshot.targets.size() << "\n";
+        std::cout << "- 미사일 수: " << snapshot.missiles.size() << "\n";
+        std::cout << "- 타겟 수: " << snapshot.targets.size() << "\n";
+        
+    }
 
     // 직렬화 및 전송
     std::vector<uint8_t> packet = Common::Serializer::serializeStatusResponse(snapshot);
 
     if (consoleSender) {
         consoleSender->sendRaw(packet);
-        std::cout << "[LCManager] ECC로 상태 메시지 전송 완료 (" << static_cast<int>(packet.size()) << " 바이트)\n";
+
+        if (sendCounter % 10 == 0) {
+            std::cout << "[LCManager] ECC로 상태 메시지 전송 완료 (" << static_cast<int>(packet.size()) << " 바이트)\n";
+        }
     } else {
         std::cerr << "[LCManager] consoleSender가 연결되지 않았습니다.\n";
     }
 }
+
 
 void LCManager::initialize(const std::string& iniPath) {
     INIReader reader(iniPath);
@@ -343,6 +373,7 @@ void LCManager::initialize(const std::string& iniPath) {
 }
 
 void LCManager::init(const std::string& configPath, const std::string& ip, int port) {
+    // 설정 파일 초기화 (필요 시 활성화)
     // initialize(configPath);
 
     // ✅ ECC 연결
@@ -352,22 +383,22 @@ void LCManager::init(const std::string& configPath, const std::string& ip, int p
     ecc->start();
 
     // ✅ MFR 연결 (ECC와 동일한 구조)
-    auto mfr = std::make_shared<TcpMFR>("0.0.0.0", 9999);
+    auto mfr = std::make_shared<TcpMFR>("0.0.0.0", MFRPORT);
     mfr->setCallback(this);
     setMFRSender(mfr);
     mfr->start();
 
-
-    // ✅ LS 연결
+    // ✅ LS 연결 (Serial UDP 방식)
     serialLS = std::make_shared<SerialLS>(
-        /* localPort */ 7000,
-        /* lcIp */ "192.168.0.30",
-        /* lcPort */ 6000
+        /* localPort */ LOCALPORT,
+        /* lcIp */ LCIP,
+        /* lcPort */ LCPORT
     );
-    // // LS는 IReceiverCallback 사용 안 함. 수신은 내부에서 콘솔로만 디버깅.
     serialLS->setCallback(this);
     serialLS->start();
 }
+
+
 
 long long LCManager::squaredDistance(const Pos2D& a, const Pos2D& b) {
     long long dx = a.x - b.x;
@@ -425,7 +456,10 @@ std::string LCManager::getRadarCommandInput() {
     return input;
 }
 
-void LCManager::onRadarStatusReceived(const Common::RadarStatus&  r) {
+void LCManager::onRadarStatusReceived(const Common::RadarStatus& r) {
+    static int counter = 0;
+    counter++;
+
     // MFR 상태 구성
     MFRStatus m;
     m.mfrId = r.radarId;
@@ -433,14 +467,18 @@ void LCManager::onRadarStatusReceived(const Common::RadarStatus&  r) {
     m.degree = r.radarAngle;
     m.position.x = r.posX;
     m.position.y = r.posY;
+    m.height = r.height;  // ✅ 정확한 위치에 할당
+
     updateStatus(m);
 
-    // 상태 출력
-    std::cout << "[MFR] 상태 갱신 완료\n";
-    std::cout << "  - ID       : " << static_cast<unsigned int>(r.radarId) << "\n";
-    std::cout << "  - 모드     : " << static_cast<unsigned int>(r.radarMode) << "\n";
-    std::cout << "  - 각도     : " << r.radarAngle << "\n";
-    std::cout << "  - 위치     : (" << r.posX << ", " << r.posY << ")\n";
+    // 5번마다 출력
+    // if (counter % 5 == 0) {
+    //     std::cout << "[MFR] 상태 갱신 완료\n";
+    //     std::cout << "  - ID       : " << static_cast<unsigned int>(r.radarId) << "\n";
+    //     std::cout << "  - 모드     : " << static_cast<unsigned int>(r.radarMode) << "\n";
+    //     std::cout << "  - 각도     : " << r.radarAngle << "\n";
+    //     std::cout << "  - 위치     : (" << r.posX << ", " << r.posY << ", " << r.height << ")\n";  // ✅ height 출력
+    // }
 }
 
 void LCManager::onRadarDetectionReceived(const Common::RadarDetection& d) {
@@ -543,35 +581,45 @@ void LCManager::onLCPositionRequest() {
     Common::LCPositionResponse res{
         .radarId = snapshot.mfr.mfrId,
         .posX = snapshot.lc.position.x,
-        .posY = snapshot.lc.position.y
+        .posY = snapshot.lc.position.y,
+        .height = snapshot.lc.height  // ✅ height 필드 추가
     };
     auto packet = Common::Serializer::serializeLCPositionResponse(res);
     sendToMFR(packet);
 
-    std::cout << "[LCManager] MFR에 LC 위치 응답 전송 완료 → radarId: " 
-              << res.radarId << ", Pos: (" << res.posX << ", " << res.posY << ")\n";
+    std::cout << "[LCManager] MFR에 LC 위치 응답 전송 완료 → radarId: "
+              << res.radarId << ", Pos: (" << res.posX << ", " << res.posY 
+              << "), Height: " << res.height << '\n';
 }
 
 
 //0x33에서 파생됨 
 
 void LCManager::onLSStatusReceived(const Common::LSReport& ls) {
+    static int counter = 0;
+    counter++;
+
     LSStatus internalLS;
     internalLS.launchSystemId = ls.lsId;
     internalLS.mode = static_cast<LauncherMode>(ls.mode);
-    internalLS.launchAngle = ls.angle;
+    internalLS.launchAngle = ls.launchAngle;
     internalLS.position.x = ls.posX;
     internalLS.position.y = ls.posY;
+    internalLS.height = ls.height;  // ✅ 정확한 필드에 저장
 
     updateStatus(internalLS);  // SystemStatus 안의 ls 항목 업데이트
 
-    std::cout << "[LS] 상태 갱신 완료\n";
-    std::cout << "  - ID       : " << ls.lsId << "\n";
-    std::cout << "  - 위치     : (" << ls.posX << ", " << ls.posY << ")\n";
-    std::cout << "  - 각도     : " << ls.angle << "\n";
-    std::cout << "  - 속도     : " << ls.speed << "\n";
-    std::cout << "  - 모드     : " << static_cast<int>(ls.mode) << "\n";
+    if (counter % 5 == 0) {
+        std::cout << "[LS] 상태 갱신 완료\n";
+        std::cout << std::dec;  // 출력 10진수로 설정
+        std::cout << "  - ID       : " << ls.lsId << "\n";
+        std::cout << "  - 위치     : (" << ls.posX << ", " << ls.posY << ", " << ls.height << ")\n";
+        std::cout << "  - 각도     : " << ls.launchAngle << "\n";
+        std::cout << "  - 속도     : " << ls.speed << "\n";
+        std::cout << "  - 모드     : " << static_cast<int>(ls.mode) << "\n";
+    }
 }
+
 // *******************FOR TEST
 void LCManager::startLSCommandLoop() {
     std::cout << "[LS] Serial 포트 수신만 실행 중... 종료하려면 Ctrl+C\n";
@@ -586,4 +634,40 @@ void LCManager::startLSCommandLoop() {
     while (true) {
         std::this_thread::sleep_for(std::chrono::seconds(1));
     }
+}
+
+void LCManager::startStatusPrintingLoop() {
+    std::thread([this]() {
+        while (true) {
+            this->printStatus();  // 현재 위치 상태 출력
+            std::this_thread::sleep_for(std::chrono::seconds(1));
+        }
+    }).detach();
+}
+
+void LCManager::printStatus() const {
+        SystemStatus snapshot = getStatusCopy();  // thread-safe하게 복사
+
+        // std::cout << "[Missile List] 총 " << snapshot.missiles.size() << "개\n";
+        for (const auto& m : snapshot.missiles) {
+            // std::cout << "  - ID: " << static_cast<int>(m.id)
+            //         << ", Pos: (" << m.posX << ", " << m.posY << ")"
+            //         << ", Altitude: " << m.altitude
+            //         << ", Speed: " << m.speed
+            //         << ", Angle: " << m.angle
+            //         << ", InterceptTime: " << m.interceptTime
+            //         << ", Hit: " << static_cast<int>(m.hit) << "\n";
+        }
+
+        // std::cout << "[Target List] 총 " << snapshot.targets.size() << "개\n";
+        for (const auto& t : snapshot.targets) {
+            // std::cout << "  - ID: " << t.id
+            //         << ", Pos: (" << t.posX << ", " << t.posY << ")"
+            //         << ", Altitude: " << t.altitude
+            //         << ", Speed: " << t.speed
+            //         << ", Angle: " << t.angle
+            //         << ", Priority: " << static_cast<int>(t.priority)
+            //         << ", Hit: " << static_cast<int>(t.hit) << "\n";
+}
+
 }

@@ -81,4 +81,9 @@ public:
     // 전송 헬퍼 (선택)
     bool hasMFRSender() const;
     void sendToMFR(const std::vector<uint8_t>& packet);
+
+    void startStatusPrintingLoop();
+
+
+    void printStatus() const ;
 };

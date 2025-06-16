@@ -3,6 +3,10 @@ project(LC_Project)
 
 set(CMAKE_CXX_STANDARD 17)
 
+# Debug build 설정 추가
+set(CMAKE_BUILD_TYPE Debug)  # 기본 빌드 타입을 Debug로 설정
+set(CMAKE_CXX_FLAGS_DEBUG "-g")  # -g 플래그로 디버깅 정보 포함
+
 # Define include directories
 include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/core
@@ -26,13 +30,11 @@ add_executable(lc
     core/StatusLoader.cpp
 
     # Communication modules
-
     comm/ecc/TcpECC.cpp
-
     comm/ls/SerialLS.cpp
-
     comm/mfr/TcpMFR.cpp
     core/LCCommandHandler.cpp
+
     # Common utilities
     comm/common/MessageParser.cpp
     comm/common/Serializer.cpp

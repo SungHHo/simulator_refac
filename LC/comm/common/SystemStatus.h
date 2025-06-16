@@ -33,6 +33,7 @@ struct MFRStatus
     MFRMode mode = MFRMode::STOP;
     double degree = 0.0;
     Pos2D position;
+    long long height;
 };
 
 struct LSStatus
@@ -41,12 +42,14 @@ struct LSStatus
     LauncherMode mode = LauncherMode::STOP;
     double launchAngle = 0.0;
     Pos2D position;
+    long long height = 0;
 };
 
 struct LCStatus
 {
     unsigned int LCId = 0;
     Pos2D position;
+    long long height;
 };
 
 struct MissileStatus

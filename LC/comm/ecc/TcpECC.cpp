@@ -1,13 +1,13 @@
-//TcpECC.cpp
 #include "TcpECC.h"
 #include "LCManager.h"
 #include "Serializer.h"
 #include "MessageParser.h"
 #include "IReceiverCallback.h"
-#include <iostream>
 #include "IReceiver.h"
-#include <unistd.h>
+
+#include <iostream>
 #include <thread>
+#include <unistd.h>
 #include <arpa/inet.h>
 
 TcpECC::TcpECC(const std::string& ip, int port)
@@ -15,13 +15,6 @@ TcpECC::TcpECC(const std::string& ip, int port)
 
 void TcpECC::setCallback(IReceiverCallback* cb) {
     callback_ = cb;
-}
-
-void TcpECC::handleReceived(const std::vector<uint8_t>& data, SenderType from) {
-    if (callback_) {
-        auto msg = Common::MessageParser::parse(data, from);
-        callback_->onMessage(msg);
-    }
 }
 
 void TcpECC::start() {
@@ -47,7 +40,6 @@ void TcpECC::start() {
 
     std::cout << "[TcpECC] 클라이언트 대기 중: " << ip_ << ":" << port_ << std::endl;
 
-    // ✅ accept + receiveLoop를 스레드로 분리
     std::thread([this, server_fd]() {
         sockaddr_in client_addr{};
         socklen_t len = sizeof(client_addr);
@@ -59,11 +51,10 @@ void TcpECC::start() {
             return;
         }
 
-        std::cout << "[TcpECC] 클라이언트 연결됨" << std::endl;
+        // std::cout << "[TcpECC] 클라이언트 연결됨" << std::endl;
         receiveLoop();
     }).detach();
 }
-
 
 void TcpECC::receiveLoop() {
     while (true) {
@@ -71,23 +62,32 @@ void TcpECC::receiveLoop() {
         ssize_t len = recv(sock_fd_, buffer, sizeof(buffer), 0);
         if (len <= 0) break;
 
-    std::vector<uint8_t> raw(buffer, buffer + len);
-    auto msg = Common::MessageParser::parse(raw, getSenderType());  // ECC에서 왔다고 명시
-    if (callback_) {
-        callback_->onMessage(msg);  // 콜백으로 넘김
+        std::vector<uint8_t> raw(buffer, buffer + len);
+        auto msg = Common::MessageParser::parse(raw, getSenderType());
+
+        if (callback_) {
+            callback_->onMessage(msg);
+        }
     }
 }
-}
+
 SenderType TcpECC::getSenderType() const {
     return SenderType::ECC;
 }
 
-void TcpECC::sendSystemStatus(const SystemStatus& status) {
+void TcpECC::handleReceived(const std::vector<uint8_t>& data, SenderType from) {
+    if (callback_) {
+        auto msg = Common::MessageParser::parse(data, from);
+        callback_->onMessage(msg);
+    }
+}
+
+void TcpECC::sendStatus(const SystemStatus& status) {
     auto data = Common::Serializer::serializeStatusResponse(status);
     sendRaw(data, "[TcpECC] 상태 전송");
 }
 
-void TcpECC::sendStatus(const SystemStatus& status) {
+void TcpECC::sendSystemStatus(const SystemStatus& status) {
     auto data = Common::Serializer::serializeStatusResponse(status);
     sendRaw(data, "[TcpECC] 상태 전송");
 }
@@ -103,6 +103,13 @@ void TcpECC::sendResponse(uint8_t eccId, uint8_t mode, bool ok, const std::strin
 }
 
 void TcpECC::sendRaw(const std::vector<uint8_t>& data, const std::string& prefix) {
+    static int sendCounter = 0;
+    sendCounter++;
+
+    if (sendCounter % 10 != 0) {
+        return;
+    }
+
     ssize_t sent = send(sock_fd_, data.data(), data.size(), 0);
     if (sent < 0) {
         std::cerr << prefix << " - 전송 실패 (errno=" << errno << ")\n";

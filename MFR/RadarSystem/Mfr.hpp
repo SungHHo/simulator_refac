@@ -24,27 +24,45 @@ private:
     const unsigned int mfrId = 101001;
 
     /// @brief  MFR 좌표
-    const Pos3D mfrCoords = { 37.54811601, 126.99611663, 244};
+    const Pos3D mfrCoords = { 37.54811601, 126.99611663, 244.0};
     RadarMode mfrMode;
     const unsigned int motorTargetRPM = 1;
     double goalMotorAngle;
 
     const long long limitDetectionRange = 100000;
     const long long maxLimitDetectionRange = 10000000;
-    const double limitedFoV = 30.0;
-    unsigned int goalTargetId;
-    
-    Pos2D lcCoords;
 
+    /// @brief MFR의 시야(FoV) 제한 각도
+    /// 30도 제한, 15도씩 좌우로 확장
+    const double limitedFoV = 15.0;
+
+    /// @brief 목표 표적 ID
+    unsigned int goalTargetId;
+
+    Pos3D lcCoords;     // 수정 필요 -> 2D -> 3D
+
+    /// @brief MFR의 상태 정보
     MfrStatus mfrStatus;
 
+    /// @brief 모터 관리 Manager
     StepMotorController* stepMotorManager;
+    
+    /// @brief LC(발사통제기) 통신 매니저 - TCP/IP
     MfrLcCommManager* lcCommManager;
+    
+    /// @brief Simulator 통신 매니저 - UDP/IP
     MfrSimCommManager* simCommManager;
     
+    /// @brief 모의 타겟 공유 자원 관리
     std::shared_mutex mockTargetMutex;
+    
+    /// @brief 모의 미사일 공유 자원 관리
     std::shared_mutex mockMissileMutex;
-    std::shared_mutex detectedTargetMutex;
+
+    /// @brief 탐지된 모의 타겟 공유 자원 관리
+    std::shared_mutex detectedTargetMutex;\
+    
+    /// @brief 탐지된 모의 미사일 공유 자원 관리
     std::shared_mutex detectedMissileMutex;
 
     std::unordered_map<unsigned int, localSimData> mockTargets;
@@ -55,10 +73,11 @@ private:
     std::thread detectionThread;
     std::atomic<bool> detectionThreadRunning{false};
 
-    static constexpr double EARTH_RADIUS_M = 6'371'000.0; // 지구 반지름 (m)
-    static double deg2rad(double deg) { return deg * M_PI / 180.0; }
-
-    static constexpr double SCALE = 1e8;
+    /// @brief Haversine Formula에 사용되는 상수(r)
+    const double EARTH_RADIUS_M = 6'371'000.0; // 지구 반지름 (m)
+    
+    /// @brief 좌표 인코딩 및 디코딩에 사용되는 스케일링 상수
+    const double SCALE = 1e8;
 
 public:
     /**
@@ -66,7 +85,11 @@ public:
      */
     Mfr();
 
+    /**
+     * Mfr 소멸자
+     */
     ~Mfr();
+
     /**
      * Simulator 또는 LC(발사통제기) 통신 매니저로부터 수신한 메시지를 처리
      * 
@@ -75,25 +98,39 @@ public:
     void callBackData(const std::vector<char>& packet) override;
     
 private:
+    bool isLittleEndian() {
+    uint16_t x = 0x0102;
+    return *(reinterpret_cast<uint8_t*>(&x)) == 0x02;
+}
+    /**
+     * @brief deg -> rad 변환 함수
+     * @param deg 각도 정보
+     * @return 라디안 값
+     */
+    double deg2rad(double deg);
 
-    static Pos3D decode(const EncodedPos3D& e) 
-    {                
-        return Pos3D
-        {
-            static_cast<double>(e.latitude)  / SCALE,
-            static_cast<double>(e.longitude) / SCALE,
-            static_cast<double>(e.altitude)  / SCALE
-        };
-    }
+    /**
+     * @brief rad -> deg 변환 함수
+     * @param rad 라디안 정보
+     * @return 각도 값
+     */
+    double rad2deg(double rad);
 
-    static EncodedPos3D encode(const Pos3D& p) 
-    {
-        EncodedPos3D e;
-        e.latitude  = std::llround(p.latitude  * SCALE);  // 37.67213612 → 3767213612
-        e.longitude = std::llround(p.longitude * SCALE);  // 127.23644256 → 12723644256
-        e.altitude  = std::llround(p.altitude  * SCALE);  // 9000.12345678 → 900012345678
-        return e;
-    }
+    /**
+     * @brief Pos3D 구조체를 EncodedPos3D 구조체로 변환
+     * 
+     * @param e EncodedPos3D 구조체를 디코딩하여 Pos3D 구조체로 변환
+     * @return Pos3D 구조체
+     */
+    Pos3D decode(const EncodedPos3D& e);
+
+    /**
+     * @brief MFR의 상태 정보를 인코딩
+     *
+     * @param p Pos3D 구조체를 인코딩하여 EncodedPos3D 구조체로 변환
+     * @return EncodedPos3D 구조체
+     */
+    EncodedPos3D encode(const Pos3D& p);
 
     /**
      * 전달된 구조체 T를 직렬화하여 바이트 벡터로 변환
@@ -173,6 +210,23 @@ private:
      * @return 거리 값 (long long)
      */
     double calcDistance(Pos3D mfrCoord, Pos3D mockCoord);
+
+    /**
+     * 두 좌표 간의 각도 값 계산
+     * @param mfrCoord 레이더 3차원 좌표
+     * @param mockCoord 모의기 3차원 좌표
+     * @return 각도 값 (double, -180 ~ 180)
+     */
+    double calcBearing(Pos3D mfrCoord, Pos3D mockCoord);
+
+    /**
+     * 기준 각도(baseAngle)와 목표 각도(targetAngle) 간의 차이를 계산
+     * 
+     * @param baseAngle 기준 각도 (도 단위, -180 ~ 180)
+     * @param targetAngle 목표 각도 (도 단위, -180 ~ 180)
+     * @return 두 각도 간의 차이 (도 단위, -180 ~ 180)
+     */
+    double angleDiff(double baseAngle, double targetAngle);
 
     /**
      * 기준 좌표(x1, y1)로부터 목표 좌표(x2, y2)까지의 각도를 계산합니다.

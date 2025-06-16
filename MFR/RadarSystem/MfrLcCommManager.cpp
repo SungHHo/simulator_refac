@@ -6,7 +6,7 @@
 #include <thread>
 #include <vector>
 
-#define LC_SERVER_IP "192.168.1.110"
+#define LC_SERVER_IP "192.168.2.115"
 #define LC_SERVER_PORT 9999
 #define BUFFER_SIZE 1024
 
@@ -90,6 +90,7 @@ void MfrLcCommManager::send(const std::vector<char>& packet)
     }
 
     ssize_t sent = write(sockfd, packet.data(), packet.size());
+    std::cout << "[MfrLcCommManager::send] 전송 시도, size: " << packet.size() << " bytes" << std::endl;
     if (sent != packet.size()) 
     {
         std::cerr << "[MfrLcCommManager::send] 전송 실패" << std::endl;

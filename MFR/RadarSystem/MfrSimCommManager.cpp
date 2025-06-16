@@ -61,7 +61,8 @@ void MfrSimCommManager::startUdpReceiver()
             sockaddr_in clientAddr{};
             socklen_t addrLen = sizeof(clientAddr);
             ssize_t len = recvfrom(this->sockfd, buffer, BUFFER_SIZE, 0, (struct sockaddr*)&clientAddr, &addrLen);
-            if (len > 0) 
+            
+            if (len > 0)
             {
                 if (len == sizeof(uint8_t) + sizeof(SimData)) 
                 {
@@ -77,6 +78,7 @@ void MfrSimCommManager::startUdpReceiver()
                         std::cout << "[MfrSimCommManager::startUdpReceiver] receiver null" << "\n";
                     }
                 }
+
                 else
                 {
                     std::cerr << "패킷 크기 이상 (" << len << " bytes)" << std::endl;

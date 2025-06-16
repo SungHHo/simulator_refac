@@ -96,7 +96,7 @@ enum isPriorityMode : uint8_t
 struct MfrStatus 
 {
     unsigned int radarId;
-    Pos3D radarPos;
+    EncodedPos3D radarPos;
     RadarMode radarMode;
     double radarAngle;    
 };
@@ -104,7 +104,7 @@ struct MfrStatus
 struct LcInitData
 {
     unsigned int radarId;
-    Pos2D lcCoord;
+    Pos3D lcCoord;
 };
 
 struct ReqLcInitData

@@ -191,16 +191,25 @@ CommonMessage parseRadarDetection(const std::vector<uint8_t>& data, SenderType s
     msg.ok = true;
 
     RadarDetection det;
-    det.radarId = data[1];
-    uint8_t numTargets = data[2];
-    uint8_t numMissiles = data[3];
+
+    size_t offset = 1; // CommandType 뒤부터 시작
+
+    // ✅ radarId: 4바이트
+    std::memcpy(&det.radarId, &data[offset], 4);
+    offset += 4;
+
+    // ✅ numTargets: 1바이트, numMissiles: 1바이트
+    uint8_t numTargets = data[offset++];
+    uint8_t numMissiles = data[offset++];
+
     std::cout << "[Parser] CommandType: " << static_cast<int>(msg.commandType) << "\n";
-    std::cout << "[Parser] Radar ID: " << static_cast<int>(det.radarId) << "\n";
+    std::cout << "[Parser] Radar ID: " << det.radarId << "\n";
     std::cout << "[Parser] Number of Targets: " << static_cast<int>(numTargets) << "\n";
     std::cout << "[Parser] Number of Missiles: " << static_cast<int>(numMissiles) << "\n";
 
-    size_t offset = 4;
-    std::cout << std::dec; // 10진수 출력으로 설정
+    std::cout << std::dec; // 10진수 출력 설정
+
+    // ✅ Target 파싱 (50바이트씩)
     for (int i = 0; i < numTargets && offset + 50 <= data.size(); ++i) {
         RadarDetection::Target t;
         std::memcpy(&t.id,         &data[offset],      4);
@@ -214,12 +223,14 @@ CommonMessage parseRadarDetection(const std::vector<uint8_t>& data, SenderType s
         t.hit = data[offset + 49];
         det.targets.push_back(t);
         offset += 50;
+
         std::cout << "[Parser] Target ID: " << t.id << ", PosX: " << t.posX << ", PosY: " << t.posY << "\n";
         std::cout << "[Parser] Target Altitude: " << t.altitude << ", Speed: " << t.speed << ", Angle: " << t.angle << "\n";
-        std::cout << "[Parser] Target Detect Time: " << t.detectTime << ", Priority: " << static_cast<int>(t.priority) << ", Hit: " << t.hit << "\n";
+        std::cout << "[Parser] Target Detect Time: " << t.detectTime << ", Priority: " << static_cast<int>(t.priority) << ", Hit: " << static_cast<int>(t.hit) << "\n";
     }
 
-    for (int i = 0; i < numMissiles && offset + 50 <= data.size(); ++i) {
+    // ✅ Missile 파싱 (57바이트씩)
+    for (int i = 0; i < numMissiles && offset + 57 <= data.size(); ++i) {
         RadarDetection::Missile m;
         std::memcpy(&m.id,           &data[offset],      4);
         std::memcpy(&m.posX,         &data[offset + 4],  8);
@@ -228,17 +239,15 @@ CommonMessage parseRadarDetection(const std::vector<uint8_t>& data, SenderType s
         std::memcpy(&m.speed,        &data[offset + 28], 4);
         std::memcpy(&m.angle,        &data[offset + 32], 8);
         std::memcpy(&m.detectTime,   &data[offset + 40], 8);
-        std::memcpy(&m.interceptTime,   &data[offset + 48], 8);
+        std::memcpy(&m.interceptTime,&data[offset + 48], 8);
         m.hit = data[offset + 56];
         det.missiles.push_back(m);
         offset += 57;
     }
 
-    // 메시지/결과 플래그 파싱 생략 (향후 확장용 필드로 구조체에만 존재)
     msg.payload = det;
     return msg;
 }
-
 
 } // anonymous namespace
 

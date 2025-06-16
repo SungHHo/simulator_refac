@@ -98,6 +98,7 @@ void TcpMFR::receiveLoop() {
     while (true) {
         uint8_t buffer[3072];
         ssize_t len = recv(sock_fd_, buffer, sizeof(buffer), 0);
+        std::cout << "[TcpMFR] recv() 호출됨, len = " << len << "\n";
 
 
         if (len == 0) {
@@ -145,7 +146,31 @@ void TcpMFR::sendStatus(const SystemStatus& status) {
 //     sendRaw(data, "[TcpMFR] 응답 전송");
 // }
 
+void TcpMFR::sendRaw(const std::vector<uint8_t>& data) {
+    static int sendCounter = 0;
+    sendCounter++;
+
+    if (sendCounter % 10 != 0) {
+        return;  // 10번 중 1번만 전송
+    }
+
+    const std::string prefix = "[TcpMFR] 일반 전송";
+
+    ssize_t sent = send(sock_fd_, data.data(), data.size(), 0);
+    if (sent < 0) {
+        std::cerr << prefix << " - 전송 실패 (errno=" << errno << ")\n";
+    } else {
+        std::cout << prefix << " - " << sent << " 바이트 전송 완료\n";
+    }
+}
 void TcpMFR::sendRaw(const std::vector<uint8_t>& data, const std::string& prefix) {
+    static int sendCounter = 0;
+    sendCounter++;
+
+    if (sendCounter % 10 != 0) {
+        return;  // 10번 중 1번만 전송
+    }
+
     ssize_t sent = send(sock_fd_, data.data(), data.size(), 0);
     if (sent < 0) {
         std::cerr << prefix << " - 전송 실패 (errno=" << errno << ")\n";

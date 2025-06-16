@@ -22,6 +22,7 @@ struct LCPositionResponse {
     unsigned int radarId;
     long long posX;
     long long posY;
+    long long height;
 };
 
 // [0x02] ECC → LC: 레이더 모드 변경
@@ -56,6 +57,7 @@ struct RadarStatus {
     unsigned int radarId;
     long long posX;
     long long posY;
+    long long height;
     uint8_t radarMode;
     double radarAngle;
     unsigned int mockTargetId;
@@ -72,7 +74,7 @@ struct RadarDetection {
         long long altitude;
         int speed;
         double angle;
-        long long detectTime;
+        unsigned long long detectTime;
         uint8_t priority;
         bool hit;
     };
@@ -124,11 +126,11 @@ struct LauncherModeCommand {
 struct LSReport {
     unsigned int lsId;       // 4 bytes
     long long posX;          // 8 bytes
-    long long posY;          // 8 bytes
-    double angle;            // 8 bytes
+    long long posY        ;            // 8 bytes
+    long long height;        // 8 bytes
     int speed;               // 4 bytes
+    double launchAngle;
     OperationMode mode;      // 1 byte
-    // 총 33 bytes (padding 시 40 bytes 가능성 있음)
 };
 
 

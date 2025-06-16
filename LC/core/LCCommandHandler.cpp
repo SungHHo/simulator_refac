@@ -15,10 +15,17 @@ namespace LCCommandHandler
         switch (msg.commandType)
         {
 
-        case CommandType::STATUS_REQUEST_ECC_TO_LC: 
-            std::cout << "[ECC] STATUS_REQUEST 수신 → 상태 전송\n";
+        case CommandType::STATUS_REQUEST_ECC_TO_LC: {
+            static int eccRequestCounter = 0;
+            eccRequestCounter++;
+
+            if (eccRequestCounter % 10 == 0) {
+                std::cout << "[ECC] STATUS_REQUEST 수신 → 상태 전송\n";
+            }
+
             manager.sendStatus();
             break;
+        }
         //0x02
         case CommandType::SET_RADAR_MODE_ECC_TO_LC:
         {

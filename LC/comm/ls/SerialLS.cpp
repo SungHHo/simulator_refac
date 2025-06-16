@@ -48,8 +48,6 @@ void SerialLS::start() {
     addr.sin_addr.s_addr = INADDR_ANY;
     addr.sin_port = htons(localPort_);
 
-    // std::cout << "here : " << bind(sockfd_, (struct sockaddr*)&addr, sizeof(addr)) << std::endl;
-
     if (bind(sockfd_, (struct sockaddr*)&addr, sizeof(addr)) < 0) {
         perror("[SerialLS] bind");
         close(sockfd_);
@@ -57,6 +55,8 @@ void SerialLS::start() {
     }
 
     std::thread([this]() {
+        int recvCounter = 0;  // ✅ 쓰레드 안에서 선언된 로컬 카운터
+
         while (!stop_) {
             uint8_t buffer[3072];
             sockaddr_in client_addr{};
@@ -65,12 +65,17 @@ void SerialLS::start() {
             ssize_t recv_len = recvfrom(sockfd_, buffer, sizeof(buffer), 0,
                                         (sockaddr*)&client_addr, &len);
             if (recv_len > 0) {
+                recvCounter++;  // ✅ 정상 수신 횟수 증가
+
+                if (recvCounter % 10 == 0) {
+                    std::cout << "[SerialLS] 수신 데이터 크기: " << recv_len << " 바이트\n";
+                }
+
                 std::vector<uint8_t> raw(buffer, buffer + recv_len);
-                std::cout << "[SerialLS] 수신 데이터 크기: " << static_cast<int>(recv_len) << " 바이트\n";
                 try {
                     auto msg = Common::MessageParser::parse(raw, getSenderType());
                     if (callback_) {
-                        callback_->onMessage(msg);  // ✅ 콜백 사용하여 LCManager로 전달
+                        callback_->onMessage(msg);
                     } else {
                         std::cerr << "[SerialLS] ⚠️ 콜백이 설정되지 않았습니다.\n";
                     }
@@ -82,10 +87,10 @@ void SerialLS::start() {
                 break;
             }
         }
+
         close(sockfd_);
     }).detach();
 }
-
 SenderType SerialLS::getSenderType() const {
     return SenderType::LS;
 }

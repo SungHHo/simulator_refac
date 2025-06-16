@@ -22,9 +22,7 @@ public:
     void sendStatus(const SystemStatus& status); // 추가 함수
     void sendStatus(const Common::CommonMessage& msg) override; // 인터페이스 구현
 
-    void sendRaw(const std::vector<uint8_t>& data) override {
-        sendRaw(data, "[TcpMFR] 일반 전송");
-    }
+    void sendRaw(const std::vector<uint8_t>& data) override;
     void handleReceived(const std::vector<uint8_t>& data, SenderType from) override;
 
     void sendResponse(uint8_t radarId, uint8_t mode, bool ok, const std::string& msg);

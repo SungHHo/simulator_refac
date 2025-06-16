@@ -15,6 +15,5 @@ void handleCommand(SenderType sender, const Common::CommonMessage& msg, LCManage
 void handleECCCommand(const Common::CommonMessage& msg, LCManager& manager);
 void handleMFRCommand(const Common::CommonMessage& msg, LCManager& manager);
 void handleLSCommand(const Common::CommonMessage& msg, LCManager& manager);
-void handleLCPositionRequest(LCManager& manager);
 
 }

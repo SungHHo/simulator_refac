@@ -1,0 +1,3 @@
+/home/nexuskang/FinalProject/Surface-to-air-missiles/MFR/build/CMakeFiles/radar.dir
+/home/nexuskang/FinalProject/Surface-to-air-missiles/MFR/build/CMakeFiles/edit_cache.dir
+/home/nexuskang/FinalProject/Surface-to-air-missiles/MFR/build/CMakeFiles/rebuild_cache.dir

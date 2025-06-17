@@ -43,7 +43,9 @@ bool Simulator::init()
 		return false;
 	}
 
-	if (!mfr_send_manager_->MFRSocketOpen("192.168.2.176", 9000))
+	//if (!mfr_send_manager_->MFRSocketOpen("192.168.2.176", 9000))
+	// if(!mfr_send_manager_->MFRSocketOpen("172.30.1.30", 9000))
+	if(!mfr_send_manager_->MFRSocketOpen("192.168.2.115", 9000))
 	{
 		std::cerr << "Failed to initialize mfr_send_manager socket." << std::endl;
 		return false;

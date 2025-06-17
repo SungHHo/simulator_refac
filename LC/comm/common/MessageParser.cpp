@@ -183,7 +183,6 @@ CommonMessage parseRadarStatus(const std::vector<uint8_t>& data, SenderType send
     return msg;
 }
 
-//0x22
 CommonMessage parseRadarDetection(const std::vector<uint8_t>& data, SenderType sender) {
     CommonMessage msg;
     msg.sender = sender;
@@ -191,11 +190,25 @@ CommonMessage parseRadarDetection(const std::vector<uint8_t>& data, SenderType s
     msg.ok = true;
 
     RadarDetection det;
-    det.radarId = data[1];
-    uint8_t numTargets = data[2];
-    uint8_t numMissiles = data[3];
-    size_t offset = 4;
 
+    size_t offset = 1; // CommandType 뒤부터 시작
+
+    // ✅ radarId: 4바이트
+    std::memcpy(&det.radarId, &data[offset], 4);
+    offset += 4;
+
+    // ✅ numTargets: 1바이트, numMissiles: 1바이트
+    uint8_t numTargets = data[offset++];
+    uint8_t numMissiles = data[offset++];
+
+    std::cout << "[Parser] CommandType: " << static_cast<int>(msg.commandType) << "\n";
+    std::cout << "[Parser] Radar ID: " << det.radarId << "\n";
+    std::cout << "[Parser] Number of Targets: " << static_cast<int>(numTargets) << "\n";
+    std::cout << "[Parser] Number of Missiles: " << static_cast<int>(numMissiles) << "\n";
+
+    std::cout << std::dec; // 10진수 출력 설정
+
+    // ✅ Target 파싱 (50바이트씩)
     for (int i = 0; i < numTargets && offset + 50 <= data.size(); ++i) {
         RadarDetection::Target t;
         std::memcpy(&t.id,         &data[offset],      4);
@@ -209,6 +222,10 @@ CommonMessage parseRadarDetection(const std::vector<uint8_t>& data, SenderType s
         t.hit = data[offset + 49];
         det.targets.push_back(t);
         offset += 50;
+
+        std::cout << "[Parser] Target ID: " << t.id << ", PosX: " << t.posX << ", PosY: " << t.posY << "\n";
+        std::cout << "[Parser] Target Altitude: " << t.altitude << ", Speed: " << t.speed << ", Angle: " << t.angle << "\n";
+        std::cout << "[Parser] Target Detect Time: " << t.detectTime << ", Priority: " << static_cast<int>(t.priority) << ", Hit: " << static_cast<int>(t.hit) << "\n";
     }
 
     // ✅ Missile 파싱 (57바이트씩)
@@ -230,6 +247,7 @@ CommonMessage parseRadarDetection(const std::vector<uint8_t>& data, SenderType s
     msg.payload = det;
     return msg;
 }
+ 
 
 
 } // anonymous namespace

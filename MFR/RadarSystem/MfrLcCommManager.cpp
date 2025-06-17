@@ -6,7 +6,7 @@
 #include <thread>
 #include <vector>
 
-#define LC_SERVER_IP "192.168.2.115"
+#define LC_SERVER_IP "192.168.1.110"
 #define LC_SERVER_PORT 9999
 #define BUFFER_SIZE 1024
 
@@ -67,7 +67,7 @@ void MfrLcCommManager::startTcpReceiver()
             }
 
             std::vector<char> packet(buffer, buffer + len);
-            std::cout << "[MfrLcCommManager::startTcpReceiver] 수신된 패킷: " << len << " bytes" << std::endl;
+            // std::cout << "[MfrLcCommManager::startTcpReceiver] 수신된 패킷: " << len << " bytes" << std::endl;
 
             if (this->receiver)
             {
@@ -90,7 +90,7 @@ void MfrLcCommManager::send(const std::vector<char>& packet)
     }
 
     ssize_t sent = write(sockfd, packet.data(), packet.size());
-    std::cout << "[MfrLcCommManager::send] 전송 시도, size: " << packet.size() << " bytes" << std::endl;
+    // std::cout << "[MfrLcCommManager::send] 전송 시도, size: " << packet.size() << " bytes" << std::endl;
     if (sent != packet.size()) 
     {
         std::cerr << "[MfrLcCommManager::send] 전송 실패" << std::endl;
@@ -98,6 +98,6 @@ void MfrLcCommManager::send(const std::vector<char>& packet)
 
     else 
     {
-        std::cout << "[MfrLcCommManager::send] send() 성공, size: " << sent << " bytes" << std::endl;
+        // std::cout << "[MfrLcCommManager::send] send() 성공, size: " << sent << " bytes" << std::endl;
     }
 }

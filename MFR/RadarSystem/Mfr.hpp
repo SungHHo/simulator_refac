@@ -25,21 +25,27 @@ private:
 
     /// @brief  MFR 좌표
     const Pos3D mfrCoords = { 37.54811601, 126.99611663, 244.0};
+
+    /// @brief MFR 모드 정보
     RadarMode mfrMode;
+
+    /// @brief Motor 목표 속도
     const unsigned int motorTargetRPM = 1;
+
+    /// @brief Motor 목표 각도
     double goalMotorAngle;
 
+    /// @brief MFR 탐지 범위
     const long long limitDetectionRange = 100000;
-    const long long maxLimitDetectionRange = 10000000;
 
     /// @brief MFR의 시야(FoV) 제한 각도
-    /// 30도 제한, 15도씩 좌우로 확장
     const double limitedFoV = 15.0;
 
     /// @brief 목표 표적 ID
     unsigned int goalTargetId;
 
-    Pos3D lcCoords;     // 수정 필요 -> 2D -> 3D
+    /// @brief 발사통제기(LC) 좌표
+    Pos3D lcCoords;
 
     /// @brief MFR의 상태 정보
     MfrStatus mfrStatus;
@@ -60,17 +66,27 @@ private:
     std::shared_mutex mockMissileMutex;
 
     /// @brief 탐지된 모의 타겟 공유 자원 관리
-    std::shared_mutex detectedTargetMutex;\
+    std::shared_mutex detectedTargetMutex;
     
     /// @brief 탐지된 모의 미사일 공유 자원 관리
     std::shared_mutex detectedMissileMutex;
 
+    /// @brief 모의 표적 관리 자료구조
     std::unordered_map<unsigned int, localSimData> mockTargets;
+
+    /// @brief 모의 미사일 관리 자료구조
     std::unordered_map<unsigned int, localSimData> mockMissile;
+
+    /// @brief 탐지된 모의 표적 관리 자료구조
     std::unordered_map<unsigned int, localSimData> detectedTargets;
+
+    /// @brief 탐지된 모의 미사일 관리 자료구조
     std::unordered_map<unsigned int, localSimData> detectedMissile;
 
+    /// @brief 탐지 알고리즘 스레드
     std::thread detectionThread;
+
+    /// @brief 탐지 알고리즘 스레드 관리 변수
     std::atomic<bool> detectionThreadRunning{false};
 
     /// @brief Haversine Formula에 사용되는 상수(r)
@@ -98,10 +114,6 @@ public:
     void callBackData(const std::vector<char>& packet) override;
     
 private:
-    bool isLittleEndian() {
-    uint16_t x = 0x0102;
-    return *(reinterpret_cast<uint8_t*>(&x)) == 0x02;
-}
     /**
      * @brief deg -> rad 변환 함수
      * @param deg 각도 정보
@@ -227,25 +239,6 @@ private:
      * @return 두 각도 간의 차이 (도 단위, -180 ~ 180)
      */
     double angleDiff(double baseAngle, double targetAngle);
-
-    /**
-     * 기준 좌표(x1, y1)로부터 목표 좌표(x2, y2)까지의 각도를 계산합니다.
-     * 
-     * @param x1 기준 x좌표
-     * @param y1 기준 y좌표
-     * @param x2 목표 x좌표
-     * @param y2 목표 y좌표
-     * @return 기준점으로부터 목표점까지의 각도 (도 단위, -180 ~ 180)
-     */
-    double calcAngleToTarget(long long x1, long long y1, long long x2, long long y2);
-    
-    /**
-     * 입력받은 targetAngle이 현재 MFR의 FoV에 포함되는지 판별
-     *
-     * @param targetAngle 목표 대상의 상대 각도
-     * @return 시야 내에 존재하면 true, 그렇지 않으면 false
-     */
-    bool isInFoV(double targetAngle);
 
     /**
      * 레이더 모의기 탐지 유무 판단 알고리즘

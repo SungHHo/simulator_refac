@@ -116,7 +116,6 @@ std::vector<char> Mfr::serializeDetectionPacket(const std::vector<MfrToLcTargetI
     std::vector<char> buffer;
 
     buffer.push_back(static_cast<char>(DETECTED_INFO));
-    // buffer.push_back(mfrId);
     const char* idPtr = reinterpret_cast<const char*>(&mfrId);
     buffer.insert(buffer.end(), idPtr, idPtr + sizeof(mfrId));
     buffer.push_back(static_cast<unsigned char>(targets.size()));
@@ -287,7 +286,7 @@ double Mfr::calcDistance(Pos3D mfrCoord, Pos3D mockCoord)
     double mfrLongitudeDeg = mfrCoord.longitude;
     double mockLatitudeDeg = mockCoord.latitude;
     double mockLongitudeDeg = mockCoord.longitude;
-
+    
     // 위도, 경도 (단위: radian)
     double mfrLatitudeRad = deg2rad(mfrLatitudeDeg);
     double mockLatitudeRad = deg2rad(mockLatitudeDeg);
@@ -325,26 +324,6 @@ double Mfr::calcBearing(Pos3D mfrCoord, Pos3D mockCoord)
     double theta = std::atan2(y, x) * 180.0/M_PI;  // rad → deg
 
     return std::fmod(theta + 360.0, 360.0);
-}
-
-double Mfr::calcAngleToTarget(long long x1, long long y1, long long x2, long long y2)
-{
-    long long dx = x2 - x1;
-    long long dy = y2 - y1;
-    double angle = std::atan2(dy, dx) * 180.0 / M_PI;
-    return angle < 0 ? angle + 360.0 : angle;
-} 
-
-bool Mfr::isInFoV(double targetAngle)
-{
-    double diff = std::fabs(targetAngle - goalMotorAngle);
-    
-    if (diff > 180.0) 
-    {
-        diff = 360.0 - diff;
-    }
-
-    return diff <= limitedFoV;
 }
 
 double Mfr::angleDiff(double baseAngle, double targetAngle)

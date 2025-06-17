@@ -228,12 +228,12 @@ void Mfr::parsingSimData(const std::vector<char>& payload)
     localSimData.speed = data.speed;
 
     // std::cout << "latitude: " << localSimData.mockCoords.latitude << ", longitude: " << localSimData.mockCoords.longitude << ", altitude: " << localSimData.mockCoords.altitude << std::endl;
-    // std::cout << "[Mfr::handleSimDataPayload] SimData 수신 -> ID: " << localSimData.mockId
-    //           << ", Latitude: " << localSimData.mockCoords.latitude
-    //           << ", Longitude: " << localSimData.mockCoords.longitude
-    //           << ", Altitude: " << localSimData.mockCoords.altitude
-    //           << ", Angle: " << localSimData.angle
-    //           << ", Speed: " << localSimData.speed << std::endl;
+    std::cout << "[Mfr::handleSimDataPayload] SimData 수신 -> ID: " << localSimData.mockId
+              << ", Latitude: " << localSimData.mockCoords.latitude
+              << ", Longitude: " << localSimData.mockCoords.longitude
+              << ", Altitude: " << localSimData.mockCoords.altitude
+              << ", Angle: " << localSimData.angle
+              << ", Speed: " << localSimData.speed << std::endl;
     if (localSimData.mockId >= 104001 && localSimData.mockId <= 104999)         // 표적 정보
     {
         // std::cout << "[Mfr::handleSimDataPayload] -> 모의 표적 등록 완료" << std::endl;

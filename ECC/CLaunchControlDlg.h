@@ -25,6 +25,7 @@ private:
 	CStatic m_staticID;               // ✅ ID 출력용
 	CStatic m_staticPosX;             // ✅ X 좌표 출력용
 	CStatic m_staticPosY;             // ✅ Y 좌표 출력용
+	CStatic m_staticPosZ;             // ✅ Z 좌표 출력용
 
 public:
 	void SetLCStatus(const LCStatus& status);    // ✅ 외부에서 LC 정보 설정
@@ -33,4 +34,5 @@ public:
 	afx_msg void OnStnClickedLcStaticId2();
 	afx_msg void OnStnClickedLcStaticPosx();
 	afx_msg void OnStnClickedLcStaticPosy();
+	afx_msg void OnStnClickedLcStaticPosz();
 };

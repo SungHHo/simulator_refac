@@ -83,7 +83,7 @@ BOOL CSAMtestDlg::OnInitDialog()
 {
 	CDialogEx::OnInitDialog();
 
-	SetWindowPos(NULL, 0, 0, 1500, 900, SWP_NOMOVE | SWP_NOZORDER);
+	SetWindowPos(NULL, 0, 0, 1600, 900, SWP_NOMOVE | SWP_NOZORDER);
 	// 클라이언트 영역 크기 구하기
 	CRect rect;
 	GetClientRect(&rect);
@@ -107,8 +107,9 @@ BOOL CSAMtestDlg::OnInitDialog()
 	
 
 	// 중앙 지도 영역
-	m_mapArea.Create(_T(""), WS_CHILD | WS_VISIBLE | SS_BLACKFRAME,
-		CRect(leftWidth, 0, leftWidth + centerWidth, height), this, 1001);
+	m_targetListDlg.Create(IDD_TARGET_LIST_DLG, this);
+	m_targetListDlg.MoveWindow(leftWidth, 0, centerWidth, height);
+	m_targetListDlg.ShowWindow(SW_SHOW);
 
 	// 오른쪽 패널
 	m_rightPane.Create(IDD_RIGHT_PANE_DLG, this);
@@ -122,13 +123,13 @@ BOOL CSAMtestDlg::OnInitDialog()
 	//std::vector<RadarStatus> dummyRadarList;
 
 	//for (int i = 1; i <= 3; ++i) {
-	//	RadarStatus radar{};
+		//RadarStatus radar{};
 	//	radar.id = i;                         // ✅ 임시 레이더 ID
-	//	radar.mode = RadarStatus::ROTATE;    // ✅ 임시 모드: 회전
+		//radar.mode = RadarStatus::ROTATE;    // ✅ 임시 모드: 회전
 	//	radar.angle = 123.4 + i;             // 임의의 탐지 각
 	//	radar.position = { 1000 * i, 2000 * i };  // 임의의 좌표
 
-	//	dummyRadarList.push_back(radar);
+		//dummyRadarList.push_back(radar);
 	//}
 
 	//m_leftTop.SetRadarList(dummyRadarList);
@@ -136,12 +137,12 @@ BOOL CSAMtestDlg::OnInitDialog()
 	//// ✅ 더미 표적 리스트 설정
 	//std::vector<TargetStatus> dummyTargets;
 	//for (int i = 0; i < 5; ++i) {
-	//	TargetStatus target{};
-	//	target.id = 200 + i;
+		//TargetStatus target{};
+		//target.id = 123456;
 	//	target.position = { 10000 + i * 500, 15000 + i * 500 };
 	//	target.angle = 45.0 + i * 5;
 	//	target.speed = 300.0 + i * 10;
-	//	dummyTargets.push_back(target);
+		//dummyTargets.push_back(target);
 	//}
 	//m_leftTop.SetTargetList(dummyTargets);
 	//m_leftBottom.SetTargetList(dummyTargets);
@@ -162,8 +163,9 @@ BOOL CSAMtestDlg::OnInitDialog()
 
 
 	m_tcp = std::make_unique<ECC_TCP>();
-	if (!m_tcp->connect("127.0.0.1", 9000)) {
-		AfxMessageBox(_T("서버 연결 실패"));
+	//if (!m_tcp->connect("127.0.0.1", 9000)) { // 127.0.0.1 192.168.1.110 8888
+	if (!m_tcp->connect("192.168.1.110", 8888)) { // 127.0.0.1 192.168.1.110 8888
+			AfxMessageBox(_T("서버 연결 실패"));
 		return FALSE;
 	}
 
@@ -171,7 +173,7 @@ BOOL CSAMtestDlg::OnInitDialog()
 	m_tcp->startReceiving();
 
 	// 2. 주기적 상태 요청 타이머 시작
-	SetTimer(TIMER_ID_REQUEST, 1000, nullptr); // 100ms 주기
+	SetTimer(TIMER_ID_REQUEST, 100, nullptr); // 100ms 주기
 
 	return TRUE;
 }
@@ -274,16 +276,17 @@ void CSAMtestDlg::receive(int len, const char* packet)
 				for (const auto& m : msg.missileList) {
 					std::cout << "  [Missile] ID=" << (int)m.id
 						<< ", Pos=(" << m.position.x << "," << m.position.y << ")"
-						<< ", Height=" << m.height
+						<< ", Height=" << m.position.z
 						<< ", Speed=" << m.speed
 						<< ", Angle=" << m.angle
 						<< ", PredictedTime=" << m.predicted_time
+						<< ", intercept_time=" << m.intercept_time
 						<< ", Hit=" << static_cast<int>(m.hit) << "\n";
 				}
 				for (const auto& t : msg.targetList) {
 					std::cout << "  [Target] ID=" << (int)t.id
 						<< ", Pos=(" << t.position.x << "," << t.position.y << ")"
-						<< ", Height=" << t.height
+						<< ", Height=" << t.position.z
 						<< ", Speed=" << t.speed
 						<< ", Angle=" << t.angle
 						<< ", FirstDetected=" << t.first_detect_time
@@ -299,6 +302,8 @@ void CSAMtestDlg::receive(int len, const char* packet)
 				if (!msg.lcList.empty())
 					m_rightPane.SetLCStatus(msg.lcList[0]);
 				m_rightPane.SetMissileStatus(msg.missileList);
+				m_rightPane.SetTargetList(msg.targetList);
+				m_targetListDlg.SetTargetList(msg.targetList);
 			}
 
 			else {
@@ -326,24 +331,25 @@ void CSAMtestDlg::sendStatusRequest() {
 	m_tcp->send(reinterpret_cast<const char*>(data.data()), static_cast<int>(data.size()));
 }
 
-void CSAMtestDlg::sendRadarModeChange(uint8_t radar_id, uint8_t mode, uint8_t target_id) {
-	RadarModeChange msg{ CommandType::RADAR_MODE_CHANGE, radar_id, mode, target_id };
+void CSAMtestDlg::sendRadarModeChange(unsigned int radar_id, uint8_t mode, uint8_t priority_select, unsigned int target_id) {
+	RadarModeChange msg{ CommandType::RADAR_MODE_CHANGE, radar_id, mode, priority_select, target_id };
 	auto data = SerializeRadarModeChange(msg);
 	m_tcp->send(reinterpret_cast<const char*>(data.data()), static_cast<int>(data.size()));
 }
 
-void CSAMtestDlg::sendLSModeChange(uint8_t ls_id, uint8_t mode) {
+void CSAMtestDlg::sendLSModeChange(unsigned int ls_id, uint8_t mode) {
 	LSModeChange msg{ CommandType::LS_MODE_CHANGE, ls_id, mode };
 	auto data = SerializeLSModeChange(msg);
+	std::cout << "[클라이언트] LS_MODE_CHANGE 전송 (0x03)\n";
 	m_tcp->send(reinterpret_cast<const char*>(data.data()), static_cast<int>(data.size()));
 }
 
-void CSAMtestDlg::sendMissileLaunch(uint8_t ls_id, uint8_t target_id) {
+void CSAMtestDlg::sendMissileLaunch(unsigned int ls_id, unsigned int target_id) {
 	MissileLaunch msg{ CommandType::MISSILE_LAUNCH, ls_id, target_id };
 	auto data = SerializeMissileLaunch(msg);
 	m_tcp->send(reinterpret_cast<const char*>(data.data()), static_cast<int>(data.size()));
 }
-void CSAMtestDlg::sendLSMove(uint8_t ls_id, Pos2D pos) {
+void CSAMtestDlg::sendLSMove(unsigned int ls_id, Pos2D pos) {
 	LSMove msg{ CommandType::LS_MOVE, ls_id, pos };
 	auto data = SerializeLSMove(msg);
 	m_tcp->send(reinterpret_cast<const char*>(data.data()), static_cast<int>(data.size()));

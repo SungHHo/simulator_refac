@@ -13,7 +13,8 @@ struct RadarModeChange {
     CommandType commandType = CommandType::RADAR_MODE_CHANGE;
     unsigned int radar_id;
     uint8_t radar_mode;
-    uint8_t target_id;
+	uint8_t priority_select; // 1= 최우선 우선순위, 2= 사용자 지정 우선순위
+    unsigned int target_id;
 };
 
 // [0x03] 발사대 모드 변경 ? 19 byte
@@ -27,7 +28,7 @@ struct LSModeChange {
 struct MissileLaunch {
     CommandType commandType = CommandType::MISSILE_LAUNCH;
     unsigned int ls_id;
-    uint8_t target_id;
+    unsigned int target_id;
 };
 // [0x05] 발사대 이동 ? 18 byte
 struct LSMove {

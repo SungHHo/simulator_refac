@@ -4,14 +4,15 @@
 
 #pragma pack(push, 1)
 
-struct MissileStatus {
-    unsigned int id;
-    Pos2D position;
-    int64_t height;
-    int64_t speed;
-    double angle;
-    int64_t predicted_time;
-    uint8_t hit;
+struct MissileStatus { // 57
+    unsigned int id; // 4
+    Pos2D position; // 24
+    //long long height;
+    int speed; // 4
+    double angle; // 8
+    unsigned long long predicted_time; // 8
+    unsigned long long intercept_time; // 8
+    bool hit; // 1
 };
 
 #pragma pack(pop)

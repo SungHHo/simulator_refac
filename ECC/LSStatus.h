@@ -5,9 +5,9 @@
 #pragma pack(push, 1)
 struct LSStatus {
     enum Mode : unsigned int {
-        STOP = 0,
+        WAR = 0,
         MOVE = 1,
-        WAR = 2
+        STOP = 2
     };
     unsigned int id;
     Pos2D position;

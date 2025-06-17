@@ -195,6 +195,7 @@
     <ClInclude Include="CMissileInfoDlg.h" />
     <ClInclude Include="CRightPaneDlg.h" />
     <ClInclude Include="CTargetInfoDlg.h" />
+    <ClInclude Include="CTargetListDlg.h" />
     <ClInclude Include="Deserializer.h" />
     <ClInclude Include="ECC_TCP.h" />
     <ClInclude Include="framework.h" />
@@ -228,6 +229,7 @@
     <ClCompile Include="CMissileInfoDlg.cpp" />
     <ClCompile Include="CRightPaneDlg.cpp" />
     <ClCompile Include="CTargetInfoDlg.cpp" />
+    <ClCompile Include="CTargetListDlg.cpp" />
     <ClCompile Include="Deserializer.cpp" />
     <ClCompile Include="ECC_TCP.cpp" />
     <ClCompile Include="MAP_TCP.cpp" />

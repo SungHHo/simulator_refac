@@ -144,6 +144,9 @@
     <ClInclude Include="SAMtestDlg.h">
       <Filter>메인 다이얼로그</Filter>
     </ClInclude>
+    <ClInclude Include="CTargetListDlg.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="SAMtest.cpp">
@@ -199,6 +202,9 @@
     </ClCompile>
     <ClCompile Include="CRightPaneDlg.cpp">
       <Filter>메인 다이얼로그</Filter>
+    </ClCompile>
+    <ClCompile Include="CTargetListDlg.cpp">
+      <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

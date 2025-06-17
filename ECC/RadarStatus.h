@@ -6,8 +6,8 @@
 
 struct RadarStatus {
     enum Mode : unsigned int {
-        STOP = 0,
-        ROTATE = 1
+        STOP = 1,
+        ROTATE = 2
     };
     unsigned int id;
     Pos2D position;

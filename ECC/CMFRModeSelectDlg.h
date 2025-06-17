@@ -13,14 +13,14 @@ class CMFRModeSelectDlg : public CDialogEx
 
 private:
 	bool m_modeChanged = false;
-	int m_selectedTargetID = -1;
+	unsigned int m_selectedTargetID = -1;
 	CComboBox m_comboTargetID;
 	CSAMtestDlg* m_parent = nullptr;
-	uint8_t m_radarId = 0;
+	unsigned int m_radarId = 0;
 	std::vector<TargetStatus> m_targetList;  // ✅ 서버에서 받은 표적 리스트
 
 public:
-	void SetContext(CSAMtestDlg* parent, uint8_t radarId) {
+	void SetContext(CSAMtestDlg* parent, unsigned int radarId) {
 		m_parent = parent;
 		m_radarId = radarId;
 	}

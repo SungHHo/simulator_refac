@@ -4,15 +4,15 @@
 
 #pragma pack(push, 1)
 
-struct TargetStatus {
-    unsigned int id;
-    Pos2D position;
-    int64_t height;
-    int64_t speed;
-    double angle;
-    int64_t first_detect_time;
-    int32_t priority;
-    uint8_t hit;
+struct TargetStatus { // 50
+    unsigned int id; // 4
+    Pos2D position; // 24
+    //long long height;
+    int speed; // 4
+    double angle; // 8
+    unsigned long long first_detect_time; // 8
+    uint8_t priority; // 1
+    bool hit; // 1
 };
 
 #pragma pack(pop)

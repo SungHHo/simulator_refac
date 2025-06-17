@@ -29,7 +29,10 @@ BOOL CLSLaunchDlg::OnInitDialog()
 {
 	CDialogEx::OnInitDialog();
 
-	// 콤보박스에 표적 리스트 삽입
+	// ✅ 고정된 "0000" 타겟을 콤보박스에 가장 먼저 추가
+	m_comboTargetID.AddString(_T("0000"));
+
+	// ✅ 서버에서 전달받은 표적 리스트 삽입
 	for (const auto& target : m_targetList)
 	{
 		CString str;
@@ -37,11 +40,12 @@ BOOL CLSLaunchDlg::OnInitDialog()
 		m_comboTargetID.AddString(str);
 	}
 
-	if (!m_targetList.empty())
-		m_comboTargetID.SetCurSel(0);
+	// ✅ 초기 선택을 첫 번째 항목("0000")으로 설정
+	m_comboTargetID.SetCurSel(0);
 
 	return TRUE;
 }
+
 
 void CLSLaunchDlg::OnCbnSelchangeComboLsTarget()
 {
@@ -66,8 +70,8 @@ void CLSLaunchDlg::OnBnClickedButtonLsLaunch()
 		if (m_parent)
 		{
 			m_parent->sendMissileLaunch(
-				static_cast<uint8_t>(m_lsId),
-				static_cast<uint8_t>(m_selectedTargetID)
+				m_lsId,
+				m_selectedTargetID
 			);
 			std::cout << "[발사 요청] 발사대 ID=" << m_lsId << ", 표적 ID=" << m_selectedTargetID << "\n";
 		}

@@ -16,7 +16,7 @@ ParsedPacket PacketParser::Parse(const char* buffer, size_t length)
 
     switch (type)
     {
-    case CommandType::STATUS_REQUEST: {
+    case CommandType::STATUS_RESPONSE: {
         std::vector<RadarStatus> radars;
         std::vector<LCStatus> lcs;
         std::vector<LSStatus> lss;
@@ -41,7 +41,7 @@ ParsedPacket PacketParser::Parse(const char* buffer, size_t length)
         return result;
     }
 
-    case CommandType::RADAR_MODE_CHANGE: {
+    case CommandType::RADAR_MODE_CHANGE_ACK: {
         RadarModeChange cmd{};
         if (!DeserializeRadarModeAck(data, length, reinterpret_cast<RadarModeChangeAck&>(cmd))) {
             throw std::runtime_error("Failed to deserialize RadarModeChange");
@@ -49,7 +49,7 @@ ParsedPacket PacketParser::Parse(const char* buffer, size_t length)
         return cmd;
     }
 
-    case CommandType::LS_MODE_CHANGE: {
+    case CommandType::LS_MODE_CHANGE_ACK: {
         LSModeChange cmd{};
         if (!DeserializeLSModeAck(data, length, reinterpret_cast<LSModeChangeAck&>(cmd))) {
             throw std::runtime_error("Failed to deserialize LSModeChange");
@@ -57,14 +57,14 @@ ParsedPacket PacketParser::Parse(const char* buffer, size_t length)
         return cmd;
     }
 
-    case CommandType::MISSILE_LAUNCH: {
+    case CommandType::MISSILE_LAUNCH_ACK: {
         MissileLaunch cmd{};
         if (!DeserializeMissileAck(data, length, reinterpret_cast<MissileLaunchAck&>(cmd))) {
             throw std::runtime_error("Failed to deserialize MissileLaunch");
         }
         return cmd;
     }
-	case CommandType::LS_MOVE: {
+	case CommandType::LS_MOVE_ACK: {
 		LSMove cmd{};
 		if (!DeserializeLSMoveAck(data, length, reinterpret_cast<LSMoveAck&>(cmd))) {
 			throw std::runtime_error("Failed to deserialize LSMove");

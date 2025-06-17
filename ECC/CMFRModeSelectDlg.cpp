@@ -31,6 +31,9 @@ BOOL CMFRModeSelectDlg::OnInitDialog()
 {
 	CDialogEx::OnInitDialog();
 
+	// ✅ 고정 타겟 ID "0000"을 가장 위에 추가
+	m_comboTargetID.AddString(_T("0000"));
+
 	// ✅ 서버에서 전달받은 표적 목록을 콤보박스에 출력
 	for (const auto& target : m_targetList) {
 		CString strID;
@@ -38,16 +41,16 @@ BOOL CMFRModeSelectDlg::OnInitDialog()
 		m_comboTargetID.AddString(strID);
 	}
 
-	if (!m_targetList.empty()) {
-		m_comboTargetID.SetCurSel(0);
-	}
+	// ✅ 초기 선택을 첫 번째 항목("0000")으로 설정
+	m_comboTargetID.SetCurSel(0);
 
 	return TRUE;
 }
 
+
 void CMFRModeSelectDlg::OnBnClickedButtonMfrmodeChange()
 {
-	int sel = m_comboTargetID.GetCurSel();
+	unsigned int sel = m_comboTargetID.GetCurSel();
 	if (sel != CB_ERR)
 	{
 		CString str;
@@ -57,7 +60,7 @@ void CMFRModeSelectDlg::OnBnClickedButtonMfrmodeChange()
 
 		// ✅ 여기서 서버로 명령 전송
 		if (m_parent) {
-			m_parent->sendRadarModeChange(m_radarId, RadarStatus::STOP, m_selectedTargetID);
+			m_parent->sendRadarModeChange(m_radarId, RadarStatus::STOP, 2, m_selectedTargetID);
 			std::cout << "[모드 전환] 레이더 ID=" << (int)m_radarId << ", 정지 요청 (표적 " << m_selectedTargetID << ")\n";
 		}
 

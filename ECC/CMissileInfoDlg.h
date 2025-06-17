@@ -43,7 +43,8 @@ private:
 	CStatic m_staticID;
 	CStatic m_staticPosX;
 	CStatic m_staticPosY;
-	CStatic m_staticHeight;
+	CStatic m_staticPosZ;
+	//CStatic m_staticHeight;
 	CStatic m_staticSpeed;
 	CStatic m_staticAngle;
 	CStatic m_staticShootTime;

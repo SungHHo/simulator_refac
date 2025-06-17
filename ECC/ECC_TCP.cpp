@@ -38,7 +38,7 @@ bool ECC_TCP::connect(const char* ip, int port)
 
     // Map Connect
     map_tcp = std::make_unique<MAP_TCP>();
-    if (map_tcp->connect("192.168.0.62", 9001))
+    if (map_tcp->connect("172.16.0.169", 9001))
     {
       std::cout << "success Map TCP Connect" << std::endl;
     }

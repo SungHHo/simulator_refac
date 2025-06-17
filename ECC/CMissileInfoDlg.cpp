@@ -22,7 +22,7 @@ void CMissileInfoDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_STATIC_MISSILE_ID2, m_staticID);
 	DDX_Control(pDX, IDC_STATIC_MISSILE_POSITIONX, m_staticPosX);
 	DDX_Control(pDX, IDC_STATIC_MISSILE_POSITIONY, m_staticPosY);
-	DDX_Control(pDX, IDC_STATIC_MISSILE_HEIGHT2, m_staticHeight);
+	DDX_Control(pDX, IDC_STATIC_MISSILE_HEIGHT2, m_staticPosZ);
 	DDX_Control(pDX, IDC_STATIC_MISSILE_SPEED2, m_staticSpeed);
 	DDX_Control(pDX, IDC_STATIC_MISSILE_ANGLE2, m_staticAngle);
 	DDX_Control(pDX, IDC_STATIC_MISSILE_SHOOTDOWNTIME2, m_staticShootTime);
@@ -60,10 +60,10 @@ void CMissileInfoDlg::UpdateUI()
 	str.Format(_T("%.8f"), posY);
 	m_staticPosY.SetWindowText(str);
 
-	str.Format(_T("%lld"), m_missileStatus.height);
-	m_staticHeight.SetWindowText(str);
+	str.Format(_T("%lld"), m_missileStatus.position.z);
+	m_staticPosZ.SetWindowText(str);
 
-	str.Format(_T("%lld"), m_missileStatus.speed);
+	str.Format(_T("%d"), m_missileStatus.speed);
 	m_staticSpeed.SetWindowText(str);
 
 	str.Format(_T("%.1f"), m_missileStatus.angle);

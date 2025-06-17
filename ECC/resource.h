@@ -17,6 +17,7 @@
 #define IDD_MFRMODE_SELECT_DLG          146
 #define IDD_LS_MOVE_DLG                 148
 #define IDD_LS_LAUNCH_DLG               150
+#define IDD_TARGET_LIST_DLG             152
 #define IDC_BUTTON1                     1000
 #define IDC_BTN_MODE_SWITCH             1000
 #define IDC_BUTTON_LS_MOVE              1000
@@ -34,6 +35,7 @@
 #define IDC_STATIC_MFR_POSITION         1011
 #define IDC_STATIC_MFR_POSITION2        1012
 #define IDC_STATIC_MISSILE_ID           1013
+#define IDC_STATIC_MFR_POSITION3        1013
 #define IDC_CHECK_MISSILE               1014
 #define IDC_STATIC_MISSILE_POSITION     1014
 #define IDC_CHECK_TARGET                1015
@@ -59,31 +61,49 @@
 #define IDC_STATIC_TARGET_PRIORITY      1025
 #define IDC_STATIC_MISSILE_SHOOTDOWNTIME2 1025
 #define IDC_BUTTON_MOVE                 1026
+#define IDC_STATIC_TARGET_ID2           1026
 #define IDC_BUTTON_LAUNCH               1027
 #define IDC_EDIT_LOG                    1027
+#define IDC_STATIC_TARGET_POSITIONX     1027
+#define IDC_STATIC_TARGET_HEIGHT2       1028
 #define IDC_COMBO_MFR_TARGET            1029
+#define IDC_STATIC_TARGET_SPEED2        1029
 #define IDC_BUTTON_MFRMODE_CHANGE       1030
+#define IDC_STATIC_TARGET_ANGLE2        1030
 #define IDC_EDIT_POS_X                  1031
+#define IDC_STATIC_TARGET_PRIORITY2     1031
 #define IDC_EDIT_POS_Y                  1032
 #define IDC_COMBO_LS_TARGET             1032
+#define IDC_STATIC_TARGET_DETECT        1032
 #define IDC_BUTTON_LS_LAUNCH            1033
+#define IDC_STATIC_TARGET_DETECT2       1033
 #define IDC_STATIC_LS_MODE              1034
+#define IDC_STATIC_TARGET_HIT           1034
 #define IDC_STATIC_LS_NETWORK           1035
+#define IDC_STATIC_TARGET_HIT2          1035
 #define IDC_STATIC_LS_POSITION          1036
+#define IDC_STATIC_TARGET_POSITIONY     1036
 #define IDC_STATIC_LS_POSITION2         1037
 #define IDC_LC_STATIC_ID                1038
+#define IDC_STATIC_LS_POSITION3         1038
 #define IDC_LC_STATIC_POS               1039
 #define IDC_LC_STATIC_ID2               1040
+#define IDC_LIST1                       1040
+#define IDC_TARGET_LIST                 1040
+#define IDC_STATIC_NETWORK_MFR          1041
 #define IDC_LC_STATIC_POSX              1042
+#define IDC_STATIC_NETWORK_LS           1042
 #define IDC_LC_STATIC_POSY              1043
+#define IDC_LC_STATIC_POSY2             1044
+#define IDC_LC_STATIC_POSZ              1044
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        152
+#define _APS_NEXT_RESOURCE_VALUE        154
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1040
+#define _APS_NEXT_CONTROL_VALUE         1043
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

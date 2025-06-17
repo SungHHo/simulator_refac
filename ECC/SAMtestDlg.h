@@ -7,6 +7,7 @@
 #include "IReceiver.h"
 #include "ECC_TCP.h"
 #include "MessageCommon.h"
+#include "CTargetListDlg.h"
 #include <memory>  // ✅ 스마트 포인터
 
 // CSAMtestDlg 대화 상자
@@ -16,20 +17,21 @@ private:
 	CLeftTopDlg m_leftTop;
 	CLeftBottomDlg m_leftBottom;
 	CRightPaneDlg m_rightPane;
+	CTargetListDlg m_targetListDlg;
 	CStatic m_mapArea; // 지도
 	HICON m_hIcon;
     std::unique_ptr<ECC_TCP> m_tcp;  // ✅ 스마트 포인터로 변경
-	std::vector<uint8_t> m_receiveBuffer;
+	//std::vector<uint8_t> m_receiveBuffer;
 public:
 	CSAMtestDlg(CWnd* pParent = nullptr);
 
 
 	//void init(ECC_TCP* tcp);  // ❓ 외부에서 주입한다면 여전히 포인터일 수도 있음
 	void sendStatusRequest();
-	void sendRadarModeChange(uint8_t radar_id, uint8_t mode, uint8_t target_id);
-	void sendLSModeChange(uint8_t ls_id, uint8_t mode);
-	void sendMissileLaunch(uint8_t ls_id, uint8_t target_id);
-	void sendLSMove(uint8_t ls_id, Pos2D pos);
+	void sendRadarModeChange(unsigned int radar_id, uint8_t mode, uint8_t priority_select, unsigned int target_id);
+	void sendLSModeChange(unsigned int ls_id, uint8_t mode);
+	void sendMissileLaunch(unsigned int ls_id, unsigned int target_id);
+	void sendLSMove(unsigned int ls_id, Pos2D pos);
 
 	void receive(int len, const char* packet) override;
 

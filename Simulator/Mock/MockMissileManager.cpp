@@ -24,7 +24,7 @@ void MockMissileManager::updateMissileID()
 	last_missile_id_++;
 
 	// 식별자 100을 앞에 추가하여 ID 생성
-	last_missile_info_.id = 102 * 1000 + last_missile_id_;
+	last_missile_info_.id = 105 * 1000 + last_missile_id_;
 }
 
 void MockMissileManager::flightMissile(const MissileInfo &MissileInfo)
@@ -49,7 +49,7 @@ void MockMissileManager::flightMissile(const MissileInfo &MissileInfo)
 	// Start the flight thread
 	flight_thread_ = std::thread([this, MissileInfo]()
 								 {
-        MockMissile missile(last_missile_info_, mfr_send_manager_);
+        MockMissile missile(last_missile_info_, mfr_send_manager_, mock_target_manager_);
         missile.updatePosMissile(); });
 
 	flight_thread_.detach();

@@ -10,6 +10,7 @@
 #include <netinet/in.h>
 #include <fcntl.h>
 #include <errno.h>
+#include <vector>
 
 class LSRecvUDPManager
 {
@@ -21,7 +22,7 @@ public:
 	bool LSSocketOpen(int port);
 
 	// Receive data from the socket
-	bool receiveData(char *buffer, int bufferSize);
+	int receiveData(std::vector<uint8_t> *buffer, int bufferSize);
 
 	// Close the socket
 	void closeSocket();

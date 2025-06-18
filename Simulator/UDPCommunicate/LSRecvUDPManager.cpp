@@ -76,24 +76,18 @@ bool LSRecvUDPManager::LSSocketOpen(int port)
 	return true;
 }
 
-bool LSRecvUDPManager::receiveData(char *buffer, int bufferSize)
+int LSRecvUDPManager::receiveData(std::vector<uint8_t> *buffer, int bufferSize)
 {
 	// Receive data from the socket
-	recv_len_ = recvfrom(ls_socket_, buffer, bufferSize, 0, (struct sockaddr *)&server_addr_, &addr_len_);
+	recv_len_ = recvfrom(ls_socket_, buffer->data(), buffer->size(), 0, (struct sockaddr *)&server_addr_, &addr_len_);
 	if (recv_len_ < 0)
 	{
 		if (errno != EAGAIN && errno != EWOULDBLOCK)
 		{
 			perror("recvfrom");
-			return false;
+			return 0;
 		}
 	}
-	else
-	{
-		std::cout << "ls udp size : " << recv_len_ << std::endl;
-		buffer[recv_len_] = '\0'; // Null-terminate the received data
-		std::cout << "Received data: " << buffer << std::endl;
-	}
 
-	return true;
+	return recv_len_;
 }

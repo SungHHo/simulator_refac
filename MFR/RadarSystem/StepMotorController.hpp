@@ -1,17 +1,22 @@
 #pragma once
 #include "PacketProtocol.hpp"
-#include <iostream>
+
+#include "MfrConfig.h"
 
 class StepMotorController {
 private:
+    int uart_fd = -1;
 
-    const unsigned char microStep = 16;         //16분주
-    const float stepAngle = 1.8;                //nema17 1 pulse -> 1.8
-                                                //최종 1 pulse -> 0.1125
-    float totalPulse;
+    MfrConfig mfrConfig;
+
+    std::string device;
+    speed_t  uartBaudRate;    
 
 public:
     StepMotorController();
-    void runSpeedMode(int speed);
-    void runAngleMode(double curMotorAngle);
+    ~StepMotorController();
+    void sendCommand(const std::string& cmd);
+
+private:    
+    bool initUart();
 };

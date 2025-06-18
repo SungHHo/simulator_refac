@@ -16,6 +16,8 @@
 #include <atomic>
 #include <thread>
 #include <chrono>
+#include <sstream>
+#include <iomanip>
 
 
 class Mfr : public IReceiver {
@@ -94,6 +96,8 @@ private:
     
     /// @brief 좌표 인코딩 및 디코딩에 사용되는 스케일링 상수
     const double SCALE = 1e8;
+
+    bool motorRotationFlag = false;
 
 public:
     /**

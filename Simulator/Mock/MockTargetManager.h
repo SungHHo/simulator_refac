@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <memory>
+#include <thread>
 
 #include "MockTarget.h"
 #include "TargetInfo.h"

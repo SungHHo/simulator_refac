@@ -35,10 +35,10 @@ BOOL CTargetListDlg::OnInitDialog()
 	m_listTarget.InsertColumn(1, _T("X좌표"), LVCFMT_CENTER, 120);
 	m_listTarget.InsertColumn(2, _T("Y좌표"), LVCFMT_CENTER, 120);
 	m_listTarget.InsertColumn(3, _T("고도"), LVCFMT_CENTER, 70);
-	m_listTarget.InsertColumn(4, _T("속도"), LVCFMT_CENTER, 70);
+	m_listTarget.InsertColumn(4, _T("속도"), LVCFMT_CENTER, 100);
 	m_listTarget.InsertColumn(5, _T("각도"), LVCFMT_CENTER, 70);
 	m_listTarget.InsertColumn(6, _T("우선순위"), LVCFMT_CENTER, 80);
-	m_listTarget.InsertColumn(7, _T("피격 여부"), LVCFMT_CENTER, 80);
+	m_listTarget.InsertColumn(7, _T("피격 여부"), LVCFMT_CENTER, 60);
 
 	return TRUE;
 }

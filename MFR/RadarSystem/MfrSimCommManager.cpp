@@ -64,12 +64,29 @@ void MfrSimCommManager::startUdpReceiver()
             
             if (len > 0)
             {
-                if (len == sizeof(uint8_t) + sizeof(SimData)) 
+                if (len == sizeof(uint8_t) + sizeof(TargetSimData))
                 {
-                    SimData data;
-                    std::memcpy(&data, buffer + 1, sizeof(SimData)); // +1로 수정
+                    TargetSimData data;
+                    std::memcpy(&data, buffer + 1, sizeof(TargetSimData)); // +1로 수정
                     if (this->receiver != nullptr) 
                     {
+                        std::cout << "target data recv" << std::endl;
+                        std::vector<char> packet(buffer, buffer + len);
+                        receiver->callBackData(packet);
+                    }
+                    else
+                    {
+                        std::cout << "[MfrSimCommManager::startUdpReceiver] receiver null" << "\n";
+                    }
+                }
+
+                else if (len == sizeof(uint8_t) + sizeof(MissileSimData))
+                {
+                    MissileSimData data;
+                    std::memcpy(&data, buffer + 1, sizeof(MissileSimData)); // +1로 수정
+                    if (this->receiver != nullptr) 
+                    {
+                        std::cout << "missile data recv" << std::endl;
                         std::vector<char> packet(buffer, buffer + len);
                         receiver->callBackData(packet);
                     }

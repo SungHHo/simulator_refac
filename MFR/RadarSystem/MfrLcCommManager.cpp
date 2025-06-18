@@ -6,7 +6,7 @@
 #include <thread>
 #include <vector>
 
-#define LC_SERVER_IP "192.168.1.110"
+#define LC_SERVER_IP "192.168.1.98"
 #define LC_SERVER_PORT 9999
 #define BUFFER_SIZE 1024
 

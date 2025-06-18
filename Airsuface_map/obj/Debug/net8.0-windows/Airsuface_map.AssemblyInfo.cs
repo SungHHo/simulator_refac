@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Airsuface_map")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+973dc7fb73f4c95e08a24110ef734823300c9b0a")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+e8d656a6a754d6097b73f5d08823f0cbf114a0fc")]
 [assembly: System.Reflection.AssemblyProductAttribute("Airsuface_map")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Airsuface_map")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

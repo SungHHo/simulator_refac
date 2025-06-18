@@ -61,7 +61,7 @@ void CMFRModeSelectDlg::OnBnClickedButtonMfrmodeChange()
 		// ✅ 여기서 서버로 명령 전송
 		if (m_parent) {
 			m_parent->sendRadarModeChange(m_radarId, RadarStatus::STOP, 2, m_selectedTargetID);
-			std::cout << "[모드 전환] 레이더 ID=" << (int)m_radarId << ", 정지 요청 (표적 " << m_selectedTargetID << ")\n";
+			//std::cout << "[모드 전환] 레이더 ID=" << (int)m_radarId << ", 정지 요청 (표적 " << m_selectedTargetID << ")\n";
 		}
 
 		EndDialog(IDOK);

@@ -56,10 +56,10 @@ void CLSMoveDlg::OnBnClickedButtonLsMove()
 
 		m_parent->sendLSMove(m_lsId, pos);
 
-		std::cout << std::fixed;
-		std::cout.precision(5);
-		std::cout << "[이동 요청] 발사대 ID=" << m_lsId
-			<< ", 좌표=(" << m_posX << ", " << m_posY << ")\n";
+		//std::cout << std::fixed;
+		//std::cout.precision(5);
+		//std::cout << "[이동 요청] 발사대 ID=" << m_lsId
+		//	<< ", 좌표=(" << m_posX << ", " << m_posY << ")\n";
 
 		EndDialog(IDOK);
 	}

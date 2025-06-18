@@ -87,7 +87,21 @@ namespace Airsuface_map.ViewModels
         // C++ 서버에서 온 바이너리 데이터 파싱 예시
         public void OnDataReceived(byte[] rawData)
         {
-            if (rawData == null || rawData.Length == 0) return;
+            if (rawData == null || rawData.Length == 0 || rawData.Length > 3072) return;
+
+            // 디버깅 프린트
+            System.Diagnostics.Debug.WriteLine($"[OnDataReceived] rawData size: {rawData.Length} bytes");
+
+            // 앞 4바이트가 0x51 0x01 0x01 0x01인지 확인
+            if (rawData.Length < 4 ||
+                rawData[0] != 0x51 ||
+                rawData[1] != 0x01 ||
+                rawData[2] != 0x01 ||
+                rawData[3] != 0x01)
+            {
+                System.Diagnostics.Debug.WriteLine("[OnDataReceived] 헤더가 51 01 01 01이 아님. 데이터 무시.");
+                return;
+            }
 
             using var ms = new MemoryStream(rawData);
             using var reader = new BinaryReader(ms);

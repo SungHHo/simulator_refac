@@ -73,7 +73,7 @@ void CLSLaunchDlg::OnBnClickedButtonLsLaunch()
 				m_lsId,
 				m_selectedTargetID
 			);
-			std::cout << "[발사 요청] 발사대 ID=" << m_lsId << ", 표적 ID=" << m_selectedTargetID << "\n";
+			//std::cout << "[발사 요청] 발사대 ID=" << m_lsId << ", 표적 ID=" << m_selectedTargetID << "\n";
 		}
 
 		EndDialog(IDOK);

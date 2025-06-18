@@ -38,7 +38,7 @@ bool ECC_TCP::connect(const char* ip, int port)
 
     // Map Connect
     map_tcp = std::make_unique<MAP_TCP>();
-    if (map_tcp->connect("192.168.0.62", 9001))
+    if (map_tcp->connect("127.0.0.1", 9001))
     {
       std::cout << "success Map TCP Connect" << std::endl;
     }
@@ -70,11 +70,24 @@ unsigned __stdcall ECC_TCP::recvThread(void* arg) {
   while (self->m_bRunning) {
     int len = recv(self->m_sock, buf, sizeof(buf), 0);
 
+        // 앞 4바이트가 0x51 0x01 0x01 0x01인지 확인
+    if (!(static_cast<unsigned char>(buf[0]) == 0x51 &&
+          static_cast<unsigned char>(buf[1]) == 0x01 &&
+          static_cast<unsigned char>(buf[2]) == 0x01 &&
+          static_cast<unsigned char>(buf[3]) == 0x01)) {
+      continue;  // 조건 불일치 시 무시
+    }
+
     if (len > 0 && self->m_receiver) {
       self->m_receiver->receive(len, buf);
       // 받은 buf를 그대로 map_tcp로 전송
       if (self->map_tcp) {
         self->map_tcp->send(buf, len);
+        std::cout << "first 5 bytes (hex): ";
+        for (int i = 0; i < 5 && i < len; ++i) {
+          printf("%02X ", static_cast<unsigned char>(buf[i]));
+        }
+        std::cout << "buf size : " << len << std::endl;
       }
     } else if (len == 0 || len == SOCKET_ERROR) {
       break;  // 연결 종료 또는 에러 발생

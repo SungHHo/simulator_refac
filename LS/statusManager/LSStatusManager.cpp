@@ -1,6 +1,6 @@
-#include "LSStatusManager.hpp"
-#include "ConfigParser.hpp"
-#include "MotorManagerFactory.hpp"
+#include "LSStatusManager.h"
+#include "ConfigParser.h"
+#include "MotorManagerFactory.h"
 #include <iostream>
 #include <cstring>
 #include <cmath>

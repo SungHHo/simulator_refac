@@ -4,8 +4,8 @@
 #include <vector>
 #include <thread>
 #include <netinet/in.h>
-#include "SerialReceiverInterface.hpp"
-#include "LCToLSCommInterface.hpp"
+#include "SerialReceiverInterface.h"
+#include "LCToLSCommInterface.h"
 class LCToLSUDPCommManager : public LCToLSCommInterface
 {
 private:

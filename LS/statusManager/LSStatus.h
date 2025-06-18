@@ -1,5 +1,5 @@
 #pragma once
-#include "info.hpp"
+#include "info.h"
 
 #pragma pack(push, 1)
 

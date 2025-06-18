@@ -1,6 +1,6 @@
 #pragma once
 #include "LSStatus.h"
-#include "LSMotorManager.hpp"
+#include "LSMotorManager.h"
 #include <string>
 #include <thread>
 #include <atomic>

@@ -1,5 +1,5 @@
-#include "LCToLSCommManager.hpp"
-#include "ConfigParser.hpp"
+#include "LCToLSCommManager.h"
+#include "ConfigParser.h"
 #include <fcntl.h>
 #include <termios.h>
 #include <unistd.h>

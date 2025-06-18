@@ -3,7 +3,9 @@
 #include <vector>
 #include <cstdint>
 #include <cstring>
-
+#include <iostream>
+#include <byteswap.h>
+#include <arpa/inet.h>
 // 패딩 제거
 #pragma pack(push, 1)
 
@@ -69,6 +71,62 @@ struct MissileInfo
         appendDouble(buffer, degree_xz);
 
         return buffer;
+    }
+
+// 역직렬화 함수
+static MissileInfo fromBytes(const std::vector<uint8_t> &buffer)
+{
+    MissileInfo data;
+    size_t offset = 0;
+
+    auto readInt64 = [&](int64_t &val) {
+        if (offset + sizeof(int64_t) <= buffer.size()) {
+            uint64_t tmp;
+            std::memcpy(&tmp, buffer.data() + offset, sizeof(int64_t));
+            tmp = bswap_64(tmp);
+            val = static_cast<int64_t>(tmp);
+            offset += sizeof(int64_t);
+        }
+    };
+
+    auto readInt = [&](int &val) {
+        if (offset + sizeof(int) <= buffer.size()) {
+            uint32_t tmp;
+            std::memcpy(&tmp, buffer.data() + offset, sizeof(int));
+            tmp = ntohl(tmp);
+            val = static_cast<int>(tmp);
+            offset += sizeof(int);
+        }
+    };
+
+    auto readDouble = [&](double &val) {
+        if (offset + sizeof(double) <= buffer.size()) {
+            uint64_t tmp;
+            std::memcpy(&tmp, buffer.data() + offset, sizeof(double));
+            tmp = bswap_64(tmp);
+            std::memcpy(&val, &tmp, sizeof(double));
+            offset += sizeof(double);
+        }
+    };
+
+    readInt64(data.LS_pos_x);
+    readInt64(data.LS_pos_y);
+    readInt64(data.LS_pos_z);
+    readInt(data.speed);
+    readDouble(data.degree_xy);
+    readDouble(data.degree_xz);
+
+    return data;
+}
+    // print
+    void print() const
+    {
+        std::cout << "LS_pos_x: " << LS_pos_x << ", "
+                  << "LS_pos_y: " << LS_pos_y << ", "
+                  << "LS_pos_z: " << LS_pos_z << ", "
+                  << "speed: " << speed << ", "
+                  << "degree_xy: " << degree_xy << ", "
+                  << "degree_xz: " << degree_xz << std::endl;
     }
 };
 

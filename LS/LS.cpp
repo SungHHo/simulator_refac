@@ -1,6 +1,6 @@
-#include "LS.hpp"
-#include "ConfigParser.hpp"
-#include "LCToLSCommUDPManager.hpp" // debug
+#include "LS.h"
+#include "ConfigParser.h"
+#include "LCToLSCommUDPManager.h" // debug
 #include <iostream>
 #include <cstring>
 #include <mutex>

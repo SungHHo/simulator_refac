@@ -1,5 +1,5 @@
-#include "LSToSimCommManager.hpp"
-#include "ConfigParser.hpp"
+#include "LSToSimCommManager.h"
+#include "ConfigParser.h"
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <cstring>
@@ -64,6 +64,16 @@ void LSToSimCommManager::sendMissileInfo(const LaunchCommand& command, const LSS
     statManager.speedBriefing(spd);
     MissileInfo missile{x, y, z, spd, command.launch_angle_xy, command.launch_angle_xz};
     std::vector<uint8_t> packet = missile.toBytes();
+    // print
+    for (const auto& byte : packet)
+    {
+        std::cout << std::hex << static_cast<int>(byte) << " ";
+    }
+
+    MissileInfo from_missile;
+    from_missile = MissileInfo::fromBytes(packet);
+    from_missile.print();
+    std::cout << "here==========" << std::endl;
     std::cout << "[Missile Info Packet Created]\n";
     std::cout << "  Position: (" << x << ", " << y << ", " << z << ")\n";
     std::cout << "  Launch Angle XY: " << command.launch_angle_xy << "\n";

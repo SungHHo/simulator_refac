@@ -2,8 +2,8 @@
 #include <string>
 #include <netinet/in.h>
 #include <vector>
-#include "LSStatusManager.hpp"
-#include "info.hpp"
+#include "LSStatusManager.h"
+#include "info.h"
 
 class LSToSimCommManager
 {

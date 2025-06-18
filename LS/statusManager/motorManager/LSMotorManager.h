@@ -2,7 +2,7 @@
 #include <cstdint>
 #include <vector>
 #include <string>
-#include "MotorManagerInterface.hpp"
+#include "MotorManagerInterface.h"
 
 class LSMotorManager :  public MotorManagerInterface
 {

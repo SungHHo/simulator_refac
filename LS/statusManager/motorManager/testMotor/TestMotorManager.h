@@ -1,5 +1,5 @@
 #pragma once
-#include "MotorManagerInterface.hpp"
+#include "MotorManagerInterface.h"
 #include <iostream>
 
 class TestMotorManager : public MotorManagerInterface {

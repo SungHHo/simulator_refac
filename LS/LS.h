@@ -5,13 +5,13 @@
 #include <thread>
 #include <mutex>
 #include <condition_variable>
-#include "LSToSimCommManager.hpp" 
+#include "LSToSimCommManager.h" 
 
-#include "LCToLSCommInterface.hpp"
-#include "LCToLSCommFactory.hpp"
-#include "SerialReceiverInterface.hpp"
-#include "info.hpp"
-#include "LSStatusManager.hpp"
+#include "LCToLSCommInterface.h"
+#include "LCToLSCommFactory.h"
+#include "SerialReceiverInterface.h"
+#include "info.h"
+#include "LSStatusManager.h"
 
 class LS : public SerialReceiverInterface {
 private:

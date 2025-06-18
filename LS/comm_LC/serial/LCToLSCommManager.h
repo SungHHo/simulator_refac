@@ -1,10 +1,10 @@
 #pragma once
-#include "LCToLSCommInterface.hpp"
+#include "LCToLSCommInterface.h"
 #include <string>
 #include <vector>
 #include <thread>
-#include "SerialReceiverInterface.hpp"
-#include "info.hpp"
+#include "SerialReceiverInterface.h"
+#include "info.h"
 class LCToLSCommManager : public LCToLSCommInterface 
 {
 private:

@@ -1,7 +1,7 @@
 #pragma once
-#include "MotorManagerInterface.hpp"
-#include "LSMotorManager.hpp"
-#include "TestMotorManager.hpp"
+#include "MotorManagerInterface.h"
+#include "LSMotorManager.h"
+#include "TestMotorManager.h"
 #include <memory>
 #include <string>
 

@@ -1,8 +1,8 @@
 #include <stdexcept>
-#include "LCToLSCommFactory.hpp"
-#include "ConfigParser.hpp"
-#include "LCToLSCommManager.hpp"
-#include "LCToLSCommUDPManager.hpp"
+#include "LCToLSCommFactory.h"
+#include "ConfigParser.h"
+#include "LCToLSCommManager.h"
+#include "LCToLSCommUDPManager.h"
 
 std::unique_ptr<LCToLSCommInterface> createLCToLSComm(
     SerialReceiverInterface& receiver, 

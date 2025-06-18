@@ -1,10 +1,10 @@
-#include "LCToLSCommUDPManager.hpp"
-#include "ConfigParser.hpp"
+#include "LCToLSCommUDPManager.h"
+#include "ConfigParser.h"
 #include <iostream>
 #include <cstring>
 #include <unistd.h>
 #include <arpa/inet.h>
-#include "info.hpp"
+#include "info.h"
 
 LCToLSUDPCommManager::LCToLSUDPCommManager(SerialReceiverInterface& receiver, const std::string& configPath)
     : receiver(receiver)

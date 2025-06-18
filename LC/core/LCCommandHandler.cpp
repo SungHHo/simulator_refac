@@ -65,7 +65,7 @@ namespace LCCommandHandler
             }
             break;
         }
-        // 0x04
+
         case CommandType::FIRE_COMMAND_ECC_TO_LC:
         {
             const auto& payload = std::get<FireCommand>(msg.payload);
@@ -79,7 +79,7 @@ namespace LCCommandHandler
             TargetStatus selectedTarget{};
             bool found = false;
 
-            // 타겟 선택 (0이면 가장 가까운 타겟)
+            // 타겟 선택
             if (payload.targetId == 0) {
                 long long minDistSq = LLONG_MAX;
                 for (const auto& t : targets) {
@@ -107,63 +107,87 @@ namespace LCCommandHandler
                 break;
             }
 
+                // 🎯 타겟 방위각 계산 (진북 기준)
+            
+            double dx_target = static_cast<double>(selectedTarget.posX - ls.position.x);
+            double dy_target = static_cast<double>(selectedTarget.posY - ls.position.y);
+            
+            double theta_math = std::atan2(dy_target, dx_target) * 180.0 / M_PI;
+            double targetBearing = 90.0 - theta_math;
+            if (targetBearing < 0.0) targetBearing += 360.0;
+
+            std::cout << "[LC] 타겟 현재 방위각 (진북 기준): " << targetBearing << "도\n";
+            
+
             LaunchCommand cmd;
             cmd.launcherId = ls.launchSystemId;
 
-            // 상대 위치 및 속도
+            double missileSpeed = 40000.0;
+            double targetSpeed = static_cast<double>(selectedTarget.speed);
+
+            // 거리 및 각도 계산
             double dx = static_cast<double>(selectedTarget.posX - ls.position.x);
             double dy = static_cast<double>(selectedTarget.posY - ls.position.y);
+            double dist = std::sqrt(dx * dx + dy * dy);
 
-            double targetSpeed = static_cast<double>(selectedTarget.speed);
-            double targetAngleRad = selectedTarget.angle * M_PI / 180.0;
-            double vx = targetSpeed * std::cos(targetAngleRad);
-            double vy = targetSpeed * std::sin(targetAngleRad);
+            double bestAngle = -1;
+            double bestTime = -1;
+            bool interceptFound = false;
 
-            double missileSpeed = 40000.0; // 단위: 좌표계 변화량/초 (실제 단위는 신경쓰지 않음)
+            for (int deg = 0; deg <= 180; ++deg) {
+                double beta = deg * M_PI / 180.0;
 
-            // 요격 각도 계산 (벡터 내적 공식)
-            double a = vx * vx + vy * vy - missileSpeed * missileSpeed;
-            double b = 2 * (dx * vx + dy * vy);
-            double c = dx * dx + dy * dy;
+                // A t^2 + B t + C = 0
+                double A = targetSpeed * targetSpeed - missileSpeed * missileSpeed;
+                double B = 2.0 * dist * missileSpeed * std::cos(beta);
+                double C = dist * dist;
 
-            double discriminant = b * b - 4 * a * c;
-            double t_impact = -1.0;
+                double discriminant = B * B - 4 * A * C;
+                if (discriminant < 0)
+                    continue;
 
-            if (a == 0) {
-                // 타겟이 정지해 있거나, 미사일 속도와 타겟 속도가 같음
-                if (b != 0)
-                    t_impact = -c / b;
-            } else if (discriminant >= 0) {
-                double t1 = (-b + std::sqrt(discriminant)) / (2 * a);
-                double t2 = (-b - std::sqrt(discriminant)) / (2 * a);
-                // 양수 중 최소값 선택
-                if (t1 > 0 && t2 > 0)
-                    t_impact = std::min(t1, t2);
-                else if (t1 > 0)
-                    t_impact = t1;
-                else if (t2 > 0)
-                    t_impact = t2;
+                double sqrtD = std::sqrt(discriminant);
+                double t1 = (-B + sqrtD) / (2 * A);
+                double t2 = (-B - sqrtD) / (2 * A);
+
+                double t = (t1 > 0) ? t1 : ((t2 > 0) ? t2 : -1.0);
+                if (t <= 0.0)
+                    continue;
+
+                // deg를 진북 기준 방위각으로 변환 (0°=북, 시계방향)
+                std::cout << "deg: " << deg << ", t: " << t << "\n";
+                double bearing = targetBearing + deg;
+                if (bearing >= 360.0) bearing -= 360.0;
+                if (bearing < 0.0) bearing += 360.0;
+                bestAngle = bearing;
+                bestTime = t;
+                interceptFound = true;
+                break;
             }
 
-            double launchAngleXY = 0.0;
-            if (t_impact > 0) {
-                double interceptX = dx + vx * t_impact;
-                double interceptY = dy + vy * t_impact;
-                launchAngleXY = std::atan2(interceptY, interceptX) * 180.0 / M_PI;
+            if (interceptFound) {
+                cmd.launchAngleXY = bestAngle;
+                cmd.launchAngleXZ = 0.0;
+
+                std::cout << "[LC] 코사인 법칙 기반 요격 계산 결과\n";
+                std::cout << "  조준 각도 (XY): " << cmd.launchAngleXY << "도 (진북 기준)\n";
+                std::cout << "  추정 요격 시간: " << bestTime << "초\n";
             } else {
-                // 요격 불가: 가장 가까운 방향으로 쏨
-                launchAngleXY = std::atan2(dy, dx) * 180.0 / M_PI;
-                t_impact = 0.0;
-                std::cerr << "[LC] 요격 불가: 타겟 속도가 너무 빠르거나, 미사일 속도가 너무 느림\n";
+                // fallback: 초기 위치 기준 진북 각도
+                double dx_f = static_cast<double>(selectedTarget.posX - ls.position.x);
+                double dy_f = static_cast<double>(selectedTarget.posY - ls.position.y);
+                double theta_math = std::atan2(dy_f, dx_f) * 180.0 / M_PI;
+                double fallbackAngle = 90.0 - theta_math;
+                if (fallbackAngle < 0.0) fallbackAngle += 360.0;
+
+                cmd.launchAngleXY = fallbackAngle;
+                cmd.launchAngleXZ = 0.0;
+                bestTime = 0.0;
+
+                std::cerr << "[LC] 요격 불가: 유효한 각도/시간 없음 → fallback 적용\n";
             }
 
-            cmd.launchAngleXY = launchAngleXY;
-            cmd.launchAngleXZ = 0.0; // z축 무시
-
-            std::cout << "[LC] 최적 조준 결과\n"
-                    << "  조준 각도 (XY): " << cmd.launchAngleXY << "도\n"
-                    << "  추정 요격 시간: " << t_impact << "초\n";
-
+            // 직렬화 및 전송
             auto packet = Serializer::serializeLaunchCommand(cmd);
 
             if (manager.hasLSSender()) {
@@ -174,15 +198,14 @@ namespace LCCommandHandler
 
             std::cout << std::dec;
             std::cout << "------------------------------------------------------" << std::endl;
-            std::cout << "발사명령 정보" << "\n"
+            std::cout << "발사명령 정보\n"
                     << "  lsId: " << cmd.launcherId
                     << ", launchAngleXY: " << cmd.launchAngleXY
                     << ", launchAngleXZ: " << cmd.launchAngleXZ << " (더미값)\n";
             std::cout << "------------------------------------------------------" << std::endl;
-
             break;
         }
-        
+
 
 
         //0x05

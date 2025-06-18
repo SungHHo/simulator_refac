@@ -134,6 +134,7 @@ struct LaunchCommand
 {
     double launch_angle_xy;
     double launch_angle_xz;
+    int speed; // 발사 속도 (미사일의 속도)
 };
 
 struct MoveCommand

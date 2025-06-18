@@ -1,11 +1,11 @@
 #pragma once
-
+#include "LCToLSCommInterface.hpp"
 #include <string>
 #include <vector>
 #include <thread>
 #include "SerialReceiverInterface.hpp"
 #include "info.hpp"
-class LCToLSCommManager
+class LCToLSCommManager : public LCToLSCommInterface 
 {
 private:
     int fd = -1;

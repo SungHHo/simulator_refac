@@ -12,7 +12,7 @@ class LSStatusManager
 private:
     LSStatus status;
 
-    std::unique_ptr<LSMotorManager> motorManager;
+    std::unique_ptr<MotorManagerInterface> motorManager;
 
     std::thread moveThread;
     std::atomic<bool> moveFlag{false};
@@ -32,8 +32,9 @@ public:
 
     // 책임 메서드들    
     void changeMode(OperationMode mode);
-    void positionBriefing(long long& x, long long& y) const;
+    void positionBriefing(long long& x, long long& y, long long& z) const;
     void serializeStatus(std::vector<uint8_t>& out) const;
     void moveLS(long long x, long long y);
     bool rotateToAngle(double angle);
+    void speedBriefing(int& speed) const;
 };

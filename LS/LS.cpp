@@ -4,48 +4,48 @@
 #include <iostream>
 #include <cstring>
 #include <mutex>
+#include <iomanip>
 
-LS::LS(const std::string& mainConfigPath)
+LS::LS(const std::string &mainConfigPath)
 {
     init(mainConfigPath);
-    workerThread = std::thread(&LS::workerLoop, this);  // 명령 처리 스레드 시작
+    workerThread = std::thread(&LS::workerLoop, this); // 명령 처리 스레드 시작
 }
 
-LS::~LS() 
+LS::~LS()
 {
     {
         std::lock_guard<std::mutex> lock(scheduleMutex);
         stopFlag = true;
     }
     scheduleCV.notify_all();
-    if (workerThread.joinable()) 
+    if (workerThread.joinable())
     {
         workerThread.join();
     }
 }
 
-void LS::init(const std::string& mainConfigPath) 
+void LS::init(const std::string &mainConfigPath)
 {
-    try {
+    try
+    {
         std::string simConfigPath = ConfigParser::getValue("ConfigPath", "SimulatorConfig", mainConfigPath);
         std::string fireConfigPath = ConfigParser::getValue("ConfigPath", "FireControlConfig", mainConfigPath);
         std::string launcherConfigPath = ConfigParser::getValue("ConfigPath", "LauncherConfig", mainConfigPath);
 
         simManager = std::make_unique<LSToSimCommManager>(simConfigPath);
-        // lcManager.reset(new LCToLSCommManager(*this, fireConfigPath));
-        lcManager.reset(new LCToLSUDPCommManager(*this, fireConfigPath));   // debug
+        lcManager = createLCToLSComm(*this, fireConfigPath);
         statManager = std::make_unique<LSStatusManager>(launcherConfigPath);
 
         std::cout << "[LS] All subsystems initialized.\n";
-
     }
-    catch (const std::exception& e) 
+    catch (const std::exception &e)
     {
         std::cerr << "[LS] Init error: " << e.what() << "\n";
     }
 }
 
-void LS::callBack(const std::vector<uint8_t>& data) 
+void LS::callBack(const std::vector<uint8_t> &data)
 {
     std::cout << "[LS] receive() called.\n";
 
@@ -66,70 +66,75 @@ void LS::callBack(const std::vector<uint8_t>& data)
     std::memcpy(&msg.launcher_id, data.data() + offset, sizeof(msg.launcher_id));
     offset += sizeof(msg.launcher_id);
 
-    switch (msg.type) 
+    switch (msg.type)
     {
-        case CommandType::LAUNCH: 
+    case CommandType::LAUNCH:
+    {
+        if (data.size() >= offset + sizeof(LaunchCommand))
         {
-            if (data.size() >= offset + sizeof(LaunchCommand)) 
-            {
-                std::memcpy(&msg.launch.launch_angle, data.data() + offset, sizeof(MoveCommand));
-                std::cout << "\n[Launch Command]\n";
-                std::cout << "  Launch Angle : " << msg.launch.launch_angle << "\n";
-                std::cout << "  Speed : " << msg.launch.speed << "\n";
-                std::cout << "  Altitude : " << msg.launch.altitude << "\n";
-            } 
-            else 
-            {
-                std::cerr << "[LS] LaunchCommand size mismatch\n";
-                return;
-            }
-            break;
-        }
+            // 각 멤버별로 파싱
+            std::memcpy(&msg.launch.launch_angle_xy, data.data() + offset, sizeof(double));
+            offset += sizeof(double);
 
-        case CommandType::MOVE: 
+            std::memcpy(&msg.launch.launch_angle_xz, data.data() + offset, sizeof(double));
+            offset += sizeof(double);
+
+            std::cout << "\n[Launch Command]\n";
+            std::cout << "  Launch Angle XY : " << msg.launch.launch_angle_xy << "\n";
+            std::cout << "  Launch Angle XZ : " << msg.launch.launch_angle_xz << "\n";
+        }
+        else
         {
-            if (data.size() >= offset + sizeof(MoveCommand)) 
-            {
-                std::memcpy(&msg.move, data.data() + offset, sizeof(MoveCommand));
-                std::cout << "\n[Move Command]\n";
-                std::cout << "  new_x : " << msg.move.new_x << "\n";
-                std::cout << "  new_y : " << msg.move.new_y << "\n";
-            } 
-            else 
-            {
-                std::cerr << "[LS] MoveCommand size mismatch\n";
-                return;
-            }
-            break;
-        }
-
-        case CommandType::MODE_CHANGE: 
-        {
-            if (data.size() >= offset + sizeof(ModeChangeCommand)) 
-            {
-                std::memcpy(&msg.mode_change, data.data() + offset, sizeof(ModeChangeCommand));
-                std::cout << "\n[Mode Change Command]\n";
-                std::cout << "  New Mode : " << static_cast<int>(msg.mode_change.new_mode) << "\n";
-            } 
-            else 
-            {
-                std::cerr << "[LS] ModeChangeCommand size mismatch\n";
-                return;
-            }
-            break;
-        }
-
-        case CommandType::STATUS_REQUEST: 
-        {
-            std::cout << "\n[Status Request Received]\n";
-            break;
-        }
-
-        default: {
-            std::cerr << "[LS] Unknown command type\n";
+            std::cerr << "[LS] LaunchCommand size mismatch\n";
             return;
         }
+        break;
+    }
 
+    case CommandType::MOVE:
+    {
+        if (data.size() >= offset + sizeof(MoveCommand))
+        {
+            std::memcpy(&msg.move, data.data() + offset, sizeof(MoveCommand));
+            std::cout << "\n[Move Command]\n";
+            std::cout << "  new_x : " << msg.move.new_x << "\n";
+            std::cout << "  new_y : " << msg.move.new_y << "\n";
+        }
+        else
+        {
+            std::cerr << "[LS] MoveCommand size mismatch\n";
+            return;
+        }
+        break;
+    }
+
+    case CommandType::MODE_CHANGE:
+    {
+        if (data.size() >= offset + sizeof(ModeChangeCommand))
+        {
+            std::memcpy(&msg.mode_change, data.data() + offset, sizeof(ModeChangeCommand));
+            std::cout << "\n[Mode Change Command]\n";
+            std::cout << "  New Mode : " << static_cast<int>(msg.mode_change.new_mode) << "\n";
+        }
+        else
+        {
+            std::cerr << "[LS] ModeChangeCommand size mismatch\n";
+            return;
+        }
+        break;
+    }
+
+    case CommandType::STATUS_REQUEST:
+    {
+        std::cout << "\n[Status Request Received]\n";
+        break;
+    }
+
+    default:
+    {
+        std::cerr << "[LS] Unknown command type\n";
+        return;
+    }
     }
 
     // lock_guard를 이용해 스케쥴 버퍼 mutex_lock
@@ -137,29 +142,31 @@ void LS::callBack(const std::vector<uint8_t>& data)
         std::lock_guard<std::mutex> lock(scheduleMutex);
         schedule.push_back(msg);
     }
-    scheduleCV.notify_one();  // 스레드 깨우기
+    scheduleCV.notify_one(); // 스레드 깨우기
 }
 
-void LS::launch(const LaunchCommand& command)
+void LS::launch(const LaunchCommand &command)
 {
-    if (simManager&&statManager) 
+    if (simManager && statManager)
     {
-        if (!statManager->rotateToAngle(command.launch_angle))
+        
+        /*if (!statManager->rotateToAngle(command.launch_angle))
         {
             std::cerr << "[LS] Failed to rotate to launch angle\n";
             return;
         }
+        */
         simManager->sendMissileInfo(command, *statManager);
-    } 
-    else 
+    }
+    else
     {
         std::cerr << "[LS] SimManager or StatusManager not initialized.\n";
     }
 }
 
-void LS::move(const MoveCommand& command)
+void LS::move(const MoveCommand &command)
 {
-    if(statManager)
+    if (statManager)
     {
         statManager->moveLS(command.new_x, command.new_y);
     }
@@ -169,9 +176,9 @@ void LS::move(const MoveCommand& command)
     }
 }
 
-void LS::changeMode(const ModeChangeCommand& command)
+void LS::changeMode(const ModeChangeCommand &command)
 {
-    if(statManager)
+    if (statManager)
     {
         statManager->changeMode(command.new_mode);
     }
@@ -185,7 +192,7 @@ void LS::sendStatus()
 {
     std::vector<uint8_t> packet;
     statManager->serializeStatus(packet);
-    
+
     lcManager->sendData(packet);
     return;
 }
@@ -197,9 +204,10 @@ void LS::workerLoop()
         LauncherMessage msg;
         {
             std::unique_lock<std::mutex> lock(scheduleMutex);
-            scheduleCV.wait(lock, [this] { return !schedule.empty() || stopFlag; });
+            scheduleCV.wait(lock, [this]
+                            { return !schedule.empty() || stopFlag; });
 
-            if (stopFlag && schedule.empty()) 
+            if (stopFlag && schedule.empty())
             {
                 break;
             }
@@ -211,30 +219,30 @@ void LS::workerLoop()
         // 실제 명령 처리
         switch (msg.type)
         {
-            case CommandType::LAUNCH:
-            {
-                launch(msg.launch);
-                break;
-            }
-            case CommandType::MOVE:
-            {
-                move(msg.move);
-                break;
-            }
-            case CommandType::MODE_CHANGE:
-            {
-                changeMode(msg.mode_change);
-                break;
-            }
-            case CommandType::STATUS_REQUEST:
-            {
-                sendStatus();
-                break;
-            }
+        case CommandType::LAUNCH:
+        {
+            launch(msg.launch);
+            break;
+        }
+        case CommandType::MOVE:
+        {
+            move(msg.move);
+            break;
+        }
+        case CommandType::MODE_CHANGE:
+        {
+            changeMode(msg.mode_change);
+            break;
+        }
+        case CommandType::STATUS_REQUEST:
+        {
+            sendStatus();
+            break;
+        }
 
-            default:
-                std::cerr << "Unknown command in worker thread\n";
-                break;
+        default:
+            std::cerr << "Unknown command in worker thread\n";
+            break;
         }
     }
 }

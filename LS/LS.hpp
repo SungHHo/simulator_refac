@@ -6,11 +6,9 @@
 #include <mutex>
 #include <condition_variable>
 #include "LSToSimCommManager.hpp" 
-#include "LCToLSCommManager.hpp"
 
-#include "LCToLSCommUDPManager.hpp" // debug
-
-#include "LCToLSCommManager.hpp"
+#include "LCToLSCommInterface.hpp"
+#include "LCToLSCommFactory.hpp"
 #include "SerialReceiverInterface.hpp"
 #include "info.hpp"
 #include "LSStatusManager.hpp"
@@ -19,11 +17,10 @@ class LS : public SerialReceiverInterface {
 private:
     std::deque<LauncherMessage> schedule;
     std::mutex scheduleMutex;
-    std::condition_variable scheduleCV; // 찾아보기, 적합한지?
+    std::condition_variable scheduleCV; 
 
     std::unique_ptr<LSToSimCommManager> simManager;
-    // std::unique_ptr<LCToLSCommManager> lcManager;
-    std::unique_ptr<LCToLSUDPCommManager> lcManager; // debug
+    std::unique_ptr<LCToLSCommInterface> lcManager;
     std::unique_ptr<LSStatusManager> statManager;
 
     std::thread workerThread;

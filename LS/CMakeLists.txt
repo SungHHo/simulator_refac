@@ -10,11 +10,11 @@ set(SOURCES
     LS.cpp
     config/ConfigParser.cpp
     comm_SIM/LSToSimCommManager.cpp
-    # comm_LC/LCToLSCommManager.cpp
+    comm_LC/serial/LCToLSCommManager.cpp
     comm_LC/udp/LCToLSCommUDPManager.cpp
+    comm_LC/LCToLSCommFactory.cpp
     statusManager/LSStatusManager.cpp
     statusManager/motorManager/LSMotorManager.cpp
-
 )
 
 # 실행 파일 생성
@@ -27,6 +27,8 @@ target_include_directories(launcher PRIVATE
     ${PROJECT_SOURCE_DIR}/comm_SIM
     ${PROJECT_SOURCE_DIR}/comm_LC
     ${PROJECT_SOURCE_DIR}/comm_LC/udp
+    ${PROJECT_SOURCE_DIR}/comm_LC/serial
     ${PROJECT_SOURCE_DIR}/statusManager
     ${PROJECT_SOURCE_DIR}/statusManager/motorManager
+    ${PROJECT_SOURCE_DIR}/statusManager/motorManager/testMotor
 )

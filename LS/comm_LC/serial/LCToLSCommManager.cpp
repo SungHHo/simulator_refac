@@ -110,11 +110,11 @@ void LCToLSCommManager::init(const std::string& configPath)
 {
     try 
     {
-        std::string device = ConfigParser::getValue("FireControlComm", "DevicePath", configPath);
-        int baud = ConfigParser::getInt("FireControlComm", "BaudRate", configPath);
-        int dataBits = ConfigParser::getInt("FireControlComm", "DataBits", configPath);
-        int stopBits = ConfigParser::getInt("FireControlComm", "StopBits", configPath);
-        std::string parityStr = ConfigParser::getValue("FireControlComm", "Parity", configPath);
+        std::string device = ConfigParser::getValue("FireControlCommSerial", "DevicePath", configPath);
+        int baud = ConfigParser::getInt("FireControlCommSerial", "BaudRate", configPath);
+        int dataBits = ConfigParser::getInt("FireControlCommSerial", "DataBits", configPath);
+        int stopBits = ConfigParser::getInt("FireControlCommSerial", "StopBits", configPath);
+        std::string parityStr = ConfigParser::getValue("FireControlCommSerial", "Parity", configPath);
 
         if (parityStr.empty()) throw std::invalid_argument("Parity value missing");
         char parity = parityStr[0];

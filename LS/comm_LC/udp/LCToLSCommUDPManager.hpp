@@ -5,8 +5,8 @@
 #include <thread>
 #include <netinet/in.h>
 #include "SerialReceiverInterface.hpp"
-
-class LCToLSUDPCommManager
+#include "LCToLSCommInterface.hpp"
+class LCToLSUDPCommManager : public LCToLSCommInterface
 {
 private:
     int recvSock = -1;
@@ -18,11 +18,11 @@ private:
     SerialReceiverInterface& receiver;
 
     void run();
+    void init(const std::string& configPath);
 
 public:
     LCToLSUDPCommManager(SerialReceiverInterface& receiver, const std::string& configPath);
     ~LCToLSUDPCommManager();
 
-    void init(const std::string& configPath);
     void sendData(const std::vector<uint8_t>& packet);
 };

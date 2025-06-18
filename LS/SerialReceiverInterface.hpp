@@ -7,6 +7,6 @@ class SerialReceiverInterface {
 public:
     virtual ~SerialReceiverInterface() = default;
 
-    // receive 가상함수
+    // callBack 가상함수
     virtual void callBack(const std::vector<uint8_t>& data) = 0;
 };

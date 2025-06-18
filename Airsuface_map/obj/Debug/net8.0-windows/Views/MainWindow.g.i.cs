@@ -10,7 +10,6 @@
 //------------------------------------------------------------------------------
 
 using Airsuface_map.Views;
-using GMap.NET.WindowsPresentation;
 using System;
 using System.Diagnostics;
 using System.Windows;
@@ -62,7 +61,7 @@ namespace Airsuface_map {
                 return;
             }
             _contentLoaded = true;
-            System.Uri resourceLocater = new System.Uri("/Airsuface_map;V1.0.0.0;component/views/mainwindow.xaml", System.UriKind.Relative);
+            System.Uri resourceLocater = new System.Uri("/Airsuface_map;component/views/mainwindow.xaml", System.UriKind.Relative);
             
             #line 1 "..\..\..\..\Views\MainWindow.xaml"
             System.Windows.Application.LoadComponent(this, resourceLocater);

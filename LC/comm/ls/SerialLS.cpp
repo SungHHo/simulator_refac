@@ -121,6 +121,6 @@ void SerialLS::sendRaw(const std::vector<uint8_t>& data, const std::string& pref
     if (sent < 0) {
         std::cerr << prefix << " - 전송 실패 (errno=" << errno << "): " << strerror(errno) << "\n"; // Debugging
     } else {
-        std::cout << prefix << " - " << sent << " 바이트 전송 완료\n";
+        // std::cout << prefix << " - " << sent << " 바이트 전송 완료\n";
     }
 }

@@ -17,8 +17,8 @@ struct Pos2D
 
 enum class MFRMode : unsigned int
 {
-    STOP = 0,
-    ROTATE = 1
+    STOP = 1,
+    ROTATE = 2
 };
 enum class LauncherMode : unsigned int
 {

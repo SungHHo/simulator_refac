@@ -75,7 +75,7 @@ buf.insert(buf.end(), reinterpret_cast<const uint8_t*>(&dummyHeight),
         buf.insert(buf.end(), reinterpret_cast<const uint8_t*>(&m.detectTime), reinterpret_cast<const uint8_t*>(&m.detectTime) + 8);
         buf.insert(buf.end(), reinterpret_cast<const uint8_t*>(&m.interceptTime), reinterpret_cast<const uint8_t*>(&m.interceptTime) + 8);
         buf.push_back(static_cast<uint8_t>(m.hit));
-        std::cout << "[DEBUG] missile ID " << m.id << " serialized, buf size: " << buf.size() << "\n";
+        // std::cout << "[DEBUG] missile ID " << m.id << " serialized, buf size: " << buf.size() << "\n";
 
     }
 
@@ -105,26 +105,19 @@ std::vector<uint8_t> Serializer::serializeLauncherResponse(unsigned int lsId, ui
     return buf;
 }
 
-std::vector<uint8_t> Serializer::serializeFireCommandToLS(const FireCommand& cmd) {
+std::vector<uint8_t> Serializer::serializeLaunchCommand(const LaunchCommand& cmd) {
     std::vector<uint8_t> buf;
-    buf.push_back(static_cast<uint8_t>(CommandType::LAUNCH_COMMAND_LC_TO_LS));  // 예: 0x31
-    buf.insert(buf.end(),
-               reinterpret_cast<const uint8_t*>(&cmd.lsId),
-               reinterpret_cast<const uint8_t*>(&cmd.lsId) + sizeof(unsigned int));
-    buf.insert(buf.end(),
-               reinterpret_cast<const uint8_t*>(&cmd.targetId),
-               reinterpret_cast<const uint8_t*>(&cmd.targetId) + sizeof(unsigned int));
-    // double 값 37.5를 hex로 추가
-    {
-        double value = 37.5;
-        buf.insert(buf.end(), reinterpret_cast<const uint8_t*>(&value), reinterpret_cast<const uint8_t*>(&value) + sizeof(double));
+    buf.push_back(static_cast<uint8_t>(CommandType::LAUNCH_COMMAND_LC_TO_LS)); // 명령 타입 1바이트
 
-        int speed = 2000000; // 예시로 1000을 사용, 필요에 따라 수정 가능
-        buf.insert(buf.end(), reinterpret_cast<const uint8_t*>(&speed), reinterpret_cast<const uint8_t*>(&speed) + sizeof(int));
+    buf.insert(buf.end(), reinterpret_cast<const uint8_t*>(&cmd.launcherId),
+               reinterpret_cast<const uint8_t*>(&cmd.launcherId) + sizeof(unsigned int));
 
-        long long altitude = 10000; // 예시로 10000을 사용, 필요에 따라 수정 가능
-        buf.insert(buf.end(), reinterpret_cast<const uint8_t*>(&altitude), reinterpret_cast<const uint8_t*>(&altitude) + sizeof(long long));
-    }
+    buf.insert(buf.end(), reinterpret_cast<const uint8_t*>(&cmd.launchAngleXY),
+               reinterpret_cast<const uint8_t*>(&cmd.launchAngleXY) + sizeof(double));
+
+    buf.insert(buf.end(), reinterpret_cast<const uint8_t*>(&cmd.launchAngleXZ),
+               reinterpret_cast<const uint8_t*>(&cmd.launchAngleXZ) + sizeof(double));
+
     return buf;
 }
 
@@ -163,15 +156,32 @@ std::vector<uint8_t> Serializer::serializeRadarStatusRequest(unsigned int radarI
 
 std::vector<uint8_t> Serializer::serializeRadarModeChange(const RadarModeCommand& cmd) {
     std::vector<uint8_t> buffer;
-    buffer.push_back(static_cast<uint8_t>(CommandType::RADAR_MODE_CHANGE_LC_TO_MFR));      
-    buffer.insert(buffer.end(), reinterpret_cast<const uint8_t*>(&cmd.radarId), reinterpret_cast<const uint8_t*>(&cmd.radarId) + 4);
-    buffer.push_back(cmd.radarMode);
-    if (cmd.radarMode == 0) {
-        buffer.push_back(cmd.flag);
-        if (cmd.flag == 0x02) {
-            buffer.insert(buffer.end(), reinterpret_cast<const uint8_t*>(&cmd.targetId), reinterpret_cast<const uint8_t*>(&cmd.targetId) + 4);
-        }
-    }
+
+    uint8_t commandType = static_cast<uint8_t>(CommandType::RADAR_MODE_CHANGE_LC_TO_MFR);
+    uint8_t radarMode = cmd.radarMode;
+    uint8_t priority_or_not = (cmd.targetId == 0) ? 0x01 : 0x02;
+
+    // 로그 출력
+    std::cout << "[Serialize] commandType: " << static_cast<int>(commandType)
+              << ", radarId: " << cmd.radarId
+              << ", radarMode: " << static_cast<int>(radarMode)
+              << ", priority_or_not: " << static_cast<int>(priority_or_not)
+              << ", targetId: " << cmd.targetId << "\n";
+
+    // 직렬화 시작
+    buffer.push_back(commandType); // [0]
+
+    buffer.insert(buffer.end(),
+                  reinterpret_cast<const uint8_t*>(&cmd.radarId),
+                  reinterpret_cast<const uint8_t*>(&cmd.radarId) + 4); // [1~4]
+
+    buffer.push_back(radarMode); // [5]
+    buffer.push_back(priority_or_not); // [6]
+
+    buffer.insert(buffer.end(),
+                  reinterpret_cast<const uint8_t*>(&cmd.targetId),
+                  reinterpret_cast<const uint8_t*>(&cmd.targetId) + 4); // [7~10]
+
     return buffer;
 }
 
@@ -184,28 +194,15 @@ std::vector<uint8_t> Serializer::serializeLCPositionResponse(const LCPositionRes
                reinterpret_cast<const uint8_t*>(&res.posX) + sizeof(long long));
     buf.insert(buf.end(), reinterpret_cast<const uint8_t*>(&res.posY),
                reinterpret_cast<const uint8_t*>(&res.posY) + sizeof(long long));
-    buf.insert(buf.end(), reinterpret_cast<const uint8_t*>(&res.posY),
+    buf.insert(buf.end(), reinterpret_cast<const uint8_t*>(&res.height),
                reinterpret_cast<const uint8_t*>(&res.height) + sizeof(long long));
     return buf;
 }
 
-std::vector<uint8_t> Serializer::serializeLaunchCommand(const LaunchCommand& cmd) {
-    std::vector<uint8_t> buf;
-    buf.push_back(static_cast<uint8_t>(CommandType::FIRE_COMMAND_ECC_TO_LC)); // 명령 타입 1바이트
-    buf.insert(buf.end(), reinterpret_cast<const uint8_t*>(&cmd.launcherId),
-                          reinterpret_cast<const uint8_t*>(&cmd.launcherId) + sizeof(unsigned int)); // 4
-    buf.insert(buf.end(), reinterpret_cast<const uint8_t*>(&cmd.launchAngle),
-                          reinterpret_cast<const uint8_t*>(&cmd.launchAngle) + sizeof(double)); // 8
-    buf.insert(buf.end(), reinterpret_cast<const uint8_t*>(&cmd.speed),
-                          reinterpret_cast<const uint8_t*>(&cmd.speed) + sizeof(int)); // 4
-    buf.insert(buf.end(), reinterpret_cast<const uint8_t*>(&cmd.altitude),
-                          reinterpret_cast<const uint8_t*>(&cmd.altitude) + sizeof(long long)); // 8
-    return buf;
-}
 
 std::vector<uint8_t> Serializer::serializeModeChangeCommand(const LauncherModeCommand& cmd) {
     std::vector<uint8_t> buf;
-    buf.push_back(static_cast<uint8_t>(CommandType::MOVE_COMMAND_LC_TO_LS)); // 명령 타입 1바이트
+    buf.push_back(static_cast<uint8_t>(CommandType::MODE_CHANGE_LC_TO_LS)); // 명령 타입 1바이트
     buf.insert(buf.end(), reinterpret_cast<const uint8_t*>(&cmd.launcherId),
                           reinterpret_cast<const uint8_t*>(&cmd.launcherId) + sizeof(unsigned int)); // 4
     buf.push_back(static_cast<uint8_t>(cmd.newMode)); // 1

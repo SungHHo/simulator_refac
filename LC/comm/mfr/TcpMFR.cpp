@@ -98,31 +98,31 @@ void TcpMFR::receiveLoop() {
     while (true) {
         uint8_t buffer[3072];
         ssize_t len = recv(sock_fd_, buffer, sizeof(buffer), 0);
-        std::cout << "[TcpMFR] recv() 호출됨, len = " << len << "\n";
+        // std::cout << "[TcpMFR] recv() 호출됨, len = " << len << "\n";
 
 
         if (len == 0) {
-            std::cerr << "[TcpMFR] 클라이언트가 연결을 종료했습니다.\n";
+            // std::cerr << "[TcpMFR] 클라이언트가 연결을 종료했습니다.\n";
             break;
         } else if (len < 0) {
             std::cerr << "[TcpMFR] 수신 에러: " << strerror(errno) << " (errno=" << errno << ")\n";
             break;
         }
 
-        std::cout << "[TcpMFR] 데이터 수신 성공: " << len << " 바이트\n";
+        // std::cout << "[TcpMFR] 데이터 수신 성공: " << len << " 바이트\n";
 
         std::vector<uint8_t> raw(buffer, buffer + len);
 
         Common::CommonMessage msg;
         try {
             msg = Common::MessageParser::parse(raw, getSenderType());
-            std::cout << "[TcpMFR] 파싱 성공: CommandType = " << static_cast<int>(msg.commandType) << "\n";
+            // std::cout << "[TcpMFR] 파싱 성공: CommandType = " << static_cast<int>(msg.commandType) << "\n";
         } catch (const std::exception& e) {
             std::cerr << "[TcpMFR] 파싱 중 예외: " << e.what() << "\n";
             continue;
         }
         if (callback_) {
-            std::cout << "[TcpMFR] onMessage 호출\n";
+            // std::cout << "[TcpMFR] onMessage 호출\n";
             callback_->onMessage(msg);
         }
     }
@@ -147,12 +147,10 @@ void TcpMFR::sendStatus(const SystemStatus& status) {
 // }
 
 void TcpMFR::sendRaw(const std::vector<uint8_t>& data) {
-    static int sendCounter = 0;
-    sendCounter++;
+    static int sendCounter2 = 0;
+    sendCounter2++;
 
-    if (sendCounter % 10 != 0) {
-        return;  // 10번 중 1번만 전송
-    }
+
 
     const std::string prefix = "[TcpMFR] 일반 전송";
 
@@ -160,21 +158,23 @@ void TcpMFR::sendRaw(const std::vector<uint8_t>& data) {
     if (sent < 0) {
         std::cerr << prefix << " - 전송 실패 (errno=" << errno << ")\n";
     } else {
-        std::cout << prefix << " - " << sent << " 바이트 전송 완료\n";
+        if(sendCounter2%10==0) {
+            std::cout << prefix << " - " << sent << " 바이트 전송 완료\n";
+         }
     }
 }
 void TcpMFR::sendRaw(const std::vector<uint8_t>& data, const std::string& prefix) {
     static int sendCounter = 0;
     sendCounter++;
 
-    if (sendCounter % 10 != 0) {
-        return;  // 10번 중 1번만 전송
-    }
 
     ssize_t sent = send(sock_fd_, data.data(), data.size(), 0);
     if (sent < 0) {
         std::cerr << prefix << " - 전송 실패 (errno=" << errno << ")\n";
-    } else {
-        std::cout << prefix << " - " << sent << " 바이트 전송 완료\n";
+    } 
+    else {
+        if(sendCounter%10==0) {
+            std::cout << prefix << " - " << sent << " 바이트 전송 완료\n";
+         }
     }
 }

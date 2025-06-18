@@ -20,21 +20,22 @@ void MfrSimCommManager::initMfrSimCommManager()
 {
     std::cout << "[Mfr::startUdp] UDP 통신 수신 시작" << "\n";
     
-    if (ini_parse("../config/MFR.ini", iniHandler, &mfrConfig) < 0) 
+    if (loadMfrConfig("../config/MFR.ini", mfrConfig)) 
     {
-        std::cerr << "[MfrSimCommManager::initMfrSimCommManager] INI 파일 읽기 실패" << std::endl;
+        std::cout << "Simulator Port: " <<mfrConfig.simulatorPort << std::endl;
+
+        simPort = mfrConfig.simulatorPort;
+
+        if (connectToSim()) 
+        {
+            startUdpReceiver();        
+        }
     }
 
     else
     {
-        simPort = mfrConfig.simulatorPort;
-        std::cout << "simport: " << simPort << std::endl;
-    }
-
-    if (connectToSim()) 
-    {
-        startUdpReceiver();        
-    }
+        std::cerr << "[MfrSimCommManager::initMfrSimCommManager] INI 파일 읽기 실패" << std::endl;
+    }    
 }
 
 bool MfrSimCommManager::connectToSim()

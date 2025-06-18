@@ -14,10 +14,23 @@ set(SOURCES
     MfrLcCommManager.cpp
     MfrSimCommManager.cpp
     StepMotorController.cpp
+    config/ini.cpp
+    config/MfrConfig.cpp
 )
 
 # 실행 파일 생성
 add_executable(radar ${SOURCES})
 
+# include 디렉토리 추가
+target_include_directories(radar PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/config
+)
+
 # pthread 사용 시 연결 (sleep, thread 등)
 target_link_libraries(radar pthread)
+
+configure_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/config/MFR.ini
+    ${CMAKE_CURRENT_BINARY_DIR}/config/MFR.ini
+    COPYONLY
+)

@@ -35,7 +35,7 @@ private:
     /// @brief Motor 목표 각도
     double goalMotorAngle;
 
-    /// @brief MFR 탐지 범위
+    /// @brief MFR 탐지 범위 (m)
     const long long limitDetectionRange = 100000;
 
     /// @brief MFR의 시야(FoV) 제한 각도

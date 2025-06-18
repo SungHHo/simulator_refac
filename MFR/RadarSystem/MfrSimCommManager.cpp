@@ -1,5 +1,6 @@
 #include "MfrSimCommManager.hpp"
 #include "PacketProtocol.hpp"
+
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <unistd.h>
@@ -11,13 +12,25 @@
 #define BUFFER_SIZE 1024
 
 MfrSimCommManager::MfrSimCommManager(IReceiver* receiver) : receiver(receiver), sockfd(-1) 
-{
+{    
     initMfrSimCommManager();
 }
 
 void MfrSimCommManager::initMfrSimCommManager()
 {
     std::cout << "[Mfr::startUdp] UDP 통신 수신 시작" << "\n";
+    
+    if (ini_parse("../config/MFR.ini", iniHandler, &mfrConfig) < 0) 
+    {
+        std::cerr << "[MfrSimCommManager::initMfrSimCommManager] INI 파일 읽기 실패" << std::endl;
+    }
+
+    else
+    {
+        simPort = mfrConfig.simulatorPort;
+        std::cout << "simport: " << simPort << std::endl;
+    }
+
     if (connectToSim()) 
     {
         startUdpReceiver();        
@@ -25,7 +38,7 @@ void MfrSimCommManager::initMfrSimCommManager()
 }
 
 bool MfrSimCommManager::connectToSim()
-{
+{    
     sockfd = socket(AF_INET, SOCK_DGRAM, 0);
     if (sockfd < 0) 
     {
@@ -36,7 +49,8 @@ bool MfrSimCommManager::connectToSim()
     sockaddr_in serverAddr{};
     serverAddr.sin_family = AF_INET;
     serverAddr.sin_addr.s_addr = INADDR_ANY;
-    serverAddr.sin_port = htons(SIM_UDP_PORT);
+    // serverAddr.sin_port = htons(SIM_UDP_PORT);
+    serverAddr.sin_port = htons(simPort);
 
     if (bind(sockfd, (struct sockaddr*)&serverAddr, sizeof(serverAddr)) < 0) 
     {

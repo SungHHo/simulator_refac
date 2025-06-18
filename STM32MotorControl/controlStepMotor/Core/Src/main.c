@@ -31,7 +31,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define STEP_PER_REV 7200
+#define STEP_PER_REV 6400
 #define DEG_PER_STEP (360.0f / STEP_PER_REV)
 
 #define STEP_GPIO_Port GPIOA
@@ -52,40 +52,46 @@
 
 COM_InitTypeDef BspCOMInit;
 
+TIM_HandleTypeDef htim2;
 TIM_HandleTypeDef htim6;
 
-UART_HandleTypeDef huart4;
 UART_HandleTypeDef huart9;
 
 /* USER CODE BEGIN PV */
-extern TIM_HandleTypeDef htim6;
-
 uint8_t rx_byte;
 char rx_buffer[RX_BUFFER_SIZE];
 uint8_t rx_index = 0;
 
 float target_angle = 0.0f;
-
 int rotation_mode = 0;           // 1: 계속 회전, 0: 목표 각도 회전 후 정지
 int direction = 1;               // 0: CCW, 1: CW
 int target_pulse_count = 0;      // 목표 펄스 수
-int current_pulse_count = 0;     // 현재 펄스 수
+volatile int current_pulse_count = 0;     // 현재 펄스 수
+
+uint32_t last_toggle_us = 0;
+uint8_t pulse_state = 0;  // LOW부터 시작
+uint32_t step_period_us = 10000;
+
+
+
+
+uint32_t target_rpm = 60;
+uint32_t pwm_freq;
+uint32_t pwm_period = 0;
+uint32_t pwm_duty = 0;
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MPU_Config(void);
 static void MX_GPIO_Init(void);
-static void MX_UART4_Init(void);
 static void MX_TIM6_Init(void);
 static void MX_UART9_Init(void);
+static void MX_TIM2_Init(void);
 /* USER CODE BEGIN PFP */
-void StepMotor_OneRevolution_1s();
-void HAL_Delay_us(uint32_t us);
+void HAL_TIM_PWM_PulseFinishedCallback(TIM_HandleTypeDef *htim);
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart);
-void Debug_UART_Print(const char *msg);
-int _write(int, char*, int);
-void StepMotor_OnePulse(int rpm, int direction);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -125,11 +131,23 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  MX_UART4_Init();
   MX_TIM6_Init();
   MX_UART9_Init();
+  MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
   HAL_UART_Receive_IT(&huart9, &rx_byte, 1);
+
+  HAL_TIM_PWM_Start_IT(&htim2, TIM_CHANNEL_1);  // PWM + Interrupt
+
+  pwm_freq = (STEP_PER_REV * target_rpm) / 60;  // 예: 200 * 60 / 60 = 200Hz
+  // 주기 및 듀티 계산 (prescaler = 63일 경우, clk = 170MHz / 64 = 2.65625MHz)
+  pwm_period = (2656250 / pwm_freq) - 1;  // 예: 2.65625MHz / 200Hz = 13281
+  pwm_duty   = pwm_period / 2;           // 50% 듀티
+
+  __HAL_TIM_SET_AUTORELOAD(&htim2, pwm_period);
+  __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, pwm_duty);
+  // PWM 시작
+//  HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
   /* USER CODE END 2 */
 
   /* Initialize leds */
@@ -153,24 +171,40 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-	  if (rotation_mode == 1)
-	  {
-		  StepMotor_OnePulse(60, direction);  // 60RPM으로 지속 회전
-	  }
-	  else
-	  {
-		  if ((direction == 1 && current_pulse_count < target_pulse_count) ||
-			  (direction == 0 && current_pulse_count > target_pulse_count))
-		  {
-			  StepMotor_OnePulse(60, direction);  // 목표까지 이동
-		  }
-		  else
-		  {
-			  // 목표 위치 도달 후 정지 → 아무 것도 하지 않음
-		  }
-	  }
-
-	  HAL_Delay(5);
+//	  uint32_t now = micros();
+//
+//	  if (rotation_mode == 1)
+//	  {
+////		  StepMotor_OnePulse(60, direction);  // 60RPM으로 지속 회전
+//		  step_period_us = 1000000 / ((60.0f / STEP_PER_REV) * 60.0f);  // 60RPM 기준
+//		  if (now - last_toggle_us >= step_period_us / 2)
+//		  {
+//			  last_toggle_us = now;
+//			  pulse_state = !pulse_state;
+//			  HAL_GPIO_WritePin(STEP_GPIO_Port, STEP_Pin, pulse_state);
+//
+//			  if (pulse_state == 0)  // falling edge에서 카운트
+//			  {
+//				  current_pulse_count++;
+//				  if (current_pulse_count >= STEP_PER_REV)
+//					  current_pulse_count = 0;
+//			  }
+//		  }
+//	  }
+//	  else
+//	  {
+//		  if ((direction == 1 && current_pulse_count < target_pulse_count) ||
+//			  (direction == 0 && current_pulse_count > target_pulse_count))
+//		  {
+//			  StepMotor_OnePulse(60, direction);  // 목표까지 이동
+//		  }
+//		  else
+//		  {
+//			  // 목표 위치 도달 후 정지 → 아무 것도 하지 않음
+//		  }
+//	  }
+//
+//	  HAL_Delay(5);
   }
   /* USER CODE END 3 */
 }
@@ -235,6 +269,65 @@ void SystemClock_Config(void)
 }
 
 /**
+  * @brief TIM2 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM2_Init(void)
+{
+
+  /* USER CODE BEGIN TIM2_Init 0 */
+
+  /* USER CODE END TIM2_Init 0 */
+
+  TIM_ClockConfigTypeDef sClockSourceConfig = {0};
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+  TIM_OC_InitTypeDef sConfigOC = {0};
+
+  /* USER CODE BEGIN TIM2_Init 1 */
+
+  /* USER CODE END TIM2_Init 1 */
+  htim2.Instance = TIM2;
+  htim2.Init.Prescaler = 63;
+  htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim2.Init.Period = 13281;
+  htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+  if (HAL_TIM_ConfigClockSource(&htim2, &sClockSourceConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  if (HAL_TIM_PWM_Init(&htim2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim2, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sConfigOC.OCMode = TIM_OCMODE_PWM1;
+  sConfigOC.Pulse = 6640;
+  sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
+  sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
+  if (HAL_TIM_PWM_ConfigChannel(&htim2, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM2_Init 2 */
+
+  /* USER CODE END TIM2_Init 2 */
+  HAL_TIM_MspPostInit(&htim2);
+
+}
+
+/**
   * @brief TIM6 Initialization Function
   * @param None
   * @retval None
@@ -273,54 +366,6 @@ static void MX_TIM6_Init(void)
 }
 
 /**
-  * @brief UART4 Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_UART4_Init(void)
-{
-
-  /* USER CODE BEGIN UART4_Init 0 */
-
-  /* USER CODE END UART4_Init 0 */
-
-  /* USER CODE BEGIN UART4_Init 1 */
-
-  /* USER CODE END UART4_Init 1 */
-  huart4.Instance = UART4;
-  huart4.Init.BaudRate = 115200;
-  huart4.Init.WordLength = UART_WORDLENGTH_8B;
-  huart4.Init.StopBits = UART_STOPBITS_1;
-  huart4.Init.Parity = UART_PARITY_NONE;
-  huart4.Init.Mode = UART_MODE_TX_RX;
-  huart4.Init.HwFlowCtl = UART_HWCONTROL_NONE;
-  huart4.Init.OverSampling = UART_OVERSAMPLING_16;
-  huart4.Init.OneBitSampling = UART_ONE_BIT_SAMPLE_DISABLE;
-  huart4.Init.ClockPrescaler = UART_PRESCALER_DIV1;
-  huart4.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_NO_INIT;
-  if (HAL_UART_Init(&huart4) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  if (HAL_UARTEx_SetTxFifoThreshold(&huart4, UART_TXFIFO_THRESHOLD_1_8) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  if (HAL_UARTEx_SetRxFifoThreshold(&huart4, UART_RXFIFO_THRESHOLD_1_8) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  if (HAL_UARTEx_DisableFifoMode(&huart4) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN UART4_Init 2 */
-
-  /* USER CODE END UART4_Init 2 */
-
-}
-
-/**
   * @brief UART9 Initialization Function
   * @param None
   * @retval None
@@ -336,7 +381,7 @@ static void MX_UART9_Init(void)
 
   /* USER CODE END UART9_Init 1 */
   huart9.Instance = UART9;
-  huart9.Init.BaudRate = 115200;
+  huart9.Init.BaudRate = 9600;
   huart9.Init.WordLength = UART_WORDLENGTH_8B;
   huart9.Init.StopBits = UART_STOPBITS_1;
   huart9.Init.Parity = UART_PARITY_NONE;
@@ -420,6 +465,14 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(LED_RED_GPIO_Port, &GPIO_InitStruct);
 
+  /*Configure GPIO pin : PA8 */
+  GPIO_InitStruct.Pin = GPIO_PIN_8;
+  GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  GPIO_InitStruct.Alternate = GPIO_AF1_TIM1;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
   /*Configure GPIO pin : PD1 */
   GPIO_InitStruct.Pin = GPIO_PIN_1;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
@@ -440,95 +493,85 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-int _write(int file, char *ptr, int len)
+
+void HAL_TIM_PWM_PulseFinishedCallback(TIM_HandleTypeDef *htim)
 {
-	HAL_UART_Transmit(&huart4, (uint8_t*)ptr, len, HAL_MAX_DELAY);
-	return len;
-}
-
-void StepMotor_OnePulse(int rpm, int direction)
-{
-	if (rpm <= 0) return;  // 0RPM은 실행하지 않음
-
-	float pulse_freq = (rpm / 60.0f) * STEP_PER_REV;
-	float delay_us = 1e6f / pulse_freq / 2.0f;
-
-	HAL_GPIO_WritePin(STEP_GPIO_Port, STEP_Pin, GPIO_PIN_SET);
-	HAL_Delay_us((uint32_t)delay_us);
-	HAL_GPIO_WritePin(STEP_GPIO_Port, STEP_Pin, GPIO_PIN_RESET);
-	HAL_Delay_us((uint32_t)delay_us);
-
-	if (direction == 1) current_pulse_count++;
-	else current_pulse_count--;
-
-	if (current_pulse_count >= STEP_PER_REV) current_pulse_count -= STEP_PER_REV;
-	else if ((int32_t)current_pulse_count < 0) current_pulse_count += STEP_PER_REV;
+    if (htim->Instance == TIM2 && htim->Channel == HAL_TIM_ACTIVE_CHANNEL_1)
+    {
+        if (rotation_mode == 1)
+        {
+            current_pulse_count++;
+            if (current_pulse_count >= STEP_PER_REV)
+                current_pulse_count = 0;
+        }
+        else if (rotation_mode == 0)
+        {
+            if ((direction == 1 && current_pulse_count < target_pulse_count) ||
+                (direction == 0 && current_pulse_count > target_pulse_count))
+            {
+                if (direction == 1) current_pulse_count++;
+                else current_pulse_count--;
+            }
+            else
+            {
+                HAL_TIM_PWM_Stop_IT(&htim2, TIM_CHANNEL_1);  // 목표 도달 시 PWM 정지
+            }
+        }
+    }
 }
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
-	if (huart->Instance == UART9)
-	{
-		if (rx_byte == '\n' || rx_byte == '\r')
-		{
-			rx_buffer[rx_index] = '\0';  // 문자열 종료
+    if (huart->Instance == UART9)
+    {
+        if (rx_byte == '\n' || rx_byte == '\r')
+        {
+            rx_buffer[rx_index] = '\0';  // 문자열 종료
 
-			if (strcmp((char*)rx_buffer, "ROTATION_MODE") == 0)
-			{
-				rotation_mode = 1;
-			}
+            if (strcmp((char*)rx_buffer, "ROTATION_MODE") == 0)
+            {
+                rotation_mode = 1;
+                current_pulse_count = 0;  // 필요 시 초기화
+                HAL_GPIO_WritePin(DIR_GPIO_Port, DIR_Pin, GPIO_PIN_SET);  // 기본 방향
+                HAL_TIM_PWM_Start_IT(&htim2, TIM_CHANNEL_1);  // PWM 시작
+            }
 
-			else if (strncmp((char*)rx_buffer, "STOP_MODE:", 10) == 0)
-			{
-				rotation_mode = 0;
-				target_angle = atof(&rx_buffer[10]);  // 정수든 소수든 안전하게 파싱
+            else if (strncmp((char*)rx_buffer, "STOP_MODE:", 10) == 0)
+            {
+                rotation_mode = 0;
+                target_angle = atof(&rx_buffer[10]);
 
-				float current_angle = fmodf(current_pulse_count * DEG_PER_STEP, 360.0f);
-				float cw_diff  = fmodf((target_angle - current_angle + 360.0f), 360.0f);
-				float ccw_diff = fmodf((current_angle - target_angle + 360.0f), 360.0f);
+                float current_angle = fmodf(current_pulse_count * DEG_PER_STEP, 360.0f);
+                float cw_diff  = fmodf((target_angle - current_angle + 360.0f), 360.0f);
+                float ccw_diff = fmodf((current_angle - target_angle + 360.0f), 360.0f);
 
-				if (cw_diff <= ccw_diff)
-				{
-					direction = 1;
-					HAL_GPIO_WritePin(DIR_GPIO_Port, DIR_Pin, GPIO_PIN_SET);
-					target_pulse_count = current_pulse_count + (uint32_t)(cw_diff / DEG_PER_STEP);
-				}
-				else
-				{
-					direction = 0;
-					HAL_GPIO_WritePin(DIR_GPIO_Port, DIR_Pin, GPIO_PIN_RESET);
-					target_pulse_count = current_pulse_count - (uint32_t)(ccw_diff / DEG_PER_STEP);
-				}
-			}
+                if (cw_diff <= ccw_diff)
+                {
+                    direction = 1;
+                    HAL_GPIO_WritePin(DIR_GPIO_Port, DIR_Pin, GPIO_PIN_SET);
+                    target_pulse_count = current_pulse_count + (uint32_t)(cw_diff / DEG_PER_STEP);
+                }
+                else
+                {
+                    direction = 0;
+                    HAL_GPIO_WritePin(DIR_GPIO_Port, DIR_Pin, GPIO_PIN_RESET);
+                    target_pulse_count = current_pulse_count - (uint32_t)(ccw_diff / DEG_PER_STEP);
+                }
 
-			rx_index = 0;
-			memset(rx_buffer, 0, RX_BUFFER_SIZE);
-		}
+                HAL_TIM_PWM_Start_IT(&htim2, TIM_CHANNEL_1);  // PWM 시작
+            }
 
-		else
-		{
-			// 버퍼에 수신 문자 저장
-			if (rx_index < RX_BUFFER_SIZE - 1)
-			{
-				rx_buffer[rx_index++] = rx_byte;
-			}
-		}
+            rx_index = 0;
+            memset(rx_buffer, 0, RX_BUFFER_SIZE);
+        }
+        else
+        {
+            if (rx_index < RX_BUFFER_SIZE - 1)
+                rx_buffer[rx_index++] = rx_byte;
+        }
 
-	    HAL_UART_Receive_IT(&huart9, &rx_byte, 1);
-	}
-}
-
-void Debug_UART_Print(const char *msg)
-{
-    HAL_UART_Transmit(&huart4, (uint8_t *)msg, strlen(msg), HAL_MAX_DELAY);
-}
-
-void HAL_Delay_us(uint32_t us)
-{
-    __HAL_TIM_SET_COUNTER(&htim6, 0);
-    HAL_TIM_Base_Start(&htim6);
-    while (__HAL_TIM_GET_COUNTER(&htim6) < us);
-    HAL_TIM_Base_Stop(&htim6);
+        HAL_UART_Receive_IT(&huart9, &rx_byte, 1);  // 다음 수신 대기
+    }
 }
 
 /* USER CODE END 4 */

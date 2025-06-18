@@ -41,8 +41,10 @@ void MockMissileManager::flightMissile(const MissileInfo &MissileInfo)
 		std::cout << "Missile is already in flight." << std::endl;
 		return;
 	}
-
-	std::cout << "Missile flight success." << std::endl;
+	else
+	{
+		std::cout << "Missile flight success." << std::endl;
+	}
 
 	is_flight_ = true;
 

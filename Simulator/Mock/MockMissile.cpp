@@ -3,6 +3,7 @@
 #include <iostream>
 #include <cstring>
 #include <memory>
+#include <chrono>
 
 #include "MockMissile.h"
 
@@ -26,6 +27,10 @@ void MockMissile::updatePosMissile()
 		}
 		else
 		{
+			// 현재시간
+			auto now = std::chrono::system_clock::now();
+			auto now_time = std::chrono::system_clock::to_time_t(now);
+			std::cout << "[Current time, MockTarget]: " << std::ctime(&now_time) << std::endl;
 			std::cout << "Missile is still in flight." << std::endl;
 		}
 

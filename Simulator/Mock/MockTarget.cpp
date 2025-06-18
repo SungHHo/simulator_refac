@@ -5,6 +5,7 @@
 #include <cmath>
 
 MockTarget::MockTarget(const TargetInfo &target_info, std::shared_ptr<MFRSendUDPManager> mfr_send_manager) : target_info_(target_info), mfr_send_manager_(mfr_send_manager)
+
 {
 	// Constructor implementation
 }
@@ -21,17 +22,23 @@ void MockTarget::updatePos()
 	target_info_.y += std::sin(target_info_.angle * M_PI / 180.0) * target_info_.speed * 1;
 	// target_info_.z += target_info_.speed * 0.01; // 고도 증가 예제
 
-	// 만약 미사일이 탐지되면 10초뒤의 나의 위치 출력
-	// if (mock_missile_manager_->getFlightStatus() && !first_flight_)
-	// {
-	// 	first_flight_ = true;
-	// 	int ex_x = std::cos(target_info_.angle * M_PI / 180.0) * target_info_.speed * 100;
-	// 	int ex_y = std::sin(target_info_.angle * M_PI / 180.0) * target_info_.speed * 100;
-	// 	std::cout << "[Target position after 10 seconds]: "
-	// 			  << "x: " << target_info_.x + ex_x
-	// 			  << ", y: " << target_info_.y + ex_y
-	// 			  << std::endl;
-	// }
+	// 현재시간
+	auto now = std::chrono::system_clock::now();
+	auto now_time = std::chrono::system_clock::to_time_t(now);
+	std::cout << "[Current time, MockTarget]: " << std::ctime(&now_time) << std::endl;
+	int ex_x = std::cos(target_info_.angle * M_PI / 180.0) * target_info_.speed * 100;
+	int ex_y = std::sin(target_info_.angle * M_PI / 180.0) * target_info_.speed * 100;
+	std::cout << "[Target position now]: "
+			  << "x: " << target_info_.x
+			  << ", y: " << target_info_.y
+			  << ", speed: " << target_info_.speed
+			  << std::endl;
+
+	std::cout << "[Target position after 10 seconds]: "
+			  << "x: " << target_info_.x + ex_x
+			  << ", y: " << target_info_.y + ex_y
+			  << ", speed: " << target_info_.speed
+			  << std::endl;
 
 	// 데이터 전송
 	sendData();

@@ -19,7 +19,7 @@ MockTargetManager::~MockTargetManager()
 
 void MockTargetManager::RaedTargetIni()
 {
-	std::ifstream file("target_list.ini");
+	std::ifstream file("/home/sra235/2024/Surface-to-air-missiles/target_list.ini");
 	if (!file.is_open())
 	{
 		std::cerr << "Failed to open target_list.ini" << std::endl;
@@ -121,7 +121,15 @@ void MockTargetManager::flitghtTarget()
 	{
 		// std::cout << "update " << std::endl;
 		target->updatePos();
+		// std::cout << "Target ID: " << target->getTargetInfo().id
+		// 		  << " Position: (" << target->getTargetInfo().x << ", "
+		// 		  << target->getTargetInfo().y << ", "
+		// 		  << target->getTargetInfo().z << ")"
+		// 		  << " Speed: " << target->getTargetInfo().speed
+		// 		  << " Angle: " << target->getTargetInfo().angle
+		// 		  << std::endl;
 	}
+	std::this_thread::sleep_for(std::chrono::milliseconds(100));
 }
 
 int MockTargetManager::downTargetStatus(const MissileInfo &missileInfo)

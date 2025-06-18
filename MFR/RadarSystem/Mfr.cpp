@@ -22,7 +22,7 @@ Pos3D Mfr::decode(const EncodedPos3D& e)
     {
         static_cast<double>(e.latitude)  / SCALE,
         static_cast<double>(e.longitude) / SCALE,
-        static_cast<double>(e.altitude)  / SCALE
+        static_cast<double>(e.altitude)
     };
 }
 
@@ -32,7 +32,7 @@ EncodedPos3D Mfr::encode(const Pos3D& p)
     
     e.latitude  = std::llround(p.latitude  * SCALE);  // 37.67213612 → 3767213612
     e.longitude = std::llround(p.longitude * SCALE);  // 127.23644256 → 12723644256
-    e.altitude  = std::llround(p.altitude  * SCALE);  // 9000.12345678 → 900012345678
+    e.altitude  = std::llround(p.altitude);  // 9000.12345678 → 900012345678
     return e;
 }
 
@@ -54,9 +54,9 @@ void Mfr::callBackData(const std::vector<char>& packet)
             break;
 
         case STATUS_REQ:
-            std::cout << "[Mfr::recvData] 상태 요청 명령 수신됨" << std::endl;
+            // std::cout << "[Mfr::recvData] 상태 요청 명령 수신됨" << std::endl;
             sendMfrStatus();
-            std::cout << "[Mfr::recvData] 상태 요청 명령 전송됨" << std::endl;
+            // std::cout << "[Mfr::recvData] 상태 요청 명령 전송됨" << std::endl;
             break;
 
         case MODE_CHANGE:
@@ -65,7 +65,7 @@ void Mfr::callBackData(const std::vector<char>& packet)
             break;
 
         case LC_INIT_RES:
-            std::cout << "[Mfr::recvData] LC 최초 정보 수신" << std::endl;
+            // std::cout << "[Mfr::recvData] LC 최초 정보 수신" << std::endl;
             parsingLcInitData(dataPayload);
             break;
 
@@ -205,48 +205,70 @@ void Mfr::parsingLcInitData(const std::vector<char>& payload)
 
 void Mfr::parsingSimData(const std::vector<char>& payload)
 {
-    if (payload.size() != sizeof(SimData)) 
+    if (payload.size() != sizeof(TargetSimData) && payload.size() != sizeof(MissileSimData)) 
     {
         std::cerr << "[Mfr::handleSimDataPayload] SimData 크기 오류. 받은 크기: " << payload.size() << std::endl;
         return;
     }
     
-    SimData data;
-    std::memcpy(&data, payload.data(), sizeof(SimData));    
-    // std::cout << "[Mfr::handleSimDataPayload] SimData 수신 -> ID: " << data.mockId
-    //           << ", Latitude: " << data.mockCoords.latitude
-    //           << ", Longitude: " << data.mockCoords.longitude
-    //           << ", Altitude: " << data.mockCoords.altitude
-    //           << ", Angle: " << data.angle
-    //           << ", Speed: " << data.speed << std::endl;
-
-
-    localSimData localSimData;
-    localSimData.mockId = data.mockId;
-    localSimData.mockCoords = decode(data.mockCoords);
-    localSimData.angle = data.angle;
-    localSimData.speed = data.speed;
-
-    // std::cout << "latitude: " << localSimData.mockCoords.latitude << ", longitude: " << localSimData.mockCoords.longitude << ", altitude: " << localSimData.mockCoords.altitude << std::endl;
-    // std::cout << "[Mfr::handleSimDataPayload] SimData 수신 -> ID: " << localSimData.mockId
-    //           << ", Latitude: " << localSimData.mockCoords.latitude
-    //           << ", Longitude: " << localSimData.mockCoords.longitude
-    //           << ", Altitude: " << localSimData.mockCoords.altitude
-    //           << ", Angle: " << localSimData.angle
-    //           << ", Speed: " << localSimData.speed << std::endl;
-    if (localSimData.mockId >= 104001 && localSimData.mockId <= 104999)         // 표적 정보
+    if (payload.size() == sizeof(TargetSimData))
     {
-        // std::cout << "[Mfr::handleSimDataPayload] -> 모의 표적 등록 완료" << std::endl;
-        addMockTarget(localSimData);        
+        TargetSimData data;
+        std::memcpy(&data, payload.data(), sizeof(TargetSimData)); 
+        
+        localTargetSimData localSimData;
+        localSimData.mockId = data.mockId;
+        localSimData.mockCoords = decode(data.mockCoords);
+        localSimData.angle = data.angle;    
+        localSimData.speed = data.speed;
+
+        std::cout << "[Mfr::handleSimDataPayload] Target Data 수신 -> ID: " << localSimData.mockId
+              << ", Latitude: " << localSimData.mockCoords.latitude
+              << ", Longitude: " << localSimData.mockCoords.longitude
+              << ", Altitude: " << localSimData.mockCoords.altitude
+              << ", Angle: " << localSimData.angle
+              << ", Speed: " << localSimData.speed 
+              << ", is Hit?: " << localSimData.isHit
+              << std::endl;
+
+        if (localSimData.mockId >= 104001 && localSimData.mockId <= 104999)         // 표적 정보
+        {
+            addMockTarget(localSimData);
+        }
+        else 
+        {
+            std::cerr << "[Mfr::handleSimDataPayload] 알 수 없는 ID 범위: " << localSimData.mockId << std::endl;
+        }
     }
-    else if (localSimData.mockId >= 105001 && localSimData.mockId <= 105999)    // 미사일 정보
+
+    else if (payload.size() == sizeof(MissileSimData))
     {
-        std::cout << "[Mfr::handleSimDataPayload] -> 모의 미사일 등록 완료" << std::endl;
-        addMockMissile(localSimData);
-    }
-    else 
-    {
-        std::cerr << "[Mfr::handleSimDataPayload] 알 수 없는 ID 범위: " << localSimData.mockId << std::endl;
+        MissileSimData data;
+        std::memcpy(&data, payload.data(), sizeof(MissileSimData));
+        localMissileSimData localSimData;
+        localSimData.mockId = data.mockId;
+        localSimData.mockCoords = decode(data.mockCoords);
+        localSimData.angle = data.angle;
+        localSimData.speed = data.speed;
+
+        std::cout << "[Mfr::handleSimDataPayload] Missile Data 수신 -> ID: " << localSimData.mockId
+              << ", Latitude: " << localSimData.mockCoords.latitude
+              << ", Longitude: " << localSimData.mockCoords.longitude
+              << ", Altitude: " << localSimData.mockCoords.altitude
+              << ", Angle: " << localSimData.angle
+              << ", Angle2: " << localSimData.angle2
+              << ", Speed: " << localSimData.speed
+              << ", is Hit?: " << localSimData.isHit
+              << std::endl;
+
+        if (localSimData.mockId >= 105001 && localSimData.mockId <= 105999)    // 미사일 정보
+        {
+            addMockMissile(localSimData);
+        }
+        else 
+        {
+            std::cerr << "[Mfr::handleSimDataPayload] 알 수 없는 ID 범위: " << localSimData.mockId << std::endl;
+        }
     }
 }
 
@@ -347,8 +369,8 @@ double Mfr::angleDiff(double baseAngle, double targetAngle)
 
 void Mfr::mfrDetectionAlgo()
 {
-    std::unordered_map<unsigned int, localSimData> localTargets;
-    std::unordered_map<unsigned int, localSimData> localMissiles;
+    std::unordered_map<unsigned int, localTargetSimData> localTargets;
+    std::unordered_map<unsigned int, localMissileSimData> localMissiles;
 
     {
         std::shared_lock<std::shared_mutex> lock(mockTargetMutex);
@@ -360,33 +382,27 @@ void Mfr::mfrDetectionAlgo()
         localMissiles = mockMissile;
     }
 
-    std::unordered_map<unsigned int, localSimData> localDetectedTargets;
-    std::unordered_map<unsigned int, localSimData> localDetectedMissile;
+    std::unordered_map<unsigned int, localTargetSimData> localDetectedTargets;
+    std::unordered_map<unsigned int, localMissileSimData> localDetectedMissile;
 
     std::vector<MfrToLcTargetInfo> detectedTargetList;
     std::vector<MfrToLcMissileInfo> detectedMissileList;
 
     auto now = std::chrono::system_clock::now();
     uint64_t nowMs = toEpochMillis(now);
-    // std::cout << "SimData SIZE: " << sizeof(MfrToLcTargetInfo) << std::endl;
-    // std::cout << "[Mfr::mfrDetectionAlgo] 현재 시간: " << nowMs << " ms, " << "targetSize: " << localTargets.size();
+    
     if (mfrMode == ROTATION_MODE)
     {
-        // std::cout << ", mfrMode: ROTATION_MODE" << std::endl;
         std::vector<std::pair<unsigned int, long long>> targetDistances;
 
         for (const auto& [id, target] : localTargets)
         {
             double distance = calcDistance(mfrCoords, target.mockCoords);
             
-            if (distance <= limitDetectionRange)
+            if (distance <= limitDetectionRange && !target.isHit)
             {
                 localDetectedTargets[id] = target;
                 targetDistances.emplace_back(id, distance);
-                // std::cout << "[Mfr::mfrDetectionAlgo] Target ID: " << id 
-                //           << ", Distance: " << distance 
-                //           << ", Coords: (" << target.mockCoords.latitude << ", " << target.mockCoords.longitude << ", " << target.mockCoords.altitude << ")" 
-                //           << std::endl;
             }
             else
             {
@@ -427,17 +443,11 @@ void Mfr::mfrDetectionAlgo()
 
         for (const auto& [id, missile] : localMissiles)
         {
-            std::cout<<"localmissiles size: " << localMissiles.size() << std::endl;
             long long distance = calcDistance(mfrCoords, missile.mockCoords);
             
-            if (distance <= limitDetectionRange)
+            if (distance <= limitDetectionRange && !missile.isHit)
             {
                 localDetectedMissile[id] = missile;
-                
-                std::cout << "[Mfr::mfrDetectionAlgo] Missile ID: " << id 
-                          << ", Distance: " << distance 
-                          << ", Coords: (" << missile.mockCoords.latitude << ", " << missile.mockCoords.longitude << ", " << missile.mockCoords.altitude << ")" 
-                          << std::endl;
 
                 MfrToLcMissileInfo status{};
                 status.id = missile.mockId;
@@ -454,10 +464,6 @@ void Mfr::mfrDetectionAlgo()
             {
                 localDetectedMissile.erase(id);
                 detectedMissile.erase(id);
-                // auto it = std::remove_if(targetDistances.begin(), targetDistances.end(),
-                //     [id](const std::pair<int, double>& p) { return p.first == id; });
-
-                // targetDistances.erase(it, targetDistances.end());
             }
         }
     }
@@ -489,20 +495,9 @@ void Mfr::mfrDetectionAlgo()
                 double az = calcBearing(mfrCoords, target.mockCoords);
                 double diff = angleDiff(baseAz, az);
 
-                // std::cout << "[Mfr::mfrDetectionAlgo] Target ID: " << id 
-                //           << ", Base Azimuth: " << baseAz 
-                //           << ", Target Azimuth: " << az 
-                //           << ", Angle Difference: " << diff 
-                //           << std::endl;
-
                 if (std::abs(diff) <= 15.0)
                 {
                     localDetectedTargets[id] = target;
-                    
-                    // std::cout << "[Mfr::mfrDetectionAlgo] Target ID: " << id 
-                    //           << ", Distance: " << distance 
-                    //           << ", Coords: (" << target.mockCoords.latitude << ", " << target.mockCoords.longitude << ", " << target.mockCoords.altitude << ")"
-                    //           << std::endl;
 
                     MfrToLcTargetInfo status{};
                     status.id = target.mockId;
@@ -532,11 +527,6 @@ void Mfr::mfrDetectionAlgo()
                 {
                     localDetectedMissile[id] = missile;
 
-                    std::cout << "[Mfr::mfrDetectionAlgo] Missile ID: " << id 
-                                << ", Distance: " << distance 
-                                << ", Coords: (" << missile.mockCoords.latitude << ", " << missile.mockCoords.longitude << ", " << missile.mockCoords.altitude << ")" 
-                                << std::endl;
-
                     MfrToLcMissileInfo status{};
                     status.id = missile.mockId;
                     status.missileCoords = encode(missile.mockCoords);
@@ -554,24 +544,21 @@ void Mfr::mfrDetectionAlgo()
     if (!detectedTargetList.empty() || !detectedMissileList.empty())
     {
         std::vector<char> packet = serializeDetectionPacket(detectedTargetList, detectedMissileList);       
-        // std::cout << "packet size: " << packet.size() << std::endl;
         lcCommManager->send(packet);
     }
 
     {
         std::unique_lock<std::shared_mutex> lock(detectedTargetMutex);
         detectedTargets = std::move(localDetectedTargets);
-        //std::cout << "[Mfr::mfrDetectionAlgo] 탐지된 표적 수: " << detectedTargets.size() << std::endl;
     }    
 
     {
         std::unique_lock<std::shared_mutex> lock(detectedMissileMutex);
         detectedMissile = std::move(localDetectedMissile);
-        //std::cout << "[Mfr::mfrDetectionAlgo] 탐지된 미사일 수: " << detectedMissile.size() << std::endl;
     }
 }
 
-void Mfr::addMockTarget(const localSimData& target) 
+void Mfr::addMockTarget(const localTargetSimData& target) 
 {
     std::unique_lock<std::shared_mutex> lock(mockTargetMutex);
     mockTargets[target.mockId] = target;
@@ -580,7 +567,7 @@ void Mfr::addMockTarget(const localSimData& target)
 //
 //  detected 된 데이터에서만 조회
 //
-localSimData* Mfr::getMockTargetById(unsigned int id) 
+localTargetSimData* Mfr::getMockTargetById(unsigned int id) 
 {
     std::shared_lock<std::shared_mutex> lock(detectedTargetMutex);
     auto it = detectedTargets.find(id);
@@ -613,7 +600,7 @@ void Mfr::clearMockTargets()
     }
 }
 
-void Mfr::addMockMissile(const localSimData& missile) 
+void Mfr::addMockMissile(const localMissileSimData& missile) 
 {
     {
         std::unique_lock<std::shared_mutex> lock(mockMissileMutex);
@@ -629,7 +616,7 @@ void Mfr::addMockMissile(const localSimData& missile)
 //
 //  detected 된 데이터에서만 조회
 //
-localSimData* Mfr::getMockMissileById(unsigned int id)
+localMissileSimData* Mfr::getMockMissileById(unsigned int id)
 {
     std::shared_lock<std::shared_mutex> lock(detectedMissileMutex);
     auto it = detectedMissile.find(id);

@@ -19,9 +19,10 @@ uint64_t be64toh(const uint8_t* data) {
 
 // 4바이트 빅엔디안 → uint32_t
 uint32_t be32toh(const uint8_t* data) {
-    uint32_t val;
-    std::memcpy(&val, data, 4);
-    return ntohl(val);
+    return (static_cast<uint32_t>(data[0]) << 24) |
+           (static_cast<uint32_t>(data[1]) << 16) |
+           (static_cast<uint32_t>(data[2]) << 8)  |
+           (static_cast<uint32_t>(data[3]));
 }
 
 CommonMessage parsePositionRequest(const std::vector<uint8_t>& data, SenderType sender) {
@@ -44,33 +45,21 @@ CommonMessage parsePositionRequest(const std::vector<uint8_t>& data, SenderType 
 CommonMessage parseRadarCommand(const std::vector<uint8_t>& data, CommonMessage& msg) {
     RadarModeCommand rc;
 
-    if (data.size() < 6) { // 최소한 commandType + radarId(4) + radarMode
+    if (data.size() < 11) {
         msg.ok = false;
         return msg;
     }
 
-    std::memcpy(&rc.radarId, &data[1], 4); // [1~4]
-    rc.radarMode = data[5];                // [5]
+    std::memcpy(&rc.radarId, &data[1], 4);             // [1~4]
+    rc.radarMode = data[5];                            // [5]
+    rc.flag = data[6];                                 // [6] → priority_select와 동일한 역할
+    std::memcpy(&rc.targetId, &data[7], 4);            // [7~10]
+    rc.priority_select = rc.flag;                      // 이름 통일용 (구조체 유지 목적)
 
-    size_t expectedSize = 6;
-
-    if (rc.radarMode == 0) { // STOP 모드
-        if (data.size() < 7) { // flag 있어야 함
-            msg.ok = false;
-            return msg;
-        }
-        rc.flag = data[6];    // [6]
-        expectedSize = 7;
-
-        if (rc.flag == 0x02) {
-            if (data.size() < 11) { // targetId까지 있어야 함
-                msg.ok = false;
-                return msg;
-            }
-            std::memcpy(&rc.targetId, &data[7], 4); // [7~10]
-            expectedSize = 11;
-        }
-    }
+    std::cout << "[RadarCommand] radarId (mfrId): " << rc.radarId << "\n";
+    std::cout << "[RadarCommand] radarMode: " << static_cast<int>(rc.radarMode) << "\n";
+    std::cout << "[RadarCommand] priority_select: " << static_cast<int>(rc.priority_select) << "\n";
+    std::cout << "[RadarCommand] targetId: " << rc.targetId << "\n";
 
     msg.payload = rc;
     msg.commandType = static_cast<CommandType>(data[0]);
@@ -124,25 +113,36 @@ CommonMessage parseLauncherCommand(const std::vector<uint8_t>& data, CommonMessa
     msg.commandType = static_cast<CommandType>(data[0]);  
 
     std::memcpy(&lc.lsId, &data[1], 4);     // 4바이트 launcherId
-    lc.lsMode = data[5];                   // 1바이트 mode
+    lc.lsMode = data[5];                    // 1바이트 mode
+
+    // ✅ 로그 출력
+    std::cout << "[LauncherCommand] lsId: " << lc.lsId
+              << ", lsMode: " << static_cast<int>(lc.lsMode) << "\n";
+
     msg.payload = lc;
     msg.ok = true;
     return msg;
 }
 
 CommonMessage parseFireCommand(const std::vector<uint8_t>& data, CommonMessage& msg) {
-    if (data.size() < 6) {
+    if (data.size() < 8) { // 1 (commandType) + 4 (lsId) + 4 (targetId) = 최소 9이지만 targetId는 중첩된 걸로 4만 계산
         msg.ok = false;
         return msg;
     }
+
     FireCommand fc;
-    fc.lsId = data[1];
-    std::memcpy(&fc.targetId, &data[2], 4);
+    std::memcpy(&fc.lsId, &data[1], 4);
+    std::memcpy(&fc.targetId, &data[5], 4);
+
+    std::cout << "[FireCommand] lsId: " << fc.lsId << "\n";
+    std::cout << "[FireCommand] targetId: " << fc.targetId << "\n";
+
     msg.payload = fc;
     msg.commandType = static_cast<CommandType>(data[0]);
     msg.ok = true;
     return msg;
 }
+
 //0x05 -> 0x31
 CommonMessage parseMoveCommand(const std::vector<uint8_t>& data, CommonMessage& msg) {
     if (data.size() < 18) {
@@ -158,8 +158,13 @@ CommonMessage parseMoveCommand(const std::vector<uint8_t>& data, CommonMessage& 
     msg.payload = mv;
     msg.commandType = static_cast<CommandType>(data[0]);
     msg.ok = true;
+    std::cout << std::dec;
+    std::cout << "발사대 이동 명령 송신\n" ;
+    std::cout << "lsId: " << mv.lsId << ", posX: " << mv.posX << ", posY: " << mv.posY << "\n";
+
     return msg;
 }
+
 CommonMessage parseRadarStatus(const std::vector<uint8_t>& data, SenderType sender) {
     CommonMessage msg;
     if (data.size() < 37) { // 4+8+8+8+1+8+4+4 = 최소 45, 넉넉히 잡아도 37 이상
@@ -183,6 +188,7 @@ CommonMessage parseRadarStatus(const std::vector<uint8_t>& data, SenderType send
     return msg;
 }
 
+//0x22
 CommonMessage parseRadarDetection(const std::vector<uint8_t>& data, SenderType sender) {
     CommonMessage msg;
     msg.sender = sender;
@@ -201,10 +207,10 @@ CommonMessage parseRadarDetection(const std::vector<uint8_t>& data, SenderType s
     uint8_t numTargets = data[offset++];
     uint8_t numMissiles = data[offset++];
 
-    std::cout << "[Parser] CommandType: " << static_cast<int>(msg.commandType) << "\n";
-    std::cout << "[Parser] Radar ID: " << det.radarId << "\n";
-    std::cout << "[Parser] Number of Targets: " << static_cast<int>(numTargets) << "\n";
-    std::cout << "[Parser] Number of Missiles: " << static_cast<int>(numMissiles) << "\n";
+    // std::cout << "[Parser] CommandType: " << static_cast<int>(msg.commandType) << "\n";
+    // std::cout << "[Parser] Radar ID: " << det.radarId << "\n";
+    // std::cout << "[Parser] Number of Targets: " << static_cast<int>(numTargets) << "\n";
+    // std::cout << "[Parser] Number of Missiles: " << static_cast<int>(numMissiles) << "\n";
 
     std::cout << std::dec; // 10진수 출력 설정
 
@@ -223,9 +229,9 @@ CommonMessage parseRadarDetection(const std::vector<uint8_t>& data, SenderType s
         det.targets.push_back(t);
         offset += 50;
 
-        std::cout << "[Parser] Target ID: " << t.id << ", PosX: " << t.posX << ", PosY: " << t.posY << "\n";
-        std::cout << "[Parser] Target Altitude: " << t.altitude << ", Speed: " << t.speed << ", Angle: " << t.angle << "\n";
-        std::cout << "[Parser] Target Detect Time: " << t.detectTime << ", Priority: " << static_cast<int>(t.priority) << ", Hit: " << static_cast<int>(t.hit) << "\n";
+        // std::cout << "[Parser] Target ID: " << t.id << ", PosX: " << t.posX << ", PosY: " << t.posY << "\n";
+        // std::cout << "[Parser] Target Altitude: " << t.altitude << ", Speed: " << t.speed << ", Angle: " << t.angle << "\n";
+        // std::cout << "[Parser] Target Detect Time: " << t.detectTime << ", Priority: " << static_cast<int>(t.priority) << ", Hit: " << static_cast<int>(t.hit) << "\n";
     }
 
     // ✅ Missile 파싱 (57바이트씩)
@@ -300,11 +306,11 @@ CommonMessage MessageParser::parse(const std::vector<uint8_t>& data, SenderType 
             //0x21
         case CommandType::STATUS_RESPONSE_MFR_TO_LC: {
             // data를 hex로 출력
-            std::cout << "[STATUS_RESPONSE_MFR_TO_LC] data (hex): ";
-            for (size_t i = 0; i < data.size(); ++i) {
-                std::cout << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(data[i]) << " ";
-            }
-            std::cout << std::dec << std::endl;
+            // std::cout << "[STATUS_RESPONSE_MFR_TO_LC] data (hex): ";
+            // for (size_t i = 0; i < data.size(); ++i) {
+            //     std::cout << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(data[i]) << " ";
+            // }
+            // std::cout << std::dec << std::endl;
             return parseRadarStatus(data, sender);
         }
             //0x22
@@ -342,24 +348,6 @@ CommonMessage MessageParser::parse(const std::vector<uint8_t>& data, SenderType 
     return msg;
 }
 //0x23 
-
-
-CommonMessage parseLaunchCommand(const std::vector<uint8_t>& data, CommonMessage& msg) {
-    if (data.size() < 1 + 4 + 8 + 4 + 8) {  // cmd + launcherId(4) + angle(8) + speed(4) + altitude(8)
-        msg.ok = false;
-        return msg;
-    }
-    LaunchCommand lc;
-    std::memcpy(&lc.launcherId, &data[1], 4);
-    std::memcpy(&lc.launchAngle, &data[5], 8);
-    std::memcpy(&lc.speed, &data[13], 4);
-    std::memcpy(&lc.altitude, &data[17], 8);
-
-    msg.payload = lc;
-    msg.commandType = static_cast<CommandType>(data[0]);
-    msg.ok = true;
-    return msg;
-}
 
 CommonMessage parseMoveCommandLS(const std::vector<uint8_t>& data, CommonMessage& msg) {
     if (data.size() < 1 + 4 + 8 + 8) {

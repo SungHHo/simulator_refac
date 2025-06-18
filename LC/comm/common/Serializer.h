@@ -30,6 +30,7 @@ public:
     static std::vector<uint8_t> serializeMoveCommandLS(const MoveCommandLS& cmd);
     static std::vector<uint8_t> serializeModeChangeCommand(const LauncherModeCommand& cmd);
     static std::vector<uint8_t> serializeLauncherModeCommand(const LauncherCommand& cmd);
+    static std::vector<uint8_t> serializeLauncherCommand(const LauncherCommand& cmd);   
 };
 
 }

@@ -28,8 +28,9 @@ struct LCPositionResponse {
 // [0x02] ECC → LC: 레이더 모드 변경
 struct RadarModeCommand {
     unsigned int radarId;
-    uint8_t radarMode;     // 예: 0 = STOP, 1 = ROTATE 등
+    uint8_t radarMode;     // 예: 1 = STOP, 2 = ROTATE 등
     uint8_t flag;          // 조건에 따른 모드 보조 정보
+    uint8_t priority_select;
     unsigned int targetId; // 수동 지정일 때만 유효
 };
 
@@ -105,9 +106,8 @@ struct RadarDetection {
 // [0x31] LC → LS: 유도탄 발사 명령
 struct LaunchCommand {
     unsigned int launcherId;
-    double launchAngle;
-    int speed;
-    long long altitude;
+    double launchAngleXY;  
+    double launchAngleXZ;
 };
 
 // [0x32] LC → LS: 이동 명령

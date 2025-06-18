@@ -1,16 +1,17 @@
 #pragma once
-#include "info.hpp"
+#include "info.h"
 
 #pragma pack(push, 1)
 
-struct Pos2D {
+struct Pos3D {
     long long x;
     long long y;
+    long long z;
 };
 
 struct LSStatus {
     unsigned int id;
-    Pos2D position;
+    Pos3D position;
     double angle;
     int speed;
     OperationMode mode;

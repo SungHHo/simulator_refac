@@ -106,11 +106,13 @@ void TcpECC::sendRaw(const std::vector<uint8_t>& data, const std::string& prefix
     static int sendCounter = 0;
     sendCounter++;
 
+
+
+    ssize_t sent = send(sock_fd_, data.data(), data.size(), 0);
+
     if (sendCounter % 10 != 0) {
         return;
     }
-
-    ssize_t sent = send(sock_fd_, data.data(), data.size(), 0);
     if (sent < 0) {
         std::cerr << prefix << " - 전송 실패 (errno=" << errno << ")\n";
     } else {

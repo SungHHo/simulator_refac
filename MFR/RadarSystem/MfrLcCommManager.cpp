@@ -1,4 +1,5 @@
 #include "MfrLcCommManager.hpp"
+
 #include <iostream>
 #include <cstring>
 #include <unistd.h>
@@ -6,18 +7,30 @@
 #include <thread>
 #include <vector>
 
-#define LC_SERVER_IP "192.168.1.110"
+#define LC_SERVER_IP "192.168.1.98"
 #define LC_SERVER_PORT 9999
 #define BUFFER_SIZE 1024
 
 MfrLcCommManager::MfrLcCommManager(IReceiver* receiver) : receiver(receiver), sockfd(-1) 
 {
-    initMfrLcCommManager();
+    initMfrLcCommManager();    
 }
 
 void MfrLcCommManager::initMfrLcCommManager()
 {
     std::cout << "[Mfr::startTcp] TCP 통신 수신 시작" << std::endl;
+
+    if (ini_parse("../config/MFR.ini", iniHandler, &mfrConfig) < 0) 
+    {
+        std::cerr << "[MfrLcCommManager::initMfrLcCommManager] INI 파일 읽기 실패" << std::endl;
+    }
+
+    else
+    {
+        lcIp = mfrConfig.launchControllerIP;
+        lcPort = mfrConfig.launchControllerPort;
+    }
+
     if(connectToLc())
     {
         startTcpReceiver();
@@ -26,28 +39,36 @@ void MfrLcCommManager::initMfrLcCommManager()
 
 bool MfrLcCommManager::connectToLc() 
 {
-    sockfd = socket(AF_INET, SOCK_STREAM, 0);
-    if (sockfd < 0) 
-    {
-        std::cerr << "[MfrLcCommManager::connectToLc] 소켓 생성 실패" << std::endl;
-        return false;
-    }
+    std::cout << "[MfrLcCommManager] 서버 연결 시도 중..." << std::endl;
 
-    sockaddr_in serverAddr{};
-    serverAddr.sin_family = AF_INET;
-    serverAddr.sin_port = htons(LC_SERVER_PORT);
-    inet_pton(AF_INET, LC_SERVER_IP, &serverAddr.sin_addr);
-    
-    if (connect(sockfd, (sockaddr*)&serverAddr, sizeof(serverAddr)) < 0) 
+    while (true)
     {
-        perror("[MfrLcCommManager::connectToLc] LC 서버 연결 실패");
-        close(sockfd);
-        sockfd = -1;
-        return false;
-    }
+        sockfd = socket(AF_INET, SOCK_STREAM, 0);
+        if (sockfd < 0) 
+        {
+            std::cerr << "[MfrLcCommManager::connectToLc] 소켓 생성 실패" << std::endl;
+            return false;  // 소켓 자체가 안되면 포기
+        }
 
-    std::cout << "[MfrLcCommManager] LC 서버에 연결 성공" << std::endl;
-    return true;
+        sockaddr_in serverAddr{};
+        serverAddr.sin_family = AF_INET;
+        serverAddr.sin_port = htons(lcPort);
+        inet_pton(AF_INET, lcIp.c_str(), &serverAddr.sin_addr);
+
+        if (connect(sockfd, (sockaddr*)&serverAddr, sizeof(serverAddr)) == 0) 
+        {
+            std::cout << "[MfrLcCommManager] LC 서버에 연결 성공" << std::endl;
+            return true;
+        }
+        else
+        {
+            perror("[MfrLcCommManager] 서버 연결 실패 - 재시도");
+            close(sockfd);
+            sockfd = -1;
+        }
+
+        std::this_thread::sleep_for(std::chrono::seconds(2));  // 2초 대기 후 재시도
+    }
 }
 
 void MfrLcCommManager::startTcpReceiver()

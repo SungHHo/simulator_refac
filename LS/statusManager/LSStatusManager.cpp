@@ -1,10 +1,11 @@
-#include "LSStatusManager.hpp"
-#include "ConfigParser.hpp"
+#include "LSStatusManager.h"
+#include "ConfigParser.h"
+#include "MotorManagerFactory.h"
 #include <iostream>
 #include <cstring>
 #include <cmath>
-#include <arpa/inet.h>  // htonl, htons
-#include <byteswap.h>   // bswap_64
+#include <arpa/inet.h>
+#include <byteswap.h>
 #include <cstdint>
 
 LSStatusManager::LSStatusManager(const std::string& launcherConfigPath)
@@ -31,6 +32,7 @@ void LSStatusManager::init(const std::string& launcherConfigPath)
         status.id = ConfigParser::getInt("Launcher", "ID", launcherConfigPath);
         status.position.x = ConfigParser::getLongLong("Launcher", "PositionX", launcherConfigPath);
         status.position.y = ConfigParser::getLongLong("Launcher", "PositionY", launcherConfigPath);
+        status.position.z = ConfigParser::getLongLong("Launcher", "PositionZ", launcherConfigPath);
         status.angle = ConfigParser::getDouble("Launcher", "LaunchAngle", launcherConfigPath);
         status.speed = ConfigParser::getInt("Launcher", "LaunchSpeed", launcherConfigPath);
 
@@ -41,10 +43,11 @@ void LSStatusManager::init(const std::string& launcherConfigPath)
         else throw std::invalid_argument("Invalid Launcher Mode: " + modeStr);
 
         // Motor 핀 설정 읽기
+        std::string motorType = ConfigParser::getValue("Motor", "Type", launcherConfigPath);
         std::string canInterface = ConfigParser::getValue("Motor", "CAN_Interface", launcherConfigPath);
         uint32_t canId = static_cast<uint32_t>(ConfigParser::getInt("Motor", "CAN_ID", launcherConfigPath));
-        motorManager = std::make_unique<LSMotorManager>(canInterface, canId);
 
+        motorManager = MotorManagerFactory::create(motorType, canInterface, canId);
 
         std::cout << "[LSStatusManager] Initialized from config: " << launcherConfigPath << "\n";
 
@@ -77,18 +80,25 @@ void LSStatusManager::changeMode(OperationMode mode)
     status.mode = mode;
 }
 
-void LSStatusManager::positionBriefing(long long& x, long long& y) const
+void LSStatusManager::positionBriefing(long long& x, long long& y, long long& z) const
 {
     x = this->status.position.x;
     y = this->status.position.y;
+    z = this->status.position.z;
     return;
 }
+
+void LSStatusManager::speedBriefing(int& speed) const
+{
+    speed = status.speed;
+    return;
+}
+
 
 void LSStatusManager::serializeStatus(std::vector<uint8_t>& out) const 
 {
     out.clear();
-    out.reserve(sizeof(status.id) + sizeof(status.position.x) + sizeof(status.position.y) + 
-                sizeof(status.angle) + sizeof(status.speed) + sizeof(OperationMode) + 1);
+    out.reserve(sizeof(LSStatus)  + 1);
 
     const LSStatus& s = status;
 
@@ -98,45 +108,51 @@ void LSStatusManager::serializeStatus(std::vector<uint8_t>& out) const
         out.insert(out.end(), bytes, bytes + size);
     };
 
-    // ✅ CommandType
+    // CommandType
     uint8_t commandType = 0x41;
     append(&commandType, sizeof(commandType));
 
-    // ✅ ID (uint32_t → network byte order)
+    // ID (uint32_t → network byte order)
     uint32_t net_id = htonl(s.id);
     append(&net_id, sizeof(net_id));
 
-    // ✅ Position X/Y (int64_t → big-endian)
+    // Position X/Y (int64_t → big-endian)
     int64_t net_x = static_cast<int64_t>(bswap_64(static_cast<uint64_t>(s.position.x)));
     int64_t net_y = static_cast<int64_t>(bswap_64(static_cast<uint64_t>(s.position.y)));
+    int64_t net_z = static_cast<int64_t>(bswap_64(static_cast<uint64_t>(s.position.z)));
     append(&net_x, sizeof(net_x));
     append(&net_y, sizeof(net_y));
+    append(&net_z, sizeof(net_z));
 
-    // ✅ Angle (double → uint64_t로 reinterpret 후 big-endian 변환)
+    // Angle (double → uint64_t로 reinterpret 후 big-endian 변환)
     uint64_t angle_raw;
     std::memcpy(&angle_raw, &s.angle, sizeof(s.angle));
     uint64_t net_angle = bswap_64(angle_raw);
     append(&net_angle, sizeof(net_angle));
 
-    // ✅ Speed (int → uint32_t → htonl)
+    // Speed (int → uint32_t → htonl)
     uint32_t net_speed = htonl(static_cast<uint32_t>(s.speed));
     append(&net_speed, sizeof(net_speed));
 
-    // ✅ Mode (OperationMode → uint8_t)
+    // Mode (OperationMode → uint8_t)
     uint8_t mode_byte = static_cast<uint8_t>(s.mode);
     append(&mode_byte, sizeof(mode_byte));
 
-    // ✅ 디버그 출력
+    // 디버그 출력
+    /*
     std::cout << std::hex;
     std::cout << "commandType: 0x" << static_cast<int>(commandType) << std::endl;
     std::cout << "id: 0x" << s.id << std::endl;
     std::cout << "position.x: 0x" << s.position.x << std::endl;
     std::cout << "position.y: 0x" << s.position.y << std::endl;
+    std::cout << "position.z: 0x" << s.position.z << std::endl;
     std::cout << "angle: 0x" << angle_raw << std::endl;
     std::cout << "speed: 0x" << s.speed << std::endl;
     std::cout << "mode: 0x" << static_cast<int>(s.mode) << std::endl;
     std::cout << std::dec;
+    */
 }
+
 void LSStatusManager::moveLS(long long x, long long y)
 {
     {
@@ -156,7 +172,6 @@ void LSStatusManager::moveLS(long long x, long long y)
         moveThread = std::thread(&LSStatusManager::moveRoutine, this, x, y);
     }
 }
-
 
 void LSStatusManager::moveRoutine(long long destX, long long destY)
 {
@@ -205,11 +220,8 @@ bool LSStatusManager::rotateToAngle(double targetAngle)
 
     double currentAngle = status.angle;
 
-    // 회전 명령 전송
-    motorManager->rotateToAngle(currentAngle, targetAngle);
-
-    // 상태 수신 대기
-    bool success = motorManager->receiveStatus();
+    // 성공 여부 판단
+    bool success = motorManager->rotateToAngle(currentAngle, targetAngle);
 
     if (success)
     {
@@ -223,3 +235,4 @@ bool LSStatusManager::rotateToAngle(double targetAngle)
 
     return success;
 }
+

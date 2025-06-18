@@ -1,4 +1,4 @@
-#include "LSMotorManager.hpp"
+#include "LSMotorManager.h"
 #include <cmath>
 #include <iostream>
 #include <cstring>
@@ -49,7 +49,7 @@ void LSMotorManager::initCAN(const std::string& canInterface)
         throw std::runtime_error("CAN bind error");
     }
 
-    std::cout << "[LSMotorManager] CAN socket opened on " << canInterface << ", ID=0x" 
+    std::cout << "[LSMotorManager] CAN socket opened on " << canInterface << ", ID=0x"
               << std::hex << canId << std::dec << "\n";
 }
 
@@ -71,13 +71,12 @@ std::pair<bool, double> LSMotorManager::computeShortestRotation(double current, 
     return {clockwise, degrees};
 }
 
-void LSMotorManager::rotateToAngle(double currentAngle, double targetAngle)
+bool LSMotorManager::rotateToAngle(double currentAngle, double targetAngle)
 {
     auto [clockwise, degrees] = computeShortestRotation(currentAngle, targetAngle);
 
     uint16_t speedRPM = 320;
     uint8_t acceleration = 2;
-
     uint32_t pulses = static_cast<uint32_t>(degrees / DEGREE_PER_STEP);
 
     auto frame = buildPositionModeFrame(clockwise, speedRPM, acceleration, pulses);
@@ -86,23 +85,29 @@ void LSMotorManager::rotateToAngle(double currentAngle, double targetAngle)
     std::cout << "[LSMotorManager] rotateToAngle(): current=" << currentAngle
               << "°, target=" << targetAngle << "°, CW=" << clockwise
               << ", pulses=" << pulses << "\n";
+
+    bool success = receiveStatus();
+    if (!success) {
+        std::cerr << "[LSMotorManager] Motor did not confirm rotation complete.\n";
+    }
+    return success;
 }
 
 std::vector<uint8_t> LSMotorManager::buildPositionModeFrame(bool clockwise, uint16_t speed, uint8_t acc, uint32_t pulses)
 {
-    uint8_t dir_bit = clockwise ? 0x00 : 0x80; // b7 = direction (0=CW, 1=CCW)
-    uint8_t speed_high = dir_bit | ((speed >> 4) & 0x7F); // 7-bit speed high with direction
-    uint8_t speed_low = (speed & 0x0F) << 4;              // 4-bit speed low shifted
+    uint8_t dir_bit = clockwise ? 0x00 : 0x80; // b7: direction (0 = CW, 1 = CCW)
+    uint8_t speed_high = dir_bit | ((speed >> 4) & 0x7F);
+    uint8_t speed_low = (speed & 0x0F) << 4;
 
     return {
-        0xFD,                      // code
-        0x01,                      // Rev (position mode)
-        speed_high,               // byte2
-        speed_low,                // byte3
-        acc,                      // byte4
-        static_cast<uint8_t>(pulses >> 16), // byte5
-        static_cast<uint8_t>(pulses >> 8),  // byte6
-        static_cast<uint8_t>(pulses)        // byte7
+        0xFD, // code for position mode
+        0x01, // Rev
+        speed_high,
+        speed_low,
+        acc,
+        static_cast<uint8_t>(pulses >> 16),
+        static_cast<uint8_t>(pulses >> 8),
+        static_cast<uint8_t>(pulses)
     };
 }
 
@@ -122,26 +127,38 @@ void LSMotorManager::sendCanFrame(const std::vector<uint8_t>& data)
 bool LSMotorManager::receiveStatus()
 {
     struct can_frame frame {};
-    int nbytes = read(canSocket, &frame, sizeof(frame));
+    constexpr int timeoutMs = 3000;
+    constexpr int sleepMs = 100;
+    int waited = 0;
 
-    if (nbytes < 0)
+    while (waited < timeoutMs)
     {
-        perror("read(CAN)");
-        return false;
+        int nbytes = read(canSocket, &frame, sizeof(frame));
+        if (nbytes < 0)
+        {
+            perror("read(CAN)");
+            return false;
+        }
+
+        if (frame.can_id == canId && frame.can_dlc >= 3 && frame.data[0] == 0xFD)
+        {
+            uint8_t status = frame.data[1];
+            if (status == 2)
+            {
+                std::cout << "[LSMotorManager] rotation complete (status=2)\n";
+                return true;
+            }
+            else if (status == 0)
+            {
+                std::cerr << "[LSMotorManager] rotation failed (status=0)\n";
+                return false;
+            }
+        }
+
+        usleep(sleepMs * 1000);
+        waited += sleepMs;
     }
 
-    if (frame.can_id != canId || frame.can_dlc < 3 || frame.data[0] != 0xFD)
-        return false;
-
-    uint8_t status = frame.data[1];
-
-    if (status == 2) {
-        std::cout << "[LSMotorManager] rotation complete (status=2)\n";
-        return true;
-    } else if (status == 0) {
-        std::cout << "[LSMotorManager] rotation failed (status=0)\n";
-        return false;
-    }
-
+    std::cerr << "[LSMotorManager]  receiveStatus timeout\n";
     return false;
 }

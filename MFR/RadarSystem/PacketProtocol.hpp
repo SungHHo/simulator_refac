@@ -7,10 +7,10 @@ struct PacketHeader
     unsigned char cmdType;
 };
 
-struct Pos2D 
+struct EncodedPos2D 
 {
-    long long x;
-    long long y;
+    long long latitude;
+    long long longitude;
 };
 
 struct EncodedPos3D
@@ -27,20 +27,42 @@ struct Pos3D
     double altitude;
 };
 
-struct localSimData // 4 + (8*3) + 8 + 4 = 40 bytes
+struct localTargetSimData // 4 + (8*3) + 8 + 4 = 40 bytes
 {
     unsigned int mockId;
     Pos3D mockCoords;
     double angle;
-    int speed;    
+    int speed;
+    bool isHit;
 };
 
-struct SimData // 4 + (8*3) + 8 + 4 = 40 bytes
+struct localMissileSimData // 4 + (8*3) + 8 + 4 = 40 bytes
+{
+    unsigned int mockId;
+    Pos3D mockCoords;
+    double angle;
+    double angle2;
+    int speed;
+    bool isHit;
+};
+
+struct TargetSimData // 4 + (8*3) + 8 + 4 = 40 bytes
 {
     unsigned int mockId;
     EncodedPos3D mockCoords;
+    int speed;
     double angle;
-    int speed;    
+    bool isHit;
+};
+
+struct MissileSimData // 4 + (8*3) + 8 + 4 = 40 bytes
+{
+    unsigned int mockId;
+    EncodedPos3D mockCoords;
+    int speed;  
+    double angle;
+    double angle2;
+    bool isHit;
 };
 
 struct MfrToLcMissileInfo   // 4 + (8*3) + 4 + 8 + 8 + 8 + 1 = 57 bytes

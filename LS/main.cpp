@@ -1,5 +1,5 @@
 #include <iostream>
-#include "LS.hpp"
+#include "LS.h"
 #include <string>
 #include <thread>
 #include <chrono>

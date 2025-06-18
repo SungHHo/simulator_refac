@@ -17,7 +17,7 @@
 #include "LCCommandHandler.h"  
 
 
-#define LCIP "172.16.0.213"
+#define LSIP "192.168.0.30"
 #define LCPORT 6000
 #define LOCALPORT 7000
 #define MFRPORT 9999
@@ -250,14 +250,14 @@ void LCManager::sendStatus() {
         //           << ", " << snapshot.lc.height << ")\n";
 
         // 미사일 / 타겟 수 출력
-        std::cout << "- 미사일 수: " << snapshot.missiles.size() << "\n";
-        std::cout << "- 타겟 수: " << snapshot.targets.size() << "\n";
-        std::cout << "- 미사일 수: " << snapshot.missiles.size() << "\n";
-        std::cout << "- 타겟 수: " << snapshot.targets.size() << "\n";
-        std::cout << "- 미사일 수: " << snapshot.missiles.size() << "\n";
-        std::cout << "- 타겟 수: " << snapshot.targets.size() << "\n";
-        std::cout << "- 미사일 수: " << snapshot.missiles.size() << "\n";
-        std::cout << "- 타겟 수: " << snapshot.targets.size() << "\n";
+        // std::cout << "- 미사일 수: " << snapshot.missiles.size() << "\n";
+        // std::cout << "- 타겟 수: " << snapshot.targets.size() << "\n";
+        // std::cout << "- 미사일 수: " << snapshot.missiles.size() << "\n";
+        // std::cout << "- 타겟 수: " << snapshot.targets.size() << "\n";
+        // std::cout << "- 미사일 수: " << snapshot.missiles.size() << "\n";
+        // std::cout << "- 타겟 수: " << snapshot.targets.size() << "\n";
+        // std::cout << "- 미사일 수: " << snapshot.missiles.size() << "\n";
+        // std::cout << "- 타겟 수: " << snapshot.targets.size() << "\n";
         
     }
 
@@ -267,9 +267,9 @@ void LCManager::sendStatus() {
     if (consoleSender) {
         consoleSender->sendRaw(packet);
 
-        if (sendCounter % 10 == 0) {
-            std::cout << "[LCManager] ECC로 상태 메시지 전송 완료 (" << static_cast<int>(packet.size()) << " 바이트)\n";
-        }
+        // if (sendCounter % 10 == 0) {
+        //     std::cout << "[LCManager] ECC로 상태 메시지 전송 완료 (" << static_cast<int>(packet.size()) << " 바이트)\n";
+        // }
     } else {
         std::cerr << "[LCManager] consoleSender가 연결되지 않았습니다.\n";
     }
@@ -374,7 +374,7 @@ void LCManager::initialize(const std::string& iniPath) {
 
 void LCManager::init(const std::string& configPath, const std::string& ip, int port) {
     // 설정 파일 초기화 (필요 시 활성화)
-    // initialize(configPath);
+    initialize(configPath);
 
     // ✅ ECC 연결
     auto ecc = std::make_shared<TcpECC>(ip, port);
@@ -391,7 +391,7 @@ void LCManager::init(const std::string& configPath, const std::string& ip, int p
     // ✅ LS 연결 (Serial UDP 방식)
     serialLS = std::make_shared<SerialLS>(
         /* localPort */ LOCALPORT,
-        /* lcIp */ LCIP,
+        /* lcIp */ LSIP,
         /* lcPort */ LCPORT
     );
     serialLS->setCallback(this);
@@ -512,21 +512,27 @@ void LCManager::onRadarDetectionReceived(const Common::RadarDetection& d) {
         missiles.push_back(ms);
     }
     updateStatus(missiles);
-
+    static int detectionCounter = 0;
+    detectionCounter++; 
     // 미사일 정보 출력
-    std::cout << "[MFR] 미사일 정보 (총 " << missiles.size() << "개)\n";
-    for (const auto& ms : missiles) {
-        std::cout << "  - ID: " << static_cast<int>(ms.id)
-                  << ", Pos: (" << ms.posX << ", " << ms.posY << ")"
-                  << ", Altitude: " << ms.altitude
-                  << ", Speed: " << ms.speed
-                  << ", Angle: " << ms.angle
-                  << ", InterceptTime: " << ms.interceptTime
-                  << ", Hit: " << static_cast<int>(ms.hit) << "\n";
-    }
+    // if(detectionCounter%10==0){
+    //     std::cout << "[MFR] 미사일 정보 (총 " << missiles.size() << "개)\n";
+    //     for (const auto& ms : missiles) {
+    //         std::cout << "  - ID: " << static_cast<int>(ms.id)
+    //                 << ", Pos: (" << ms.posX << ", " << ms.posY << ")"
+    //                 << ", Altitude: " << ms.altitude
+    //                 << ", Speed: " << ms.speed
+    //                 << ", Angle: " << ms.angle
+    //                 << ", InterceptTime: " << ms.interceptTime
+    //                 << ", Hit: " << static_cast<int>(ms.hit) << "\n";
+    //     }
+    // }
 
-    std::cout << "[MFR] 탐지 정보 갱신 완료 (타겟 " << targets.size()
-              << ", 미사일 " << missiles.size() << ")\n";
+
+    {
+    // std::cout << "[MFR] 탐지 정보 갱신 완료 (타겟 " << targets.size()
+            //   << ", 미사일 " << missiles.size() << ")\n";
+    }
 }
 
 
@@ -566,6 +572,7 @@ bool LCManager::hasMFRSender() const {
 void LCManager::sendToMFR(const std::vector<uint8_t>& packet) {
     if (mfrSender) {
         mfrSender->sendRaw(packet);
+        std::cout << "[LCManager] MFR로 " << packet.size() << "바이트 전송 완료.\n";
     } else {
         std::cerr << "[LCManager] MFR 송신자(mfrSender)가 설정되지 않았습니다. 전송 실패.\n";
     }
@@ -646,28 +653,51 @@ void LCManager::startStatusPrintingLoop() {
 }
 
 void LCManager::printStatus() const {
-        SystemStatus snapshot = getStatusCopy();  // thread-safe하게 복사
+    SystemStatus snapshot = getStatusCopy();  // thread-safe하게 복사
+    std::cout << std::dec;
+    std::cout << "\n\n";
+    std::cout << "----| Launch System (LS)\n";
+    std::cout << "  - ID: " << snapshot.ls.launchSystemId << "\n";
+    std::cout << "  - Pos: (" << snapshot.ls.position.x << ", " << snapshot.ls.position.y << ")\n";
+    std::cout << "  - Altitude: " << snapshot.ls.height << "\n";
+    std::cout << "  - Mode: " << static_cast<int>(snapshot.ls.mode) << "\n";
+    std::cout << "  - LaunchAngle: " << snapshot.ls.launchAngle << "\n";
+    
+    std::cout << std::dec;
+    std::cout << "----| Radar (MFR)\n";
+    std::cout << "  - ID: " << snapshot.mfr.mfrId << "\n";
+    std::cout << "  - Pos: (" << snapshot.mfr.position.x << ", " << snapshot.mfr.position.y << ")\n";
+    std::cout << "  - Altitude: " << snapshot.mfr.height << "\n";
+    std::cout << "  - Mode: " << static_cast<int>(snapshot.mfr.mode) << "\n";
+    std::cout << "  - Degree: " << snapshot.mfr.degree << "\n";
+    
+    std::cout << std::dec;
+    std::cout << "----| Launcher Controller (LC)\n";
+    std::cout << "  - ID: " << snapshot.lc.LCId << "\n";
+    std::cout << "  - Pos: (" << snapshot.lc.position.x << ", " << snapshot.lc.position.y << ")\n";
+    std::cout << "  - Height: " << snapshot.lc.height << "\n";
 
-        // std::cout << "[Missile List] 총 " << snapshot.missiles.size() << "개\n";
-        for (const auto& m : snapshot.missiles) {
-            // std::cout << "  - ID: " << static_cast<int>(m.id)
-            //         << ", Pos: (" << m.posX << ", " << m.posY << ")"
-            //         << ", Altitude: " << m.altitude
-            //         << ", Speed: " << m.speed
-            //         << ", Angle: " << m.angle
-            //         << ", InterceptTime: " << m.interceptTime
-            //         << ", Hit: " << static_cast<int>(m.hit) << "\n";
-        }
-
-        // std::cout << "[Target List] 총 " << snapshot.targets.size() << "개\n";
-        for (const auto& t : snapshot.targets) {
-            // std::cout << "  - ID: " << t.id
-            //         << ", Pos: (" << t.posX << ", " << t.posY << ")"
-            //         << ", Altitude: " << t.altitude
-            //         << ", Speed: " << t.speed
-            //         << ", Angle: " << t.angle
-            //         << ", Priority: " << static_cast<int>(t.priority)
-            //         << ", Hit: " << static_cast<int>(t.hit) << "\n";
-}
-
+    std::cout << "----| Missile List (" << snapshot.missiles.size() << "개)\n";
+    std::cout << std::dec;
+    for (const auto& m : snapshot.missiles) {
+        std::cout << "  - ID: " << m.id
+        << ", Pos: (" << m.posX << ", " << m.posY << ")"
+        << ", Altitude: " << m.altitude
+        << ", Speed: " << m.speed
+        << ", Angle: " << m.angle
+        << ", InterceptTime: " << m.interceptTime
+        << ", Hit: " << static_cast<int>(m.hit) << "\n";
+    }
+    
+    std::cout << std::dec;
+    std::cout << "----| Target List (" << snapshot.targets.size() << "개)\n";
+    for (const auto& t : snapshot.targets) {
+        std::cout << "  - ID: " << t.id
+                  << ", Pos: (" << t.posX << ", " << t.posY << ")"
+                  << ", Altitude: " << t.altitude
+                  << ", Speed: " << t.speed
+                  << ", Angle: " << t.angle
+                  << ", Priority: " << static_cast<int>(t.priority)
+                  << ", Hit: " << static_cast<int>(t.hit) << "\n";
+    }
 }

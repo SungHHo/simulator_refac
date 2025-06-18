@@ -115,7 +115,7 @@ void CLeftTopDlg::SetRadarUI(const RadarStatus& status)
 	CString posXStr, posYStr,posZStr;
 	posXStr.Format(_T("%.8f"), posX);
 	posYStr.Format(_T("%.8f"), posY);
-	posZStr.Format(_T("%.8f"), posZ);
+	posZStr.Format(_T("%.2f"), posZ);
 
 	GetDlgItem(IDC_STATIC_MFR_MODE)->SetWindowText(modeStr);
 	GetDlgItem(IDC_STATIC_MFR_ANGLE)->SetWindowText(angleStr);

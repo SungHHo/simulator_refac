@@ -10,5 +10,8 @@
 
         public double Y { get; set; }
         // 경도 또는 Y 좌표
+
+        public long Z { get; set; }
+        // 경도 또는 Z 좌표
     }
 }

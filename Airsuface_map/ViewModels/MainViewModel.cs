@@ -105,6 +105,7 @@ namespace Airsuface_map.ViewModels
                 Id = reader.ReadInt32(),                 // uint8_t
                 X = ConvertLongToDouble(ReadCustomInt64(reader)),
                 Y = ConvertLongToDouble(ReadCustomInt64(reader)),
+                Z = reader.ReadInt64(),
                 Mode = reader.ReadByte(),               // uint8_t
                 Angle = reader.ReadDouble()            // double
             };
@@ -116,6 +117,7 @@ namespace Airsuface_map.ViewModels
                 Id = reader.ReadInt32(),                    // uint8_t
                 X = ConvertLongToDouble(ReadCustomInt64(reader)),                 // long long
                 Y = ConvertLongToDouble(ReadCustomInt64(reader)),                // long long
+                Z = reader.ReadInt64(),                // long long
                 Mode = reader.ReadByte(),                  // uint8_t
                 Angle = reader.ReadDouble()               // double
             };
@@ -124,7 +126,8 @@ namespace Airsuface_map.ViewModels
             var lc = new LC {
                 Id = reader.ReadInt32(),                   // uint8_t
                 X = ConvertLongToDouble(ReadCustomInt64(reader)),                 // long long
-                Y = ConvertLongToDouble(ReadCustomInt64(reader))                 // long long
+                Y = ConvertLongToDouble(ReadCustomInt64(reader)),                // long long
+                Z = reader.ReadInt64()                                           // long long
             };
 
             MockMissile missile = null;

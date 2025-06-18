@@ -3,20 +3,36 @@
 #include <iostream>
 #include <cstring>
 #include <memory>
+#include <chrono>
 
 #include "MockMissile.h"
 
-MockMissile::MockMissile(const MissileInfo &missile_info, std::shared_ptr<MFRSendUDPManager> mfr_send_manager)
-	: missile_info_(missile_info), mfr_send_manager_(mfr_send_manager) {}
+MockMissile::MockMissile(const MissileInfo &missile_info,
+						 std::shared_ptr<MFRSendUDPManager> mfr_send_manager,
+						 std::shared_ptr<MockTargetManager> mock_target_manager)
+	: missile_info_(missile_info), mfr_send_manager_(mfr_send_manager), mock_target_manager_(mock_target_manager) {}
 
 void MockMissile::updatePosMissile()
 {
 	while (true)
 	{
-		// 위치 업데이트 로직 (예: 속도와 각도를 기반으로 위치 계산)
-		missile_info_.x += std::cos(missile_info_.angle * M_PI / 180.0) * missile_info_.speed * 0.1;
-		missile_info_.y += std::sin(missile_info_.angle * M_PI / 180.0) * missile_info_.speed * 0.1;
-		missile_info_.z += missile_info_.speed * 0.01; // 고도 증가 예제
+		missile_info_.x += std::cos(missile_info_.angle * M_PI / 180.0) * missile_info_.speed * 1;
+		missile_info_.y += std::sin(missile_info_.angle * M_PI / 180.0) * missile_info_.speed * 1;
+
+		// 명중여부 판단
+		if (mock_target_manager_->downTargetStatus(missile_info_) > 0)
+		{
+			std::cout << "Missile hit target!" << std::endl;
+			missile_info_.is_hit = true;
+		}
+		else
+		{
+			// 현재시간
+			auto now = std::chrono::system_clock::now();
+			auto now_time = std::chrono::system_clock::to_time_t(now);
+			std::cout << "[Current time, MockTarget]: " << std::ctime(&now_time) << std::endl;
+			std::cout << "Missile is still in flight." << std::endl;
+		}
 
 		// 데이터 전송
 		sendData();

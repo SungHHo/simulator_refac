@@ -6,6 +6,7 @@
 
 #include "MockTarget.h"
 #include "TargetInfo.h"
+#include "MissileInfo.h"
 
 #include "MFRSendUDPManager.h"
 
@@ -17,7 +18,9 @@ public:
 
 	void RaedTargetIni();
 	void addTarget(std::shared_ptr<MockTarget> &target);
+	void removeTarget(const std::vector<TargetInfo> &target_list);
 	void flitghtTarget();
+	int downTargetStatus(const MissileInfo &missileInfo);
 
 private:
 	std::vector<std::shared_ptr<MockTarget>> targets;

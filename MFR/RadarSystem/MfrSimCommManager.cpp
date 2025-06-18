@@ -114,6 +114,7 @@ void MfrSimCommManager::startUdpReceiver()
                 else
                 {
                     std::cerr << "패킷 크기 이상 (" << len << " bytes)" << std::endl;
+                    std::cout << sizeof(MissileSimData) << std::endl;
                 }
             }
         }

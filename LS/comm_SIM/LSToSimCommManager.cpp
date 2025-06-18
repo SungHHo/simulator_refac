@@ -59,10 +59,10 @@ int LSToSimCommManager::init(const std::string& configPath)
 void LSToSimCommManager::sendMissileInfo(const LaunchCommand& command, const LSStatusManager& statManager)
 {
     long long x, y, z;
-    int spd = command.speed;
+    int spd; //= command.speed;
     statManager.positionBriefing(x, y, z);
 
-    // statManager.speedBriefing(spd);
+    statManager.speedBriefing(spd);
     MissileInfo missile{x, y, z, spd, command.launch_angle_xy, command.launch_angle_xz};
     std::cout << "[Missile Info Packet Created]\n";
     std::cout << "  Position: (" << x << ", " << y << ", " << z << ")\n";

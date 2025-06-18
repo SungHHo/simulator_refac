@@ -159,7 +159,7 @@ void TcpMFR::sendRaw(const std::vector<uint8_t>& data) {
         std::cerr << prefix << " - 전송 실패 (errno=" << errno << ")\n";
     } else {
         if(sendCounter2%10==0) {
-            std::cout << prefix << " - " << sent << " 바이트 전송 완료\n";
+            //std::cout << prefix << " - " << sent << " 바이트 전송 완료\n";
          }
     }
 }
@@ -174,7 +174,7 @@ void TcpMFR::sendRaw(const std::vector<uint8_t>& data, const std::string& prefix
     } 
     else {
         if(sendCounter%10==0) {
-            std::cout << prefix << " - " << sent << " 바이트 전송 완료\n";
+            //std::cout << prefix << " - " << sent << " 바이트 전송 완료\n";
          }
     }
 }

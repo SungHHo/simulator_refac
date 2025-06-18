@@ -19,7 +19,7 @@ MockTargetManager::~MockTargetManager()
 
 void MockTargetManager::RaedTargetIni()
 {
-	std::ifstream file("/home/sra235/2024/Surface-to-air-missiles/target_list.ini");
+	std::ifstream file("target_list.ini");
 	if (!file.is_open())
 	{
 		std::cerr << "Failed to open target_list.ini" << std::endl;

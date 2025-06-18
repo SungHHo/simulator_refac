@@ -7,6 +7,9 @@
 
 #include "MockMissile.h"
 
+constexpr double DEGREE_TO_INT = 1e8; // 실수 → 정수 저장시 스케일
+constexpr double METERS_PER_DEGREE_LAT = 111320.0;
+
 MockMissile::MockMissile(const MissileInfo &missile_info,
 						 std::shared_ptr<MFRSendUDPManager> mfr_send_manager,
 						 std::shared_ptr<MockTargetManager> mock_target_manager)
@@ -14,39 +17,69 @@ MockMissile::MockMissile(const MissileInfo &missile_info,
 
 void MockMissile::updatePosMissile()
 {
+	auto last_time = std::chrono::steady_clock::now();
+	double accumulated_distance = 0.0;
+	double total_elapsed = 0.0;
+
 	while (true)
 	{
-		missile_info_.x += std::cos(missile_info_.angle * M_PI / 180.0) * missile_info_.speed * 1;
-		missile_info_.y += std::sin(missile_info_.angle * M_PI / 180.0) * missile_info_.speed * 1;
+		auto now = std::chrono::steady_clock::now();
+		std::chrono::duration<double> elapsed = now - last_time;
+		last_time = now;
 
-		// 명중여부 판단
-		if (mock_target_manager_->downTargetStatus(missile_info_) > 0)
+		double elapsed_seconds = elapsed.count();
+		total_elapsed += elapsed_seconds;
+
+		double speed_mps = missile_info_.speed * 0.27778;
+		double distance = speed_mps * elapsed_seconds;
+		accumulated_distance += distance;
+
+		// 현재 위도, 경도 (실수 변환)
+		double lat = static_cast<double>(missile_info_.x) / DEGREE_TO_INT;
+		double lon = static_cast<double>(missile_info_.y) / DEGREE_TO_INT;
+
+		// 위경도 1도당 m 계산
+		double meters_per_deg_lon = METERS_PER_DEGREE_LAT * std::cos(lat * M_PI / 180.0);
+
+		// 위도/경도 증가량 계산 (도 단위)
+		double delta_lat = std::cos(missile_info_.angle * M_PI / 180.0) * distance / METERS_PER_DEGREE_LAT;
+		double delta_lon = std::sin(missile_info_.angle * M_PI / 180.0) * distance / meters_per_deg_lon;
+
+		// 정수형으로 환산해서 반영
+		missile_info_.x += static_cast<long long>(delta_lat * DEGREE_TO_INT);
+		missile_info_.y += static_cast<long long>(delta_lon * DEGREE_TO_INT);
+
+		// 4초마다 거리 출력
+		if (total_elapsed >= 4.0)
 		{
-			std::cout << "Missile hit target!" << std::endl;
-			missile_info_.is_hit = true;
-		}
-		else
-		{
-			// 현재시간
-			auto now = std::chrono::system_clock::now();
-			auto now_time = std::chrono::system_clock::to_time_t(now);
-			std::cout << "[Current time, MockTarget]: " << std::ctime(&now_time) << std::endl;
-			std::cout << "Missile is still in flight." << std::endl;
+			std::cout << "[4 sec update] Missile moved " << accumulated_distance << " meters.\n";
+			std::cout << " → Current lat: " << static_cast<double>(missile_info_.x) / DEGREE_TO_INT
+					  << ", lon: " << static_cast<double>(missile_info_.y) / DEGREE_TO_INT << "\n\n";
+			total_elapsed = 0.0;
+			accumulated_distance = 0.0;
 		}
 
-		// 데이터 전송
+		// 명중 여부 판단
+		// if (mock_target_manager_->downTargetStatus(missile_info_) > 0)
+		// {
+		// 	std::cout << "Missile hit target!" << std::endl;
+		// 	missile_info_.is_hit = true;
+		// }
+		// else
+		// {
+		// 	auto now_time = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+		// 	std::cout << "[Current time, MockMissile]: " << std::ctime(&now_time);
+		// 	std::cout << "Missile is still in flight.\n";
+		// }
+
 		sendData();
-
-		// 0.1초 대기
 		std::this_thread::sleep_for(std::chrono::milliseconds(100));
 	}
 }
 
 void MockMissile::sendData()
 {
-	// 미사일 데이터를 전송
 	char buffer[1024];
 	std::memcpy(buffer, &missile_info_, sizeof(missile_info_));
 	mfr_send_manager_->sendData(buffer, sizeof(missile_info_));
-	// std::cout << "Missile data sent." << std::endl;
 }

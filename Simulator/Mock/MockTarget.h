@@ -5,6 +5,7 @@
 #include <memory>
 
 #include "TargetInfo.h"
+#include "MissileInfo.h"
 #include "MFRSendUDPManager.h"
 
 class MockTarget
@@ -14,6 +15,8 @@ public:
 	~MockTarget();
 
 	void updatePos(); // 위치 업데이트
+	bool downTargetStatus(const MissileInfo &missileInfo);
+	TargetInfo getTargetInfo() const { return target_info_; }
 
 private:
 	TargetInfo target_info_;

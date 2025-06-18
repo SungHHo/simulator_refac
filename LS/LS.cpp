@@ -78,10 +78,14 @@ void LS::callBack(const std::vector<uint8_t> &data)
 
             std::memcpy(&msg.launch.launch_angle_xz, data.data() + offset, sizeof(double));
             offset += sizeof(double);
+            
+            std::memcpy(&msg.launch.speed, data.data() + offset, sizeof(int));
+            offset += sizeof(int);
 
             std::cout << "\n[Launch Command]\n";
             std::cout << "  Launch Angle XY : " << msg.launch.launch_angle_xy << "\n";
             std::cout << "  Launch Angle XZ : " << msg.launch.launch_angle_xz << "\n";
+            std::cout << "  Speed : " << msg.launch.speed << "\n";
         }
         else
         {

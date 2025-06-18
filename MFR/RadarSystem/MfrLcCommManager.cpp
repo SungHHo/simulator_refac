@@ -20,20 +20,22 @@ void MfrLcCommManager::initMfrLcCommManager()
 {
     std::cout << "[Mfr::startTcp] TCP 통신 수신 시작" << std::endl;
 
-    if (ini_parse("../config/MFR.ini", iniHandler, &mfrConfig) < 0) 
+    if (loadMfrConfig("../config/MFR.ini", mfrConfig)) 
     {
-        std::cerr << "[MfrLcCommManager::initMfrLcCommManager] INI 파일 읽기 실패" << std::endl;
+        std::cout << "Device: " << mfrConfig.device << ", BaudRate: " << mfrConfig.uartBaudRate << std::endl;
+
+        lcIp = mfrConfig.launchControllerIP;
+        lcPort = mfrConfig.launchControllerPort;
+
+        if(connectToLc())
+        {
+            startTcpReceiver();
+        }
     }
 
     else
     {
-        lcIp = mfrConfig.launchControllerIP;
-        lcPort = mfrConfig.launchControllerPort;
-    }
-
-    if(connectToLc())
-    {
-        startTcpReceiver();
+        std::cerr << "[MfrLcCommManager::initMfrLcCommManager] ini Read Failed" << std::endl;
     }
 }
 

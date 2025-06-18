@@ -3,6 +3,7 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <algorithm>
 
 // 생성자 수정: MFRSendUDPManager 포인터를 받도록 변경
 MockTargetManager::MockTargetManager(std::shared_ptr<MFRSendUDPManager> mfr_send_manager)
@@ -93,6 +94,27 @@ void MockTargetManager::addTarget(std::shared_ptr<MockTarget> &target)
 	targets.push_back(target);
 }
 
+void MockTargetManager::removeTarget(const std::vector<TargetInfo> &target_list)
+{
+	for (const auto &target : target_list)
+	{
+		auto it = std::remove_if(targets.begin(), targets.end(),
+								 [&target](const std::shared_ptr<MockTarget> &t)
+								 {
+									 return t->getTargetInfo().id == target.id;
+								 });
+		if (it != targets.end())
+		{
+			targets.erase(it, targets.end());
+			std::cout << "Target removed: " << target.id << std::endl;
+		}
+		else
+		{
+			std::cout << "Target not found: " << target.id << std::endl;
+		}
+	}
+}
+
 void MockTargetManager::flitghtTarget()
 {
 	for (auto &target : targets)
@@ -100,4 +122,22 @@ void MockTargetManager::flitghtTarget()
 		// std::cout << "update " << std::endl;
 		target->updatePos();
 	}
+}
+
+int MockTargetManager::downTargetStatus(const MissileInfo &missileInfo)
+{
+	int down_count = 0;
+	std::vector<TargetInfo> down_targets;
+	for (auto &target : targets)
+	{
+		if (target->downTargetStatus(missileInfo))
+		{
+			++down_count;
+			down_targets.push_back(target->getTargetInfo());
+		}
+	}
+
+	removeTarget(down_targets);
+
+	return down_count;
 }

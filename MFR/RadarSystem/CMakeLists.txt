@@ -14,7 +14,6 @@ set(SOURCES
     MfrLcCommManager.cpp
     MfrSimCommManager.cpp
     StepMotorController.cpp
-    config/ini.cpp
     config/MfrConfig.cpp
 )
 

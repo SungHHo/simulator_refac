@@ -17,7 +17,7 @@
 #include "LCCommandHandler.h"  
 
 
-#define LSIP "192.168.0.30"
+#define LSIP "127.0.0.1"
 #define LCPORT 6000
 #define LOCALPORT 7000
 #define MFRPORT 9999
@@ -616,15 +616,15 @@ void LCManager::onLSStatusReceived(const Common::LSReport& ls) {
 
     updateStatus(internalLS);  // SystemStatus 안의 ls 항목 업데이트
 
-    if (counter % 5 == 0) {
-        std::cout << "[LS] 상태 갱신 완료\n";
-        std::cout << std::dec;  // 출력 10진수로 설정
-        std::cout << "  - ID       : " << ls.lsId << "\n";
-        std::cout << "  - 위치     : (" << ls.posX << ", " << ls.posY << ", " << ls.height << ")\n";
-        std::cout << "  - 각도     : " << ls.launchAngle << "\n";
-        std::cout << "  - 속도     : " << ls.speed << "\n";
-        std::cout << "  - 모드     : " << static_cast<int>(ls.mode) << "\n";
-    }
+    // if (counter % 5 == 0) {
+    //     std::cout << "[LS] 상태 갱신 완료\n";
+    //     std::cout << std::dec;  // 출력 10진수로 설정
+    //     std::cout << "  - ID       : " << ls.lsId << "\n";
+    //     std::cout << "  - 위치     : (" << ls.posX << ", " << ls.posY << ", " << ls.height << ")\n";
+    //     std::cout << "  - 각도     : " << ls.launchAngle << "\n";
+    //     std::cout << "  - 속도     : " << ls.speed << "\n";
+    //     std::cout << "  - 모드     : " << static_cast<int>(ls.mode) << "\n";
+    // }
 }
 
 // *******************FOR TEST
@@ -646,7 +646,7 @@ void LCManager::startLSCommandLoop() {
 void LCManager::startStatusPrintingLoop() {
     std::thread([this]() {
         while (true) {
-            this->printStatus();  // 현재 위치 상태 출력
+            //this->printStatus();  // 현재 위치 상태 출력
             std::this_thread::sleep_for(std::chrono::seconds(1));
         }
     }).detach();

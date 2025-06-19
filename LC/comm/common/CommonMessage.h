@@ -109,6 +109,9 @@ struct LaunchCommand {
     unsigned int launcherId;
     double launchAngleXY;  
     double launchAngleXZ;
+    long long start_x;
+    long long start_y;
+    long long start_z;
 };
 
 // [0x32] LC → LS: 이동 명령

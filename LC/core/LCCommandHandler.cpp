@@ -134,6 +134,7 @@ namespace LCCommandHandler
 
             // 속도
             const double missileSpeed = static_cast<double>(snapshot.ls.speed) * 1000.0 / 3600.0; // m/s
+
             const double targetSpeed = static_cast<double>(selectedTarget.speed) * 1000.0 / 3600.0;
 
             std::cout << "[LC] 타겟 속도: " << selectedTarget.speed << " km/h (" << targetSpeed << " m/s)\n";
@@ -167,7 +168,8 @@ namespace LCCommandHandler
                     if (interceptAngle < 0.0) interceptAngle += 360.0;
                     bestTime = t;
                     foundSolution = true;
-                    dz = static_cast<double>(selectedTarget.altitude+ (tan(selectedTarget.angle2 * M_PI / 180.0) * missileSpeed * t) - ls.height);
+                    dz = static_cast<double>(selectedTarget.altitude+ (tan(selectedTarget.angle2 * M_PI / 180.0) * targetSpeed * t) - ls.height);
+                    std::cout << "dz : " << dz << std::endl;
                     cmd.launchAngleXZ = std::atan2(dz, missileSpeed * t) * 180.0 / M_PI; // 수직 각도 계산
                     std::cout << "[Intercept] t=" << t << "s, 위치=(" << future_lat << ", " << future_lon << "), 각도=" << interceptAngle << "도\n";
                     break;
@@ -180,9 +182,21 @@ namespace LCCommandHandler
                 std::cout << "  조준 각도 (XY): " << cmd.launchAngleXY << "도 (진북 기준)\n";
                 std::cout << "  조준 각도 (XZ): " << cmd.launchAngleXZ << "도 (수직 기준)\n";
                 std::cout << "  추정 요격 시간: " << bestTime << " 초\n";
+                cmd.start_x = static_cast<long long>(
+                    (std::cos(cmd.launchAngleXY * M_PI / 180.0) * selectedTarget.speed * 0.0005 / 111.32) * 1e8
+                        + snapshot.ls.position.x);
+                double lat_deg = static_cast<double>(snapshot.ls.position.x) / 1e8;
+                cmd.start_y = static_cast<long long>(
+                    (std::sin(cmd.launchAngleXY * M_PI / 180.0) * selectedTarget.speed * 0.0005 / (111.32 * std::cos(lat_deg * M_PI / 180.0))) * 1e8
+                        + snapshot.ls.position.y);
+                cmd.start_z = static_cast<long long> (
+                    (std::tan(cmd.launchAngleXZ * M_PI / 180.0) * selectedTarget.speed * 2) + snapshot.ls.height);
             } else {
                 cmd.launchAngleXY = initial_bearing;
                 cmd.launchAngleXZ = 0.0;
+                cmd.start_x = 0;
+                cmd.start_y = 0;
+                cmd.start_z = 0;
                 std::cerr << "[LC] 요격 불가: fallback 각도 적용 → " << initial_bearing << " 도\n";
             }
 

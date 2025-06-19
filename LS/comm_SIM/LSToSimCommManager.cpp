@@ -65,7 +65,7 @@ void LSToSimCommManager::sendMissileInfo(const LaunchCommand& command, const LSS
     statManager.speedBriefing(spd);
     MissileInfo missile{x, y, z, spd, command.launch_angle_xy, command.launch_angle_xz};
     std::cout << "[Missile Info Packet Created]\n";
-    std::cout << "  Position: (" << x << ", " << y << ", " << z << ")\n";
+    std::cout << "  Position: (" << command.start_x << ", " << command.start_y << ", " << command.start_z << ")\n";
     std::cout << "  Speed: " << spd << "\n";
     std::cout << "  Launch Angle XY: " << command.launch_angle_xy << "\n";
     std::cout << "  Launch Angle XZ: " << command.launch_angle_xz << "\n";

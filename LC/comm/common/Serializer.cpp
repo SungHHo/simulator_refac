@@ -118,6 +118,13 @@ std::vector<uint8_t> Serializer::serializeLaunchCommand(const LaunchCommand& cmd
     buf.insert(buf.end(), reinterpret_cast<const uint8_t*>(&cmd.launchAngleXZ),
                reinterpret_cast<const uint8_t*>(&cmd.launchAngleXZ) + sizeof(double));
 
+    buf.insert(buf.end(), reinterpret_cast<const uint8_t*>(&cmd.start_x),
+                reinterpret_cast<const uint8_t*>(&cmd.start_x) + sizeof(long long));
+    buf.insert(buf.end(), reinterpret_cast<const uint8_t*>(&cmd.start_y),
+                reinterpret_cast<const uint8_t*>(&cmd.start_y) + sizeof(long long));
+    buf.insert(buf.end(), reinterpret_cast<const uint8_t*>(&cmd.start_z),
+                reinterpret_cast<const uint8_t*>(&cmd.start_z) + sizeof(long long));
+
     return buf;
 }
 

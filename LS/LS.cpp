@@ -79,13 +79,19 @@ void LS::callBack(const std::vector<uint8_t> &data)
             std::memcpy(&msg.launch.launch_angle_xz, data.data() + offset, sizeof(double));
             offset += sizeof(double);
             
-            std::memcpy(&msg.launch.speed, data.data() + offset, sizeof(int));
-            offset += sizeof(int);
+            std::memcpy(&msg.launch.start_x, data.data() + offset, sizeof(long long));
+            offset += sizeof(long long);
+            std::memcpy(&msg.launch.start_y, data.data() + offset, sizeof(long long));
+            offset += sizeof(long long);
+            std::memcpy(&msg.launch.start_z, data.data() + offset, sizeof(long long));
+            offset += sizeof(long long);
 
             std::cout << "\n[Launch Command]\n";
             std::cout << "  Launch Angle XY : " << msg.launch.launch_angle_xy << "\n";
             std::cout << "  Launch Angle XZ : " << msg.launch.launch_angle_xz << "\n";
-            std::cout << "  Speed : " << msg.launch.speed << "\n";
+            std::cout << "  start_x : " << msg.launch.start_x << "\n";
+            std::cout << "  start_y : " << msg.launch.start_x << "\n";
+            std::cout << "  start_z : " << msg.launch.start_x << "\n";
         }
         else
         {

@@ -19,7 +19,7 @@ MockTargetManager::~MockTargetManager()
 
 void MockTargetManager::RaedTargetIni()
 {
-	std::ifstream file("target_list.ini");
+	std::ifstream file("../Config/target_list.ini");
 	if (!file.is_open())
 	{
 		std::cerr << "Failed to open target_list.ini" << std::endl;

@@ -16,6 +16,7 @@ include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/comm/mfr
     ${CMAKE_CURRENT_SOURCE_DIR}/status
     ${CMAKE_CURRENT_SOURCE_DIR}/inih
+    ${CMAKE_CURRENT_SOURCE_DIR}/Config
 )
 
 # Set the output directory for the executable
@@ -24,6 +25,8 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
 # Define the executable and its source files
 add_executable(lc
     main.cpp
+
+    Config/LCConfig.cpp
 
     # Core components
     core/LCManager.cpp

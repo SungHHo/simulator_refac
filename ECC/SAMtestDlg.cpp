@@ -288,7 +288,7 @@ void CSAMtestDlg::receive(int len, const char* packet)
 						<< ", Pos=(" << t.position.x << "," << t.position.y << ")"
 						<< ", Height=" << t.position.z
 						<< ", Speed=" << t.speed
-						<< ", Angle=" << t.angle
+						<< ", Angle=" << t.angle1
 						<< ", FirstDetected=" << t.first_detect_time
 						<< ", Priority=" << t.priority
 						<< ", Hit=" << static_cast<int>(t.hit) << "\n";

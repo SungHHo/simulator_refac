@@ -35,7 +35,8 @@ private:
 	CStatic m_staticPosZ;
 	//CStatic m_staticHeight;
 	CStatic m_staticSpeed;
-	CStatic m_staticAngle;
+	CStatic m_staticAngle1;
+	CStatic m_staticAngle2;
 	CStatic m_staticPriority;
 	CStatic m_staticDetect;
 	CStatic m_staticHit;
@@ -54,4 +55,5 @@ public:
 	afx_msg void OnStnClickedStaticTargetPriority2();
 	afx_msg void OnStnClickedStaticTargetDetect2();
 	afx_msg void OnStnClickedStaticTargetHit2();
+	afx_msg void OnStnClickedStaticTargetAngle3();
 };

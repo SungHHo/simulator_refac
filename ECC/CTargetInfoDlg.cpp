@@ -23,7 +23,8 @@ void CTargetInfoDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_STATIC_TARGET_POSITIONY, m_staticPosY);
 	DDX_Control(pDX, IDC_STATIC_TARGET_HEIGHT2, m_staticPosZ);
 	DDX_Control(pDX, IDC_STATIC_TARGET_SPEED2, m_staticSpeed);
-	DDX_Control(pDX, IDC_STATIC_TARGET_ANGLE2, m_staticAngle);
+	DDX_Control(pDX, IDC_STATIC_TARGET_ANGLE2, m_staticAngle1);
+	DDX_Control(pDX, IDC_STATIC_TARGET_ANGLE3, m_staticAngle2);
 	DDX_Control(pDX, IDC_STATIC_TARGET_PRIORITY2, m_staticPriority);
 	DDX_Control(pDX, IDC_STATIC_TARGET_DETECT2, m_staticDetect);
 	DDX_Control(pDX, IDC_STATIC_TARGET_HIT2, m_staticHit);
@@ -38,6 +39,7 @@ BEGIN_MESSAGE_MAP(CTargetInfoDlg, CDialogEx)
 	ON_STN_CLICKED(IDC_STATIC_TARGET_PRIORITY2, &CTargetInfoDlg::OnStnClickedStaticTargetPriority2)
 	ON_STN_CLICKED(IDC_STATIC_TARGET_DETECT2, &CTargetInfoDlg::OnStnClickedStaticTargetDetect2)
 	ON_STN_CLICKED(IDC_STATIC_TARGET_HIT2, &CTargetInfoDlg::OnStnClickedStaticTargetHit2)
+	ON_STN_CLICKED(IDC_STATIC_TARGET_ANGLE3, &CTargetInfoDlg::OnStnClickedStaticTargetAngle3)
 END_MESSAGE_MAP()
 
 BOOL CTargetInfoDlg::OnInitDialog()
@@ -127,8 +129,11 @@ void CTargetInfoDlg::UpdateUIFromSelection()
 	str.Format(_T("%d"), t.speed);
 	m_staticSpeed.SetWindowText(str);
 
-	str.Format(_T("%.1f"), t.angle);
-	m_staticAngle.SetWindowText(str);
+	str.Format(_T("%.1f"), t.angle1);
+	m_staticAngle1.SetWindowText(str);
+
+	str.Format(_T("%.1f"), t.angle2);
+	m_staticAngle2.SetWindowText(str);
 
 	str.Format(_T("%d"), t.priority);
 	m_staticPriority.SetWindowText(str);
@@ -153,3 +158,4 @@ void CTargetInfoDlg::OnStnClickedStaticTargetAngle2() {}
 void CTargetInfoDlg::OnStnClickedStaticTargetPriority2() {}
 void CTargetInfoDlg::OnStnClickedStaticTargetDetect2() {}
 void CTargetInfoDlg::OnStnClickedStaticTargetHit2() {}
+void CTargetInfoDlg::OnStnClickedStaticTargetAngle3(){}

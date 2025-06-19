@@ -84,6 +84,7 @@
 #define IDC_STATIC_LS_POSITION          1036
 #define IDC_STATIC_TARGET_POSITIONY     1036
 #define IDC_STATIC_LS_POSITION2         1037
+#define IDC_STATIC_TARGET_ANGLE3        1037
 #define IDC_LC_STATIC_ID                1038
 #define IDC_STATIC_LS_POSITION3         1038
 #define IDC_LC_STATIC_POS               1039
@@ -94,7 +95,6 @@
 #define IDC_LC_STATIC_POSX              1042
 #define IDC_STATIC_NETWORK_LS           1042
 #define IDC_LC_STATIC_POSY              1043
-#define IDC_LC_STATIC_POSY2             1044
 #define IDC_LC_STATIC_POSZ              1044
 
 // Next default values for new objects

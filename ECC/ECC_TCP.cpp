@@ -65,7 +65,7 @@ void ECC_TCP::startReceiving() {
 
 unsigned __stdcall ECC_TCP::recvThread(void* arg) {
     ECC_TCP* self = static_cast<ECC_TCP*>(arg);
-    char buf[3072];
+    char buf[4096];
 
   while (self->m_bRunning) {
     int len = recv(self->m_sock, buf, sizeof(buf), 0);

@@ -36,9 +36,10 @@ BOOL CTargetListDlg::OnInitDialog()
 	m_listTarget.InsertColumn(2, _T("Y좌표"), LVCFMT_CENTER, 120);
 	m_listTarget.InsertColumn(3, _T("고도"), LVCFMT_CENTER, 70);
 	m_listTarget.InsertColumn(4, _T("속도"), LVCFMT_CENTER, 100);
-	m_listTarget.InsertColumn(5, _T("각도"), LVCFMT_CENTER, 70);
-	m_listTarget.InsertColumn(6, _T("우선순위"), LVCFMT_CENTER, 80);
-	m_listTarget.InsertColumn(7, _T("피격 여부"), LVCFMT_CENTER, 60);
+	m_listTarget.InsertColumn(5, _T("각도1"), LVCFMT_CENTER, 60);
+	m_listTarget.InsertColumn(6, _T("각도2"), LVCFMT_CENTER, 60);
+	m_listTarget.InsertColumn(7, _T("우선순위"), LVCFMT_CENTER, 80);
+	m_listTarget.InsertColumn(8, _T("피격 여부"), LVCFMT_CENTER, 60);
 
 	return TRUE;
 }
@@ -87,13 +88,14 @@ void CTargetListDlg::SetTargetList(const std::vector<TargetStatus>& targets)
 	{
 		const auto& t = m_targetList[i];
 
-		CString idStr, xStr, yStr, hStr, sStr, aStr, pStr, hitStr;
+		CString idStr, xStr, yStr, hStr, sStr, aStr1, aStr2, pStr, hitStr;
 		idStr.Format(_T("%d"), t.id);
 		xStr.Format(_T("%.8f"), static_cast<double>(t.position.x) / 100000000.0);
 		yStr.Format(_T("%.8f"), static_cast<double>(t.position.y) / 100000000.0);
 		hStr.Format(_T("%lld"), t.position.z);
 		sStr.Format(_T("%d"), t.speed);
-		aStr.Format(_T("%.1f"), t.angle);
+		aStr1.Format(_T("%.1f"), t.angle1);
+		aStr2.Format(_T("%.1f"), t.angle2);
 		pStr.Format(_T("%d"), t.priority);
 		hitStr = (t.hit != 0) ? _T("O") : _T("X");
 
@@ -103,9 +105,10 @@ void CTargetListDlg::SetTargetList(const std::vector<TargetStatus>& targets)
 		m_listTarget.SetItemText(row, 2, yStr);
 		m_listTarget.SetItemText(row, 3, hStr);
 		m_listTarget.SetItemText(row, 4, sStr);
-		m_listTarget.SetItemText(row, 5, aStr);
-		m_listTarget.SetItemText(row, 6, pStr);
-		m_listTarget.SetItemText(row, 7, hitStr);
+		m_listTarget.SetItemText(row, 5, aStr1);
+		m_listTarget.SetItemText(row, 6, aStr2);
+		m_listTarget.SetItemText(row, 7, pStr);
+		m_listTarget.SetItemText(row, 8, hitStr);
 
 		if (highlightIndex == -1 && t.hit == 0)
 			highlightIndex = row;

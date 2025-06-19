@@ -3,6 +3,7 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <algorithm>
 
 // 생성자 수정: MFRSendUDPManager 포인터를 받도록 변경
 MockTargetManager::MockTargetManager(std::shared_ptr<MFRSendUDPManager> mfr_send_manager)
@@ -18,7 +19,7 @@ MockTargetManager::~MockTargetManager()
 
 void MockTargetManager::RaedTargetIni()
 {
-	std::ifstream file("target_list.ini");
+	std::ifstream file("/home/sra235/2024/Surface-to-air-missiles/target_list.ini");
 	if (!file.is_open())
 	{
 		std::cerr << "Failed to open target_list.ini" << std::endl;
@@ -49,6 +50,7 @@ void MockTargetManager::RaedTargetIni()
 				long long z = std::stoul(tokens[3]);
 				std::cout << "z : " << z << std::endl;
 				double angle = std::stod(tokens[4]);
+				double angle2 = std::stod(tokens[4]);
 				int speed = std::stoi(tokens[5]);
 
 				// TargetInfo 객체 생성 및 데이터 설정
@@ -59,6 +61,7 @@ void MockTargetManager::RaedTargetIni()
 				targetInfo.y = y;
 				targetInfo.z = z;
 				targetInfo.angle = angle;
+				targetInfo.angle2 = angle2;
 				targetInfo.speed = speed;
 
 				// MockTarget 객체 생성 및 TargetInfo, MFRSendUDPManager 설정
@@ -93,11 +96,58 @@ void MockTargetManager::addTarget(std::shared_ptr<MockTarget> &target)
 	targets.push_back(target);
 }
 
+void MockTargetManager::removeTarget(const std::vector<TargetInfo> &target_list)
+{
+	for (const auto &target : target_list)
+	{
+		auto it = std::remove_if(targets.begin(), targets.end(),
+								 [&target](const std::shared_ptr<MockTarget> &t)
+								 {
+									 return t->getTargetInfo().id == target.id;
+								 });
+		if (it != targets.end())
+		{
+			targets.erase(it, targets.end());
+			std::cout << "Target removed: " << target.id << std::endl;
+		}
+		else
+		{
+			std::cout << "Target not found: " << target.id << std::endl;
+		}
+	}
+}
+
 void MockTargetManager::flitghtTarget()
 {
 	for (auto &target : targets)
 	{
 		// std::cout << "update " << std::endl;
 		target->updatePos();
+		// std::cout << "Target ID: " << target->getTargetInfo().id
+		// 		  << " Position: (" << target->getTargetInfo().x << ", "
+		// 		  << target->getTargetInfo().y << ", "
+		// 		  << target->getTargetInfo().z << ")"
+		// 		  << " Speed: " << target->getTargetInfo().speed
+		// 		  << " Angle: " << target->getTargetInfo().angle
+		// 		  << std::endl;
 	}
+	std::this_thread::sleep_for(std::chrono::milliseconds(100));
+}
+
+int MockTargetManager::downTargetStatus(const MissileInfo &missileInfo)
+{
+	int down_count = 0;
+	std::vector<TargetInfo> down_targets;
+	for (auto &target : targets)
+	{
+		if (target->downTargetStatus(missileInfo))
+		{
+			++down_count;
+			down_targets.push_back(target->getTargetInfo());
+		}
+	}
+
+	removeTarget(down_targets);
+
+	return down_count;
 }

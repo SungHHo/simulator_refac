@@ -9,6 +9,10 @@ using System.Windows;
 using System.Windows.Threading;
 using System.Windows.Input;
 using System.Linq;
+using System.Windows.Media.Imaging;
+using Airsuface_map.Models;
+using GMap.NET.MapProviders;
+using System.Reflection;
 
 namespace Airsuface_map.Views
 {
@@ -36,6 +40,24 @@ namespace Airsuface_map.Views
             MapControl.OnPositionChanged += MapControl_OnPositionChanged;
 
             //AddMarker("발사대", new PointLatLng(37.5665, 126.9780));
+            //{
+            //    var start = new PointLatLng(37.5665, 126.9780);
+            //    double angleDegree = 45.0;
+            //    double lengthMeters = 500.0;
+            //    var (lineStart, lineEnd) = CreateLineByAngle(start, angleDegree, lengthMeters);
+
+            //    // GMap.NET에서 선을 그리려면:
+            //    var points = new List<PointLatLng> { lineStart, lineEnd };
+            //    var polyline = new GMapRoute(points)
+            //    {
+            //        Shape = new System.Windows.Shapes.Path
+            //        {
+            //            Stroke = Brushes.Red,
+            //            StrokeThickness = 2
+            //        }
+            //    };
+            //    MapControl.Markers.Add(polyline);
+            //}
             //AddMarker("목표지점", new PointLatLng(37.5676438, 127.159259));
 
             MapControl.CanDragMap = true;
@@ -196,14 +218,14 @@ namespace Airsuface_map.Views
 
         private GMapMarker CreateMissileMarker(Airsuface_map.Models.MockMissile missile)
         {
-            var ellipse = new Ellipse
+            var image = new Image
             {
-                Width = 12,
-                Height = 12,
-                Stroke = Brushes.Blue,
-                StrokeThickness = 2,
-                Fill = Brushes.LightBlue
+                Width = 20,
+                Height = 20,
+                Source = new BitmapImage(new Uri(System.IO.Path.GetFullPath("Friend-Air.png"))),
+                Stretch = Stretch.Uniform
             };
+
             var text = new TextBlock
             {
                 Text = $"미사일 {missile.Id}",
@@ -214,8 +236,37 @@ namespace Airsuface_map.Views
                 Margin = new Thickness(0, 0, 0, 0),
                 HorizontalAlignment = HorizontalAlignment.Center
             };
+
+            // 각도(도)를 라디안으로 변환
+            double angleRad = missile.Angle * Math.PI / 180.0;
+            double lineLength = 500; // px 단위
+
+            // 선의 끝점 계산 (StackPanel 기준)
+            double x2 = Math.Sin(angleRad) * lineLength;
+            double y2 = -Math.Cos(angleRad) * lineLength;
+
+            var line = new Line
+            {
+                X1 = 10, // 이미지 중앙(20/2)
+                Y1 = 20, // 이미지 하단
+                X2 = 10 + x2,
+                Y2 = 20 + y2,
+                Stroke = Brushes.Red,
+                StrokeThickness = 2
+            };
+
+            var canvas = new Canvas
+            {
+                Width = Math.Max(20, Math.Abs(x2) + 20),
+                Height = Math.Max(20, Math.Abs(y2) + 20)
+            };
+            Canvas.SetLeft(image, 0);
+            Canvas.SetTop(image, 0);
+            canvas.Children.Add(image);
+            canvas.Children.Add(line);
+
             var stackPanel = new StackPanel();
-            stackPanel.Children.Add(ellipse);
+            stackPanel.Children.Add(canvas);
             stackPanel.Children.Add(text);
             stackPanel.Tag = $"Missile_{missile.Id}";
 
@@ -228,14 +279,14 @@ namespace Airsuface_map.Views
 
         private GMapMarker CreateTargetMarker(Airsuface_map.Models.MockTarget target)
         {
-            var ellipse = new Ellipse
+            var image = new Image
             {
-                Width = 12,
-                Height = 12,
-                Stroke = Brushes.Orange,
-                StrokeThickness = 2,
-                Fill = Brushes.Orange
+                Width = 20,
+                Height = 20,
+                Source = new BitmapImage(new Uri(System.IO.Path.GetFullPath("Air-Hostile.png"))),
+                Stretch = Stretch.Uniform
             };
+
             var text = new TextBlock
             {
                 Text = $"타겟 {target.Id}",
@@ -246,8 +297,37 @@ namespace Airsuface_map.Views
                 Margin = new Thickness(0, 0, 0, 0),
                 HorizontalAlignment = HorizontalAlignment.Center
             };
+
+            //// 각도(도)를 라디안으로 변환
+            //double angleRad = target.Angle * Math.PI / 180.0;
+            //double lineLength = 500; // px 단위
+
+            //// 선의 끝점 계산 (StackPanel 기준)
+            //double x2 = Math.Sin(angleRad) * lineLength;
+            //double y2 = -Math.Cos(angleRad) * lineLength;
+
+            //var line = new Line
+            //{
+            //    X1 = 10, // 이미지 중앙(20/2)
+            //    Y1 = 20, // 이미지 하단
+            //    X2 = 10 + x2,
+            //    Y2 = 20 + y2,
+            //    Stroke = Brushes.Green,
+            //    StrokeThickness = 2
+            //};
+
+            //var canvas = new Canvas
+            //{
+            //    Width = Math.Max(20, Math.Abs(x2) + 20),
+            //    Height = Math.Max(20, Math.Abs(y2) + 20)
+            //};
+            //Canvas.SetLeft(image, 0);
+            //Canvas.SetTop(image, 0);
+            //canvas.Children.Add(image);
+            //canvas.Children.Add(line);
+
             var stackPanel = new StackPanel();
-            stackPanel.Children.Add(ellipse);
+            stackPanel.Children.Add(image);
             stackPanel.Children.Add(text);
             stackPanel.Tag = $"Target_{target.Id}";
 
@@ -260,14 +340,14 @@ namespace Airsuface_map.Views
 
         private GMapMarker CreateLCMarker(Airsuface_map.Models.LC lc)
         {
-            var ellipse = new Ellipse
+            var image = new Image
             {
-                Width = 12,
-                Height = 12,
-                Stroke = Brushes.Green,
-                StrokeThickness = 2,
-                Fill = Brushes.LightGreen
+                Width = 20,
+                Height = 20,
+                Source = new BitmapImage(new Uri(System.IO.Path.GetFullPath("Friend-Units.png"))),
+                Stretch = Stretch.Uniform
             };
+
             var text = new TextBlock
             {
                 Text = $"LC {lc.Id}",
@@ -278,8 +358,9 @@ namespace Airsuface_map.Views
                 Margin = new Thickness(0, 0, 0, 0),
                 HorizontalAlignment = HorizontalAlignment.Center
             };
+
             var stackPanel = new StackPanel();
-            stackPanel.Children.Add(ellipse);
+            stackPanel.Children.Add(image);
             stackPanel.Children.Add(text);
             stackPanel.Tag = $"LC_{lc.Id}";
 
@@ -292,14 +373,14 @@ namespace Airsuface_map.Views
 
         private GMapMarker CreateLSMarker(Airsuface_map.Models.LS ls)
         {
-            var ellipse = new Ellipse
+            var image = new Image
             {
-                Width = 12,
-                Height = 12,
-                Stroke = Brushes.Green,
-                StrokeThickness = 2,
-                Fill = Brushes.LightGreen
+                Width = 20,
+                Height = 20,
+                Source = new BitmapImage(new Uri(System.IO.Path.GetFullPath("Friend-Units.png"))),
+                Stretch = Stretch.Uniform
             };
+
             var text = new TextBlock
             {
                 Text = $"LS {ls.Id}",
@@ -311,7 +392,7 @@ namespace Airsuface_map.Views
                 HorizontalAlignment = HorizontalAlignment.Center
             };
             var stackPanel = new StackPanel();
-            stackPanel.Children.Add(ellipse);
+            stackPanel.Children.Add(image);
             stackPanel.Children.Add(text);
             stackPanel.Tag = $"LS_{ls.Id}";
 
@@ -324,14 +405,14 @@ namespace Airsuface_map.Views
 
         private GMapMarker CreateMFRMarker(Airsuface_map.Models.MFR mfr)
         {
-            var ellipse = new Ellipse
+            var image = new Image
             {
-                Width = 12,
-                Height = 12,
-                Stroke = Brushes.Green,
-                StrokeThickness = 2,
-                Fill = Brushes.LightGreen
+                Width = 20,
+                Height = 20,
+                Source = new BitmapImage(new Uri(System.IO.Path.GetFullPath("Friend-Units.png"))),
+                Stretch = Stretch.Uniform
             };
+
             var text = new TextBlock
             {
                 Text = $"MFR {mfr.Id}",
@@ -343,7 +424,7 @@ namespace Airsuface_map.Views
                 HorizontalAlignment = HorizontalAlignment.Center
             };
             var stackPanel = new StackPanel();
-            stackPanel.Children.Add(ellipse);
+            stackPanel.Children.Add(image);
             stackPanel.Children.Add(text);
             stackPanel.Tag = $"MFR_{mfr.Id}";
 
@@ -351,8 +432,49 @@ namespace Airsuface_map.Views
             {
                 Shape = stackPanel
             };
+
             return marker;
         }
+
+        // 위도/경도 기준 원의 점 리스트 생성 (단위: meter)
+        // test
+        public static (PointLatLng start, PointLatLng end) CreateLineByAngle(PointLatLng start, double angleDegree, double lengthMeters)
+        {
+            double earthRadius = 6378137.0; // WGS84 기준 지구 반지름(m)
+            double angleRad = angleDegree * Math.PI / 180.0;
+
+            // 위도, 경도를 라디안으로 변환
+            double latRad = start.Lat * Math.PI / 180.0;
+            double lngRad = start.Lng * Math.PI / 180.0;
+
+            // 거리만큼 이동한 후의 위도/경도 계산
+            double dLat = (lengthMeters * Math.Cos(angleRad)) / earthRadius;
+            double dLng = (lengthMeters * Math.Sin(angleRad)) / (earthRadius * Math.Cos(latRad));
+
+            double endLat = start.Lat + dLat * 180.0 / Math.PI;
+            double endLng = start.Lng + dLng * 180.0 / Math.PI;
+
+            return (start, new PointLatLng(endLat, endLng));
+        }
+
+        public static PointLatLng GetEndPointByAngle(PointLatLng start, double angleDegree, double lengthMeters)
+        {
+            double earthRadius = 6378137.0; // WGS84 기준 지구 반지름(m)
+            double angleRad = angleDegree * Math.PI / 180.0;
+
+            // 위도, 경도를 라디안으로 변환
+            double latRad = start.Lat * Math.PI / 180.0;
+
+            // 거리만큼 이동한 후의 위도/경도 계산
+            double dLat = (lengthMeters * Math.Cos(angleRad)) / earthRadius;
+            double dLng = (lengthMeters * Math.Sin(angleRad)) / (earthRadius * Math.Cos(latRad));
+
+            double endLat = start.Lat + dLat * 180.0 / Math.PI;
+            double endLng = start.Lng + dLng * 180.0 / Math.PI;
+
+            return new PointLatLng(endLat, endLng);
+        }
+        // test
 
         private void MapControl_MouseWheel(object sender, MouseWheelEventArgs e)
         {

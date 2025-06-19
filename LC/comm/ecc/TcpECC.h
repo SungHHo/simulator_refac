@@ -23,7 +23,7 @@ public:
     // IStatusSender 인터페이스 구현
     void sendStatus(const SystemStatus& status);
     void sendRaw(const std::vector<uint8_t>& data) override {
-        sendRaw(data, "[TcpECC] 일반 전송");
+        sendRaw(data, "");
     }
 
     // TcpECC만의 기능

@@ -152,7 +152,7 @@ void CLeftTopDlg::OnBnClickedBtnModeSwitch()
 		if (m_parent)
 		{
 			m_parent->sendRadarModeChange(radarId, RadarStatus::ROTATE, 2, 0);
-			std::cout << "레이더 정지모드로 변환"<<"\n";
+			//std::cout << "레이더 정지모드로 변환"<<"\n";
 		}
 	}
 }

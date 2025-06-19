@@ -164,7 +164,7 @@ BOOL CSAMtestDlg::OnInitDialog()
 
 	m_tcp = std::make_unique<ECC_TCP>();
 	//if (!m_tcp->connect("127.0.0.1", 9000)) { // 127.0.0.1 192.168.1.110 8888
-	if (!m_tcp->connect("192.168.1.98", 8888)) { // 127.0.0.1 192.168.1.110 8888
+	if (!m_tcp->connect("192.168.3.129", 8888)) { // 127.0.0.1 192.168.1.110 8888
 			AfxMessageBox(_T("서버 연결 실패"));
 		return FALSE;
 	}
@@ -240,24 +240,24 @@ void CSAMtestDlg::receive(int len, const char* packet)
 			using T = std::decay_t<decltype(msg)>;
 
 			if constexpr (std::is_same_v<T, ParsedStatusResponse>) {
-				std::cout << "[수신] 상태 패킷: Radar=" << msg.radarList.size()
-					<< ", LS=" << msg.lsList.size()
-					<< ", LC=" << msg.lcList.size()
-					<< ", Target=" << msg.targetList.size()
-					<< ", Missile=" << msg.missileList.size() << "\n";
+				//std::cout << "[수신] 상태 패킷: Radar=" << msg.radarList.size()
+				//	<< ", LS=" << msg.lsList.size()
+				//	<< ", LC=" << msg.lcList.size()
+				//	<< ", Target=" << msg.targetList.size()
+				//	<< ", Missile=" << msg.missileList.size() << "\n";
 
 				// ✅ 구조체 크기 출력 (최초 1회)
 				static bool printed = false;
 				if (!printed) {
-					std::cout << "[DEBUG] sizeof(RadarStatus)   = " << sizeof(RadarStatus) << "\n";
-					std::cout << "[DEBUG] sizeof(LCStatus)      = " << sizeof(LCStatus) << "\n";
-					std::cout << "[DEBUG] sizeof(LSStatus)      = " << sizeof(LSStatus) << "\n";
-					std::cout << "[DEBUG] sizeof(TargetStatus)  = " << sizeof(TargetStatus) << "\n";
-					std::cout << "[DEBUG] sizeof(MissileStatus) = " << sizeof(MissileStatus) << "\n";
+					//std::cout << "[DEBUG] sizeof(RadarStatus)   = " << sizeof(RadarStatus) << "\n";
+					//std::cout << "[DEBUG] sizeof(LCStatus)      = " << sizeof(LCStatus) << "\n";
+					//std::cout << "[DEBUG] sizeof(LSStatus)      = " << sizeof(LSStatus) << "\n";
+					//std::cout << "[DEBUG] sizeof(TargetStatus)  = " << sizeof(TargetStatus) << "\n";
+					//std::cout << "[DEBUG] sizeof(MissileStatus) = " << sizeof(MissileStatus) << "\n";
 					printed = true;
 				}
 
-				for (const auto& r : msg.radarList) {
+				/*for (const auto& r : msg.radarList) {
 					std::cout << "  [Radar] ID=" << static_cast<int>(r.id)
 						<< ", Pos=(" << r.position.x << "," << r.position.y << ")"
 						<< ", Mode=" << (int)r.mode
@@ -292,7 +292,7 @@ void CSAMtestDlg::receive(int len, const char* packet)
 						<< ", FirstDetected=" << t.first_detect_time
 						<< ", Priority=" << t.priority
 						<< ", Hit=" << static_cast<int>(t.hit) << "\n";
-				}
+				}*/
 
 				// UI 반영
 				m_leftTop.SetRadarList(msg.radarList);
@@ -307,12 +307,12 @@ void CSAMtestDlg::receive(int len, const char* packet)
 			}
 
 			else {
-				std::cout << "[수신] ACK or 기타 패킷 수신됨\n";
+				//std::cout << "[수신] ACK or 기타 패킷 수신됨\n";
 			}
 			}, parsed);
 	}
 	catch (const std::exception& ex) {
-		std::cerr << "[에러] 패킷 파싱 실패: " << ex.what() << "\n";
+		//std::cerr << "[에러] 패킷 파싱 실패: " << ex.what() << "\n";
 	}
 }
 
@@ -327,7 +327,7 @@ void CSAMtestDlg::receive(int len, const char* packet)
 void CSAMtestDlg::sendStatusRequest() {
 	StatusRequest msg{};
 	auto data = SerializeStatusRequest(msg);
-	std::cout << "[클라이언트] STATUS_REQUEST 전송 (0x01)\n";
+	//std::cout << "[클라이언트] STATUS_REQUEST 전송 (0x01)\n";
 	m_tcp->send(reinterpret_cast<const char*>(data.data()), static_cast<int>(data.size()));
 }
 
@@ -340,7 +340,7 @@ void CSAMtestDlg::sendRadarModeChange(unsigned int radar_id, uint8_t mode, uint8
 void CSAMtestDlg::sendLSModeChange(unsigned int ls_id, uint8_t mode) {
 	LSModeChange msg{ CommandType::LS_MODE_CHANGE, ls_id, mode };
 	auto data = SerializeLSModeChange(msg);
-	std::cout << "[클라이언트] LS_MODE_CHANGE 전송 (0x03)\n";
+	//std::cout << "[클라이언트] LS_MODE_CHANGE 전송 (0x03)\n";
 	m_tcp->send(reinterpret_cast<const char*>(data.data()), static_cast<int>(data.size()));
 }
 

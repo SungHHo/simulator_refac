@@ -5,6 +5,7 @@ Mfr::Mfr() : goalTargetId(101001), mfrMode(ROTATION_MODE), goalMotorAngle(135.0)
     stepMotorManager = new StepMotorController();
     lcCommManager = new MfrLcCommManager(this);
     simCommManager = new MfrSimCommManager(this);
+
     startDetectionAlgoThread();
     requestLcInitData();
 }
@@ -163,6 +164,7 @@ void Mfr::parsingModeChangeData(const std::vector<char>& payload)
     if(modeData == ROTATION_MODE)
     {
         mfrMode = ROTATION_MODE;
+        motorRotationFlag = true;
         // stepMotorManager->runSpeedMode(motorTargetRPM);
         std::cout << "[Mfr::parsingModeChangeData] 모드 변경: ROTATION_MODE" << std::endl;
     }
@@ -170,6 +172,7 @@ void Mfr::parsingModeChangeData(const std::vector<char>& payload)
     else if(modeData == ANGLE_MODE)
     {
         mfrMode = ANGLE_MODE;
+        motorRotationFlag = false;
         std::cout << "[Mfr::parsingModeChangeData] ANGLE_MODE" << std::endl;
         if (payload.size() < 5 + sizeof(unsigned int) + sizeof(unsigned char))
         {
@@ -393,6 +396,11 @@ void Mfr::mfrDetectionAlgo()
     
     if (mfrMode == ROTATION_MODE)
     {
+        if(!motorRotationFlag)
+        {
+            stepMotorManager->sendCommand("ROTATION_MODE");
+        }        
+
         std::vector<std::pair<unsigned int, long long>> targetDistances;
 
         for (const auto& [id, target] : localTargets)
@@ -483,6 +491,10 @@ void Mfr::mfrDetectionAlgo()
             std::cout << "[Mfr::mfrDetectionAlgo] 목표 표적 ID: " << goalTargetId << std::endl;
             const auto& goalTarget = localTargets[goalTargetId];
             double baseAz = calcBearing(mfrCoords, goalTarget.mockCoords);
+            
+            std::ostringstream oss;
+            oss << std::fixed << std::setprecision(2) << baseAz;
+            stepMotorManager->sendCommand("STOP_MODE:" + oss.str());
 
             for (const auto& [id, target] : localTargets)
             {

@@ -27,7 +27,7 @@ public:
     void sendStatus(const Common::CommonMessage& msg) override; // 인터페이스 구현
 
     void sendRaw(const std::vector<uint8_t>& data) override {
-        sendRaw(data, "[SerialLS] 일반 전송");
+        sendRaw(data, "");
     }
     void handleReceived(const std::vector<uint8_t>& data, SenderType from) override;
 

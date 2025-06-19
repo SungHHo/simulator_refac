@@ -2,7 +2,6 @@
 #include "IReceiver.hpp"
 
 #include "MfrConfig.h"
-#include "ini.h"
 
 #include <vector>
 

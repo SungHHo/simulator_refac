@@ -11,5 +11,7 @@ struct TargetInfo
 	long long z;	 // 고도
 	int speed;		 // 속도
 	double angle;	 // 발사각
+	double angle2;	 // 고도각
+	bool is_hit = false;
 };
 #pragma pack(pop)

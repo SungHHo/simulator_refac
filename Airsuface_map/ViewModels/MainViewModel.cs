@@ -9,6 +9,8 @@ namespace Airsuface_map.ViewModels
 {
     public class MainViewModel
     {
+
+        bool first_init = false;
         private static double ConvertLongToDouble(long value)
         {
             // 8자리 소수부 분리
@@ -203,9 +205,13 @@ namespace Airsuface_map.ViewModels
 
             // ViewModel에 데이터 전달
             TargetMapVM.UpdateTargets(targets); // 주석 해제 필요
-            LCMapVM.UpdateLC(lc);
-            LSMapVM.UpdateLS(ls);
-            MFRMapVM.UpdateMFR(mfr);
+            if (first_init == false)
+            {
+                LCMapVM.UpdateLC(lc);
+                LSMapVM.UpdateLS(ls);
+                MFRMapVM.UpdateMFR(mfr);
+                first_init = true;
+            }
         }
     }
 }

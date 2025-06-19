@@ -83,7 +83,7 @@ namespace Airsuface_map.Views
 
             if (LSViewModel != null)
             {
-                LSViewModel.LSS.CollectionChanged += LCs_CollectionChanged;
+                LSViewModel.LSS.CollectionChanged += LSs_CollectionChanged;
                 UpdateLSMarkers();
             }
 
@@ -99,9 +99,9 @@ namespace Airsuface_map.Views
             {
                 UpdateMissileMarkers();
                 UpdateTargetMarkers();
-                UpdateLCMarkers();
-                UpdateLSMarkers();
-                UpdateMFRMarkers();
+                //UpdateLCMarkers();
+                //UpdateLSMarkers();
+                //UpdateMFRMarkers();
             };
             _updateTimer.Start();
         }

@@ -133,18 +133,59 @@ namespace Airsuface_map.Views
 
         private void UpdateMissileMarkers()
         {
+            // 1. 기존 미사일 마커 제거
             var missileMarkers = MapControl.Markers
                 .Where(m => m.Shape is FrameworkElement fe && fe.Tag is string tag && tag.StartsWith("Missile_"))
                 .ToList();
             foreach (var marker in missileMarkers)
                 MapControl.Markers.Remove(marker);
 
+            // 2. 기존 점선(dashLine) 마커 제거
+            var dashLineMarkers = MapControl.Markers
+                .Where(m => m.Tag is string tag && tag.StartsWith("Missile_DashLine_"))
+                .ToList();
+            foreach (var marker in dashLineMarkers)
+                MapControl.Markers.Remove(marker);
+
+            // 3. 기존 폭격 범위 원(circle) 마커 제거
+            var circleMarkers = MapControl.Markers
+                .Where(m => m.Tag is string tag && tag.StartsWith("MISSILE_CIRCLE_"))
+                .ToList();
+            foreach (var marker in circleMarkers)
+                MapControl.Markers.Remove(marker);
+
+            // 4. 새 마커 추가
             var vm = MissileViewModel;
             if (vm == null) return;
+            MockMissile lastMissile = null;
             foreach (var missile in vm.Missiles)
             {
+                // 미사일 마커
                 var marker = CreateMissileMarker(missile);
                 MapControl.Markers.Add(marker);
+
+                // 폭격 범위 원(circle)
+                var center = new PointLatLng(missile.X, missile.Y);
+                var circle = CreateCircle(center, 0.1, 72, Brushes.Red);
+                circle.Tag = $"MISSILE_CIRCLE_{missile.Id}";
+                MapControl.Markers.Add(circle);
+
+                lastMissile = missile;
+            }
+
+            // 5. 점선 추가 (최초/마지막 미사일 Id가 같을 때)
+            if (lastMissile != null)
+            {
+                var firstMissile = vm.FirstMissileInfos.FirstOrDefault(m => m.Id == lastMissile.Id);
+                if (firstMissile != null)
+                {
+                    var dashedLine = CreateDashedLine(
+                        new PointLatLng(firstMissile.X, firstMissile.Y),
+                        new PointLatLng(lastMissile.X, lastMissile.Y)
+                    );
+                    dashedLine.Tag = $"Missile_DashLine_{lastMissile.Id}";
+                    MapControl.Markers.Add(dashedLine);
+                }
             }
         }
 
@@ -220,12 +261,16 @@ namespace Airsuface_map.Views
 
         private GMapMarker CreateMissileMarker(Airsuface_map.Models.MockMissile missile)
         {
+            double markerWidth = 40;   // 이미지+텍스트 예상 최대 너비
+            double markerHeight = 40;  // 이미지+텍스트 예상 최대 높이
+
             var image = new Image
             {
                 Width = 20,
                 Height = 20,
                 Source = new BitmapImage(new Uri(System.IO.Path.GetFullPath("Friend-Air.png"))),
-                Stretch = Stretch.Uniform
+                Stretch = Stretch.Uniform,
+                HorizontalAlignment = HorizontalAlignment.Center
             };
 
             var text = new TextBlock
@@ -235,46 +280,26 @@ namespace Airsuface_map.Views
                 Background = Brushes.White,
                 FontWeight = FontWeights.Bold,
                 FontSize = 11,
-                Margin = new Thickness(0, 0, 0, 0),
-                HorizontalAlignment = HorizontalAlignment.Center
+                Margin = new Thickness(0, 2, 0, 0),
+                HorizontalAlignment = HorizontalAlignment.Center,
             };
 
-            // 각도(도)를 라디안으로 변환
-            double angleRad = missile.Angle * Math.PI / 180.0;
-            double lineLength = 500; // px 단위
-
-            // 선의 끝점 계산 (StackPanel 기준)
-            double x2 = Math.Sin(angleRad) * lineLength;
-            double y2 = -Math.Cos(angleRad) * lineLength;
-
-            var line = new Line
+            var stackPanel = new StackPanel
             {
-                X1 = 10, // 이미지 중앙(20/2)
-                Y1 = 20, // 이미지 하단
-                X2 = 10 + x2,
-                Y2 = 20 + y2,
-                Stroke = Brushes.Red,
-                StrokeThickness = 2
+                Orientation = Orientation.Vertical,
+                Width = markerWidth,
+                Height = markerHeight,
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Center
             };
-
-            var canvas = new Canvas
-            {
-                Width = Math.Max(20, Math.Abs(x2) + 20),
-                Height = Math.Max(20, Math.Abs(y2) + 20)
-            };
-            Canvas.SetLeft(image, 0);
-            Canvas.SetTop(image, 0);
-            canvas.Children.Add(image);
-            canvas.Children.Add(line);
-
-            var stackPanel = new StackPanel();
-            stackPanel.Children.Add(canvas);
+            stackPanel.Children.Add(image);
             stackPanel.Children.Add(text);
             stackPanel.Tag = $"Missile_{missile.Id}";
 
             var marker = new GMapMarker(new PointLatLng(missile.X, missile.Y))
             {
-                Shape = stackPanel
+                Shape = stackPanel,
+                Offset = new System.Windows.Point(-markerWidth / 2, -markerHeight / 2)
             };
             return marker;
         }
@@ -296,37 +321,9 @@ namespace Airsuface_map.Views
                 Background = Brushes.White,
                 FontWeight = FontWeights.Bold,
                 FontSize = 11,
-                Margin = new Thickness(0, 0, 0, 0),
+                Margin = new Thickness(0, 2, 0, 0),
                 HorizontalAlignment = HorizontalAlignment.Center
             };
-
-            //// 각도(도)를 라디안으로 변환
-            //double angleRad = target.Angle * Math.PI / 180.0;
-            //double lineLength = 500; // px 단위
-
-            //// 선의 끝점 계산 (StackPanel 기준)
-            //double x2 = Math.Sin(angleRad) * lineLength;
-            //double y2 = -Math.Cos(angleRad) * lineLength;
-
-            //var line = new Line
-            //{
-            //    X1 = 10, // 이미지 중앙(20/2)
-            //    Y1 = 20, // 이미지 하단
-            //    X2 = 10 + x2,
-            //    Y2 = 20 + y2,
-            //    Stroke = Brushes.Green,
-            //    StrokeThickness = 2
-            //};
-
-            //var canvas = new Canvas
-            //{
-            //    Width = Math.Max(20, Math.Abs(x2) + 20),
-            //    Height = Math.Max(20, Math.Abs(y2) + 20)
-            //};
-            //Canvas.SetLeft(image, 0);
-            //Canvas.SetTop(image, 0);
-            //canvas.Children.Add(image);
-            //canvas.Children.Add(line);
 
             var stackPanel = new StackPanel();
             stackPanel.Children.Add(image);
@@ -652,6 +649,24 @@ namespace Airsuface_map.Views
                 Shape = stackPanel
             };
             MapControl.Markers.Add(marker);
+        }
+
+        private GMapRoute CreateDashedLine(PointLatLng start, PointLatLng end, Brush stroke = null, double thickness = 2)
+        {
+            var points = new List<PointLatLng> { start, end };
+            var route = new GMapRoute(points);
+
+            // WPF Path 스타일로 점선 적용
+            var path = new Path
+            {
+                Stroke = stroke ?? Brushes.Blue,
+                StrokeThickness = thickness,
+                StrokeDashArray = new DoubleCollection { 4, 4 }, // 4px 선, 4px 공백 반복
+                Opacity = 0.8
+            };
+            route.Shape = path;
+
+            return route;
         }
     }
 }

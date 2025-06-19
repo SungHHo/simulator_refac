@@ -66,7 +66,7 @@ bool loadConfig(const std::string &filepath, ConfigCommon &config)
             {
                 config.ECCRecvIP = value;
             }
-            else if (key == "Port")
+            else if (key == "RecvPort")
             {
                 config.ECCRecvPort = std::stoi(value);
             }
@@ -77,7 +77,7 @@ bool loadConfig(const std::string &filepath, ConfigCommon &config)
             {
                 config.MFRRecvIP = value;
             }
-            else if (key == "Port")
+            else if (key == "RecvPort")
             {
                 config.MFRRecvPort = std::stoi(value);
             }

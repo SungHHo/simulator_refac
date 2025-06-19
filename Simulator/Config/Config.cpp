@@ -66,7 +66,7 @@ bool loadConfig(const std::string &filepath, ConfigCommon &config)
             {
                 config.MFRSendIP = value;
             }
-            else if (key == "Port")
+            else if (key == "SendPort")
             {
                 config.MFRSendPort = std::stoi(value);
             }

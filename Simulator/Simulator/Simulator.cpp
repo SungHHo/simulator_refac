@@ -50,10 +50,6 @@ bool Simulator::init()
 		std::cerr << "Failed to initialize ls_recv_manager socket." << std::endl;
 		return false;
 	}
-	{
-		std::cerr << "Failed to initialize ls_recv_manager socket." << std::endl;
-		return false;
-	}
 
 	if (!mfr_send_manager_->MFRSocketOpen(config.MFRSendIP, config.MFRSendPort))
 	{

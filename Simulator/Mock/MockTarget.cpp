@@ -41,23 +41,27 @@ void MockTarget::updatePos()
 	// 현재 위경도 (정수 → 실수)
 	double lat = static_cast<double>(target_info_.x) / DEGREE_TO_INT;
 	double lon = static_cast<double>(target_info_.y) / DEGREE_TO_INT;
+	double alt_start = static_cast<double>(target_info_.z);
 
 	// 위도, 경도 보정값 계산
 	double meters_per_deg_lon = METERS_PER_DEGREE_LAT * std::cos(lat * M_PI / 180.0);
 
 	double delta_lat = std::cos(target_info_.angle * M_PI / 180.0) * distance / METERS_PER_DEGREE_LAT;
 	double delta_lon = std::sin(target_info_.angle * M_PI / 180.0) * distance / meters_per_deg_lon;
-
+	double alt_change = std::tan(target_info_.angle2 * M_PI / 180.0) * distance;
+	
 	// 정수로 환산하여 위치 갱신
 	target_info_.x += static_cast<long long>(delta_lat * DEGREE_TO_INT);
 	target_info_.y += static_cast<long long>(delta_lon * DEGREE_TO_INT);
-
+	alt_start += alt_change;
+	target_info_.z = static_cast<long long>(alt_start);
 	// 4초마다 이동 거리 및 위치 출력
 	if (total_elapsed >= 4.0)
 	{
 		std::cout << "[4 sec update] Target moved " << accumulated_distance << " meters.\n";
 		std::cout << " → Current lat: " << static_cast<double>(target_info_.x) / DEGREE_TO_INT
-				  << ", lon: " << static_cast<double>(target_info_.y) / DEGREE_TO_INT << "\n\n";
+				  << ", lon: " << static_cast<double>(target_info_.y) / DEGREE_TO_INT
+				  << ", alt: " << static_cast<double>(target_info_.z) << "\n\n";
 
 		total_elapsed = 0.0;
 		accumulated_distance = 0.0;

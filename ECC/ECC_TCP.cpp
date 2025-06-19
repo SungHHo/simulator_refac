@@ -1,5 +1,7 @@
 #include "pch.h"
 #include "ECC_TCP.h"
+#include "Config.h"
+
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #include <process.h>
@@ -36,9 +38,15 @@ bool ECC_TCP::connect(const char* ip, int port)
         return false;
     }
 
+    ConfigCommon config;
+    if (!loadConfig("ECCconfig.ini", config)) {
+      AfxMessageBox(_T("설정 파일을 읽어오는 데 실패했습니다."));
+      return FALSE;  // 초기화 실패
+    }
+
     // Map Connect
     map_tcp = std::make_unique<MAP_TCP>();
-    if (map_tcp->connect("127.0.0.1", 9001))
+    if (map_tcp->connect(config.MAPSendIP, config.MAPSendPort))
     {
       std::cout << "success Map TCP Connect" << std::endl;
     }

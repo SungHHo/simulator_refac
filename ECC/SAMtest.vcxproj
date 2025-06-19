@@ -193,6 +193,7 @@
     <ClInclude Include="CLSMoveDlg.h" />
     <ClInclude Include="CMFRModeSelectDlg.h" />
     <ClInclude Include="CMissileInfoDlg.h" />
+    <ClInclude Include="Config.h" />
     <ClInclude Include="CRightPaneDlg.h" />
     <ClInclude Include="CTargetInfoDlg.h" />
     <ClInclude Include="CTargetListDlg.h" />
@@ -227,6 +228,7 @@
     <ClCompile Include="CLSMoveDlg.cpp" />
     <ClCompile Include="CMFRModeSelectDlg.cpp" />
     <ClCompile Include="CMissileInfoDlg.cpp" />
+    <ClCompile Include="Config.cpp" />
     <ClCompile Include="CRightPaneDlg.cpp" />
     <ClCompile Include="CTargetInfoDlg.cpp" />
     <ClCompile Include="CTargetListDlg.cpp" />
@@ -250,6 +252,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="ClassDiagram.cd" />
+    <None Include="ECCconfig.ini" />
     <None Include="res\SAMtest.rc2" />
   </ItemGroup>
   <ItemGroup>

@@ -194,8 +194,9 @@ namespace Airsuface_map.Views
             if (vm == null) return;
             foreach (var ls in vm.LSS)
             {
-                var marker = CreateLSMarker(ls);
+                var (marker, circle) = CreateLSMarker(ls, 100.0);
                 MapControl.Markers.Add(marker);
+                MapControl.Markers.Add(circle);
             }
         }
 
@@ -211,8 +212,9 @@ namespace Airsuface_map.Views
             if (vm == null) return;
             foreach (var mfr in vm.MFRS)
             {
-                var marker = CreateMFRMarker(mfr);
+                var (marker, circle) = CreateMFRMarker(mfr, 100.0);
                 MapControl.Markers.Add(marker);
+                MapControl.Markers.Add(circle);
             }
         }
 
@@ -340,75 +342,153 @@ namespace Airsuface_map.Views
 
         private GMapMarker CreateLCMarker(Airsuface_map.Models.LC lc)
         {
+            double ellipseSize = 80;
+            double imageSize = 20;
+
+            //// 원(반경 표시)
+            //var ellipse = new Ellipse
+            //{
+            //    Width = ellipseSize,
+            //    Height = ellipseSize,
+            //    Stroke = Brushes.Blue,
+            //    StrokeThickness = 3,
+            //    Fill = Brushes.Transparent,
+            //    Opacity = 0.4
+            //};
+
+            // 마커 이미지
             var image = new Image
             {
-                Width = 20,
-                Height = 20,
+                Width = imageSize,
+                Height = imageSize,
                 Source = new BitmapImage(new Uri(System.IO.Path.GetFullPath("Friend-Units.png"))),
                 Stretch = Stretch.Uniform
             };
 
+            // 텍스트 (배경을 투명으로)
             var text = new TextBlock
             {
                 Text = $"LC {lc.Id}",
                 Foreground = Brushes.Black,
-                Background = Brushes.White,
+                Background = Brushes.Transparent, // 반드시 투명!
                 FontWeight = FontWeights.Bold,
                 FontSize = 11,
-                Margin = new Thickness(0, 0, 0, 0),
-                HorizontalAlignment = HorizontalAlignment.Center
+                Margin = new Thickness(0, 2, 0, 0),
+                HorizontalAlignment = HorizontalAlignment.Center,
+                TextAlignment = TextAlignment.Center
             };
 
-            var stackPanel = new StackPanel();
-            stackPanel.Children.Add(image);
-            stackPanel.Children.Add(text);
-            stackPanel.Tag = $"LC_{lc.Id}";
+            // Overlay용 Canvas (모든 요소를 겹치게 배치)
+            var overlay = new Canvas
+            {
+                Width = ellipseSize,
+                Height = ellipseSize
+            };
+
+            //// 원을 가장 위에 (ZIndex 높게)
+            //Canvas.SetLeft(ellipse, 0);
+            //Canvas.SetTop(ellipse, 0);
+            //Panel.SetZIndex(ellipse, 100);
+            //overlay.Children.Add(ellipse);
+
+            // 이미지를 중앙에
+            Canvas.SetLeft(image, (ellipseSize - imageSize) / 2);
+            Canvas.SetTop(image, (ellipseSize - imageSize) / 2);
+            Panel.SetZIndex(image, 10);
+            overlay.Children.Add(image);
+
+            // 텍스트를 이미지 바로 아래에
+            Canvas.SetLeft(text, (ellipseSize - imageSize) / 2);
+            Canvas.SetTop(text, (ellipseSize + imageSize) / 2 + 2); // 이미지 하단 + 약간의 간격
+            Panel.SetZIndex(text, 10);
+            overlay.Children.Add(text);
+
+            // 중심이 실제 좌표에 오도록 설정
+            overlay.RenderTransformOrigin = new Point(0.5, 0.5);
+            overlay.RenderTransform = new TranslateTransform(-ellipseSize / 2, -ellipseSize / 2);
+
+            overlay.Tag = $"LC_{lc.Id}";
 
             var marker = new GMapMarker(new PointLatLng(lc.X, lc.Y))
             {
-                Shape = stackPanel
+                Shape = overlay
             };
+
             return marker;
         }
 
-        private GMapMarker CreateLSMarker(Airsuface_map.Models.LS ls)
+
+        private (GMapMarker marker, GMapPolygon circle) CreateLSMarker(Airsuface_map.Models.LS ls, double radiusKm = 2.0)
         {
+            // 마커 이미지
+            double imageSize = 20;
+
             var image = new Image
             {
-                Width = 20,
-                Height = 20,
+                Width = imageSize,
+                Height = imageSize,
                 Source = new BitmapImage(new Uri(System.IO.Path.GetFullPath("Friend-Units.png"))),
                 Stretch = Stretch.Uniform
             };
 
+            // 텍스트 (배경을 투명으로)
             var text = new TextBlock
             {
                 Text = $"LS {ls.Id}",
                 Foreground = Brushes.Black,
-                Background = Brushes.White,
+                Background = Brushes.Transparent, // 반드시 투명으로!
                 FontWeight = FontWeights.Bold,
                 FontSize = 11,
-                Margin = new Thickness(0, 0, 0, 0),
-                HorizontalAlignment = HorizontalAlignment.Center
+                Margin = new Thickness(0, 2, 0, 0),
+                HorizontalAlignment = HorizontalAlignment.Center,
+                TextAlignment = TextAlignment.Center
             };
-            var stackPanel = new StackPanel();
-            stackPanel.Children.Add(image);
-            stackPanel.Children.Add(text);
-            stackPanel.Tag = $"LS_{ls.Id}";
+
+            // Canvas로 이미지와 텍스트를 배치
+            var canvas = new Canvas
+            {
+                Width = imageSize,
+                Height = imageSize + 18 // 텍스트 높이 고려
+            };
+            // 이미지 중앙 배치
+            Canvas.SetLeft(image, 0);
+            Canvas.SetTop(image, 0);
+            canvas.Children.Add(image);
+
+            // 텍스트를 이미지 바로 아래에 배치
+            Canvas.SetLeft(text, 0);
+            Canvas.SetTop(text, imageSize);
+            canvas.Children.Add(text);
+
+            // 중심이 실제 좌표에 오도록 Transform 적용 (이미지 중앙이 중심)
+            canvas.RenderTransformOrigin = new Point(0.5, 0.0);
+            canvas.RenderTransform = new TranslateTransform(-imageSize / 2, 0);
+
+            canvas.Tag = $"LS_{ls.Id}";
 
             var marker = new GMapMarker(new PointLatLng(ls.X, ls.Y))
             {
-                Shape = stackPanel
+                Shape = canvas
             };
-            return marker;
+
+            // 실제 반경 원(GMapPolygon)
+            var center = new PointLatLng(ls.X, ls.Y);
+            var circle = CreateCircle(center, radiusKm, 72, Brushes.Green);
+            circle.Tag = $"MFR_CIRCLE_{ls.Id}";
+
+            return (marker, circle);
         }
 
-        private GMapMarker CreateMFRMarker(Airsuface_map.Models.MFR mfr)
+
+        private (GMapMarker marker, GMapPolygon circle) CreateMFRMarker(Airsuface_map.Models.MFR mfr, double radiusKm = 2.0)
         {
+            // 마커 이미지
+            double imageSize = 20;
+
             var image = new Image
             {
-                Width = 20,
-                Height = 20,
+                Width = imageSize,
+                Height = imageSize,
                 Source = new BitmapImage(new Uri(System.IO.Path.GetFullPath("Friend-Units.png"))),
                 Stretch = Stretch.Uniform
             };
@@ -420,20 +500,44 @@ namespace Airsuface_map.Views
                 Background = Brushes.White,
                 FontWeight = FontWeights.Bold,
                 FontSize = 11,
-                Margin = new Thickness(0, 0, 0, 0),
-                HorizontalAlignment = HorizontalAlignment.Center
+                Margin = new Thickness(0, 2, 0, 0),
+                HorizontalAlignment = HorizontalAlignment.Center,
+                TextAlignment = TextAlignment.Center
             };
-            var stackPanel = new StackPanel();
-            stackPanel.Children.Add(image);
-            stackPanel.Children.Add(text);
-            stackPanel.Tag = $"MFR_{mfr.Id}";
+
+            // Canvas로 이미지와 텍스트를 배치
+            var canvas = new Canvas
+            {
+                Width = imageSize,
+                Height = imageSize + 18 // 텍스트 높이 고려
+            };
+            // 이미지 중앙 배치
+            Canvas.SetLeft(image, 0);
+            Canvas.SetTop(image, 0);
+            canvas.Children.Add(image);
+
+            // 텍스트를 이미지 바로 아래에 배치
+            Canvas.SetLeft(text, 0);
+            Canvas.SetTop(text, imageSize);
+            canvas.Children.Add(text);
+
+            // 중심이 실제 좌표에 오도록 Transform 적용 (이미지 중앙이 중심)
+            canvas.RenderTransformOrigin = new Point(0.5, 0.0);
+            canvas.RenderTransform = new TranslateTransform(-imageSize / 2, 0);
+
+            canvas.Tag = $"MFR_{mfr.Id}";
 
             var marker = new GMapMarker(new PointLatLng(mfr.X, mfr.Y))
             {
-                Shape = stackPanel
+                Shape = canvas
             };
 
-            return marker;
+            // 실제 반경 원(GMapPolygon)
+            var center = new PointLatLng(mfr.X, mfr.Y);
+            var circle = CreateCircle(center, radiusKm, 72, Brushes.Red);
+            circle.Tag = $"MFR_CIRCLE_{mfr.Id}";
+
+            return (marker, circle);
         }
 
         // 위도/경도 기준 원의 점 리스트 생성 (단위: meter)
@@ -493,6 +597,32 @@ namespace Airsuface_map.Views
         private void UpdateCoordinatesText(PointLatLng point)
         {
             CoordinatesTextBlock.Text = $"위도: {point.Lat}, 경도: {point.Lng}";
+        }
+
+        private GMapPolygon CreateCircle(PointLatLng center, double radiusKm, int segments, Brush stroke, Brush fill = null)
+        {
+            var points = new List<PointLatLng>();
+            double seg = 360.0 / segments;
+            for (int i = 0; i < segments; i++)
+            {
+                double theta = Math.PI * i * seg / 180.0;
+                // 위도 1도 ≈ 111.32km, 경도 1도 ≈ 111.32km * cos(위도)
+                double dLat = (radiusKm / 111.32) * Math.Sin(theta);
+                double dLng = (radiusKm / (111.32 * Math.Cos(center.Lat * Math.PI / 180))) * Math.Cos(theta);
+                points.Add(new PointLatLng(center.Lat + dLat, center.Lng + dLng));
+            }
+            var polygon = new GMapPolygon(points);
+
+            // WPF Path 스타일 적용
+            polygon.Shape = new System.Windows.Shapes.Path
+            {
+                Stroke = stroke,
+                StrokeThickness = 3,
+                Fill = fill ?? Brushes.Transparent,
+                Opacity = 0.4
+            };
+
+            return polygon;
         }
 
         private void AddMarker(string name, PointLatLng point)

@@ -74,6 +74,7 @@ struct TargetStatus
     long long altitude;
     int speed;
     double angle;
+    double angle2; // 고도각
     unsigned long long detectTime;
     uint8_t priority;
     bool hit;

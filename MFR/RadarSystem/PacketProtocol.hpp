@@ -46,6 +46,26 @@ struct localMissileSimData // 4 + (8*3) + 8 + 4 = 40 bytes
     bool isHit;
 };
 
+struct localMockSimData // 4 + (8*3) + 8 + 4 = 40 bytes
+{
+    unsigned int mockId;
+    Pos3D mockCoords;
+    double angle;
+    double angle2;
+    int speed;
+    bool isHit;
+};
+
+struct MockSimData // 4 + (8*3) + 8 + 4 = 40 bytes
+{
+    unsigned int mockId;
+    EncodedPos3D mockCoords;
+    int speed;
+    double angle;
+    double angle2;
+    bool isHit;
+};
+
 struct TargetSimData // 4 + (8*3) + 8 + 4 = 40 bytes
 {
     unsigned int mockId;

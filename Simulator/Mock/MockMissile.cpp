@@ -55,7 +55,7 @@ void MockMissile::updatePosMissile()
 		// 4초마다 거리 출력
 		if (total_elapsed >= 4.0)
 		{
-			std::cout << "[4 sec update] Missile moved " << accumulated_distance << " meters.\n";
+			std::cout << "[4 sec update] Missile moved" << "Missile ID : " << missile_info_.id << " = " << accumulated_distance << " meters.\n";
 			std::cout << " → Current lat: " << static_cast<double>(missile_info_.x) / DEGREE_TO_INT
 					  << ", lon: " << static_cast<double>(missile_info_.y) / DEGREE_TO_INT << ", alt: " << static_cast<double>(missile_info_.z) / DEGREE_TO_INT << "\n";
 			total_elapsed = 0.0;

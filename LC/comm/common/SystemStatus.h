@@ -3,6 +3,7 @@
 #pragma once
 #include <string>
 #include <vector>
+#include <cstdint>
 
 struct Pos2D
 {
@@ -54,7 +55,7 @@ struct LCStatus
 
 struct MissileStatus
 {
-    unsigned int id; 
+    unsigned int id;
     long long posX;
     long long posY;
     long long altitude;
@@ -72,7 +73,8 @@ struct TargetStatus
     long long posY;
     long long altitude;
     int speed;
-    double angle;
+    double angle1;
+    double angle2; // 고도각
     unsigned long long detectTime;
     uint8_t priority;
     bool hit;

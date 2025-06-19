@@ -50,6 +50,7 @@ void MockTargetManager::RaedTargetIni()
 				long long z = std::stoul(tokens[3]);
 				std::cout << "z : " << z << std::endl;
 				double angle = std::stod(tokens[4]);
+				double angle2 = std::stod(tokens[4]);
 				int speed = std::stoi(tokens[5]);
 
 				// TargetInfo 객체 생성 및 데이터 설정
@@ -60,6 +61,7 @@ void MockTargetManager::RaedTargetIni()
 				targetInfo.y = y;
 				targetInfo.z = z;
 				targetInfo.angle = angle;
+				targetInfo.angle2 = angle2;
 				targetInfo.speed = speed;
 
 				// MockTarget 객체 생성 및 TargetInfo, MFRSendUDPManager 설정
@@ -121,7 +123,15 @@ void MockTargetManager::flitghtTarget()
 	{
 		// std::cout << "update " << std::endl;
 		target->updatePos();
+		// std::cout << "Target ID: " << target->getTargetInfo().id
+		// 		  << " Position: (" << target->getTargetInfo().x << ", "
+		// 		  << target->getTargetInfo().y << ", "
+		// 		  << target->getTargetInfo().z << ")"
+		// 		  << " Speed: " << target->getTargetInfo().speed
+		// 		  << " Angle: " << target->getTargetInfo().angle
+		// 		  << std::endl;
 	}
+	std::this_thread::sleep_for(std::chrono::milliseconds(100));
 }
 
 int MockTargetManager::downTargetStatus(const MissileInfo &missileInfo)

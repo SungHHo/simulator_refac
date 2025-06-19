@@ -20,7 +20,7 @@ void MockMissile::updatePosMissile()
 	auto last_time = std::chrono::steady_clock::now();
 	double accumulated_distance = 0.0;
 	double total_elapsed = 0.0;
-
+	double alt_start = static_cast<double>(missile_info_.z);
 	while (true)
 	{
 		auto now = std::chrono::steady_clock::now();
@@ -40,37 +40,40 @@ void MockMissile::updatePosMissile()
 
 		// 위경도 1도당 m 계산
 		double meters_per_deg_lon = METERS_PER_DEGREE_LAT * std::cos(lat * M_PI / 180.0);
-
+		
 		// 위도/경도 증가량 계산 (도 단위)
 		double delta_lat = std::cos(missile_info_.angle * M_PI / 180.0) * distance / METERS_PER_DEGREE_LAT;
 		double delta_lon = std::sin(missile_info_.angle * M_PI / 180.0) * distance / meters_per_deg_lon;
-
+		double alt_change = std::tan(missile_info_.angle2 * M_PI / 180.0) * distance; 
+		alt_start += alt_change;
+		
 		// 정수형으로 환산해서 반영
 		missile_info_.x += static_cast<long long>(delta_lat * DEGREE_TO_INT);
 		missile_info_.y += static_cast<long long>(delta_lon * DEGREE_TO_INT);
+		missile_info_.z = static_cast<long long>(alt_start);
 
 		// 4초마다 거리 출력
 		if (total_elapsed >= 4.0)
 		{
 			std::cout << "[4 sec update] Missile moved " << accumulated_distance << " meters.\n";
 			std::cout << " → Current lat: " << static_cast<double>(missile_info_.x) / DEGREE_TO_INT
-					  << ", lon: " << static_cast<double>(missile_info_.y) / DEGREE_TO_INT << "\n\n";
+					  << ", lon: " << static_cast<double>(missile_info_.y) / DEGREE_TO_INT << ", alt: " << static_cast<double>(missile_info_.z) / DEGREE_TO_INT << "\n";
 			total_elapsed = 0.0;
 			accumulated_distance = 0.0;
 		}
 
 		// 명중 여부 판단
-		// if (mock_target_manager_->downTargetStatus(missile_info_) > 0)
-		// {
-		// 	std::cout << "Missile hit target!" << std::endl;
-		// 	missile_info_.is_hit = true;
-		// }
-		// else
-		// {
-		// 	auto now_time = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-		// 	std::cout << "[Current time, MockMissile]: " << std::ctime(&now_time);
-		// 	std::cout << "Missile is still in flight.\n";
-		// }
+		if (mock_target_manager_->downTargetStatus(missile_info_) > 0)
+		{
+			std::cout << "Missile hit target!" << std::endl;
+			missile_info_.is_hit = true;
+		}
+		else
+		{
+			auto now_time = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+			std::cout << "[Current time, MockMissile]: " << std::ctime(&now_time);
+			std::cout << "Missile is still in flight.\n";
+		}
 
 		sendData();
 		std::this_thread::sleep_for(std::chrono::milliseconds(100));

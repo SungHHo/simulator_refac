@@ -3,6 +3,7 @@
 
 #include <string>
 #include <memory>
+#include <chrono>
 
 #include "TargetInfo.h"
 #include "MissileInfo.h"
@@ -21,6 +22,10 @@ public:
 private:
 	TargetInfo target_info_;
 	std::shared_ptr<MFRSendUDPManager> mfr_send_manager_ = nullptr;
+
+	std::chrono::steady_clock::time_point last_time_;
+	double total_elapsed_;
+	double accumulated_distance_;
 
 	void sendData(); // 데이터를 전송
 };

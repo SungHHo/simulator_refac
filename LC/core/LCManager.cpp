@@ -352,7 +352,8 @@ void LCManager::initialize(const std::string& iniPath) {
             target.posY = reader.GetLongLong(section, "posY", 0);
             target.altitude = reader.GetLongLong(section, "height", 0);
             target.speed = reader.GetInteger(section, "speed", 0);
-            target.angle = reader.GetReal(section, "degree", 0.0);
+            target.angle1 = reader.GetReal(section, "degree1", 0.0);
+            target.angle2 = reader.GetReal(section, "degree2", 0.0);
             target.detectTime = reader.GetLongLong(section, "first_detect_time", 0);
             target.priority = static_cast<uint8_t>(reader.GetInteger(section, "priority", 0));
             target.hit = reader.GetBoolean(section, "hit", false);
@@ -364,7 +365,8 @@ void LCManager::initialize(const std::string& iniPath) {
                       << ", posY=" << target.posY
                       << ", altitude=" << target.altitude
                       << ", speed=" << target.speed
-                      << ", angle=" << target.angle
+                      << ", angle=" << target.angle1
+                      << ", angle=" << target.angle2
                       << ", detectTime=" << target.detectTime
                       << ", priority=" << static_cast<int>(target.priority)
                       << ", hit=" << target.hit << std::endl;
@@ -442,7 +444,8 @@ void LCManager::printStatus(const SystemStatus& status) {
     std::cout << "[Target List] 총 " << status.targets.size() << "개\n";
     for (const auto& t : status.targets) {
         std::cout << "  - ID: " << t.id
-                  << ", Angle: " << t.angle
+                  << ", Angle: " << t.angle1
+                  << ", Angle: " << t.angle2
                   << ", Pos: (" << t.posX << ", " << t.posY << ")"
                   << ", Speed: " << t.speed
                   << ", Priority: " << static_cast<int>(t.priority)
@@ -486,7 +489,8 @@ void LCManager::onRadarDetectionReceived(const Common::RadarDetection& d) {
     for (const auto& t : d.targets) {
         TargetStatus ts;
         ts.id = t.id;
-        ts.angle = t.angle;
+        ts.angle1 = t.angle1;
+        ts.angle2 = t.angle2;
         ts.posX = t.posX;
         ts.posY = t.posY;
         ts.altitude = t.altitude;
@@ -696,7 +700,8 @@ void LCManager::printStatus() const {
                   << ", Pos: (" << t.posX << ", " << t.posY << ")"
                   << ", Altitude: " << t.altitude
                   << ", Speed: " << t.speed
-                  << ", Angle: " << t.angle
+                  << ", Angle1: " << t.angle1
+                  << ", Angle2: " << t.angle2
                   << ", Priority: " << static_cast<int>(t.priority)
                   << ", Hit: " << static_cast<int>(t.hit) << "\n";
     }

@@ -52,6 +52,7 @@ struct TargetSimData // 4 + (8*3) + 8 + 4 = 40 bytes
     EncodedPos3D mockCoords;
     int speed;
     double angle;
+    double angle2;
     bool isHit;
 };
 
@@ -82,6 +83,7 @@ struct MfrToLcTargetInfo    // 4 + (8*3) + 4 + 8 + 8 + 1 + 1 = 50 bytes
     EncodedPos3D targetCoords;
     int targetSpeed;
     double targetAngle;
+    double targetAngle2; // 고도각
     unsigned long long firstDetectionTime;
     unsigned char prioirty;
     bool isHit;

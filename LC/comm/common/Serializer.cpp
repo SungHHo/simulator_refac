@@ -81,17 +81,17 @@ buf.insert(buf.end(), reinterpret_cast<const uint8_t*>(&dummyHeight),
 
     // Target
     for (const auto& t : status.targets) {
-        buf.insert(buf.end(), reinterpret_cast<const uint8_t*>(&t.id), reinterpret_cast<const uint8_t*>(&t.id) + 4);
-        buf.insert(buf.end(), reinterpret_cast<const uint8_t*>(&t.posX), reinterpret_cast<const uint8_t*>(&t.posX) + 8);
-        buf.insert(buf.end(), reinterpret_cast<const uint8_t*>(&t.posY), reinterpret_cast<const uint8_t*>(&t.posY) + 8);
-        buf.insert(buf.end(), reinterpret_cast<const uint8_t*>(&t.altitude), reinterpret_cast<const uint8_t*>(&t.altitude) + 8);
-        buf.insert(buf.end(), reinterpret_cast<const uint8_t*>(&t.speed), reinterpret_cast<const uint8_t*>(&t.speed) + 4);
-        buf.insert(buf.end(), reinterpret_cast<const uint8_t*>(&t.angle), reinterpret_cast<const uint8_t*>(&t.angle) + 8);
+        buf.insert(buf.end(), reinterpret_cast<const uint8_t*>(&t.id),         reinterpret_cast<const uint8_t*>(&t.id) + 4);
+        buf.insert(buf.end(), reinterpret_cast<const uint8_t*>(&t.posX),       reinterpret_cast<const uint8_t*>(&t.posX) + 8);
+        buf.insert(buf.end(), reinterpret_cast<const uint8_t*>(&t.posY),       reinterpret_cast<const uint8_t*>(&t.posY) + 8);
+        buf.insert(buf.end(), reinterpret_cast<const uint8_t*>(&t.altitude),   reinterpret_cast<const uint8_t*>(&t.altitude) + 8);
+        buf.insert(buf.end(), reinterpret_cast<const uint8_t*>(&t.speed),      reinterpret_cast<const uint8_t*>(&t.speed) + 4);
+        buf.insert(buf.end(), reinterpret_cast<const uint8_t*>(&t.angle1),     reinterpret_cast<const uint8_t*>(&t.angle1) + 8);  // angle1
+        buf.insert(buf.end(), reinterpret_cast<const uint8_t*>(&t.angle2),     reinterpret_cast<const uint8_t*>(&t.angle2) + 8);  // angle2
         buf.insert(buf.end(), reinterpret_cast<const uint8_t*>(&t.detectTime), reinterpret_cast<const uint8_t*>(&t.detectTime) + 8);
         buf.push_back(t.priority);
         buf.push_back(static_cast<uint8_t>(t.hit));
-    }  
-
+    }
     return buf;
 }
 

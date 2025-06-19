@@ -1,0 +1,22 @@
+{
+  "configurations": [
+    {
+      "name": "Linux",
+      "includePath": [
+        "${workspaceFolder}/comm/common",
+        "${workspaceFolder}/comm/ecc",
+        "${workspaceFolder}/comm/ls",
+        "${workspaceFolder}/comm/mfr",
+        "${workspaceFolder}/core",
+        "${workspaceFolder}/status",
+        "${workspaceFolder}/inih"
+      ],
+      "defines": [],
+      "compilerPath": "/usr/bin/g++",
+      "cStandard": "c17",
+      "cppStandard": "c++17",
+      "intelliSenseMode": "linux-gcc-x64"
+    }
+  ],
+  "version": 4
+}

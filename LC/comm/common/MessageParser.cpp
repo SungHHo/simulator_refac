@@ -215,23 +215,20 @@ CommonMessage parseRadarDetection(const std::vector<uint8_t>& data, SenderType s
     std::cout << std::dec; // 10진수 출력 설정
 
     // ✅ Target 파싱 (50바이트씩)
-    for (int i = 0; i < numTargets && offset + 50 <= data.size(); ++i) {
+    for (int i = 0; i < numTargets && offset + 58 <= data.size(); ++i) {
         RadarDetection::Target t;
         std::memcpy(&t.id,         &data[offset],      4);
         std::memcpy(&t.posX,       &data[offset + 4],  8);
         std::memcpy(&t.posY,       &data[offset + 12], 8);
         std::memcpy(&t.altitude,   &data[offset + 20], 8);
         std::memcpy(&t.speed,      &data[offset + 28], 4);
-        std::memcpy(&t.angle,      &data[offset + 32], 8);
-        std::memcpy(&t.detectTime, &data[offset + 40], 8);
-        t.priority = data[offset + 48];
-        t.hit = data[offset + 49];
+        std::memcpy(&t.angle1,     &data[offset + 32], 8);  // 기존 angle → angle1
+        std::memcpy(&t.angle2,     &data[offset + 40], 8);  // 새로 추가된 angle2
+        std::memcpy(&t.detectTime, &data[offset + 48], 8);
+        t.priority = data[offset + 56];
+        t.hit = data[offset + 57];
         det.targets.push_back(t);
-        offset += 50;
-
-        // std::cout << "[Parser] Target ID: " << t.id << ", PosX: " << t.posX << ", PosY: " << t.posY << "\n";
-        // std::cout << "[Parser] Target Altitude: " << t.altitude << ", Speed: " << t.speed << ", Angle: " << t.angle << "\n";
-        // std::cout << "[Parser] Target Detect Time: " << t.detectTime << ", Priority: " << static_cast<int>(t.priority) << ", Hit: " << static_cast<int>(t.hit) << "\n";
+        offset += 58;
     }
 
     // ✅ Missile 파싱 (57바이트씩)

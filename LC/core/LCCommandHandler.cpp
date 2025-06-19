@@ -139,6 +139,7 @@ namespace LCCommandHandler
             std::cout << "[LC] 타겟 속도: " << selectedTarget.speed << " km/h (" << targetSpeed << " m/s)\n";
             std::cout << "[LC] 타겟 헤딩 : " << selectedTarget.angle << "도\n";
 
+            
             double targetHeadingRad = selectedTarget.angle * M_PI / 180.0;
             double vx_t = targetSpeed * std::sin(targetHeadingRad); // 경도 방향
             double vy_t = targetSpeed * std::cos(targetHeadingRad); // 위도 방향

@@ -34,7 +34,7 @@ bool loadConfig(const std::string &filepath, ConfigCommon &config)
     std::ifstream file(filepath);
     if (!file.is_open())
     {
-        std::cerr << "[loadMfrConfig] INI 파일 열기 실패: " << filepath << std::endl;
+        std::cerr << "[loadSIMConfig] INI 파일 열기 실패: " << filepath << std::endl;
         return false;
     }
 

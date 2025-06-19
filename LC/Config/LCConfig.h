@@ -1,5 +1,5 @@
-#ifndef MFR_CONFIG_H
-#define MFR_CONFIG_H
+#ifndef LC_CONFIG_H
+#define LC_CONFIG_H
 
 #include <string>
 #include <termios.h>
@@ -21,7 +21,7 @@ struct ConfigCommon
 std::string trim(const std::string &s);
 std::string toLower(const std::string &s);
 
-// ini 파일을 읽어 MfrConfig 구조체를 채움
+// ini 파일을 읽어 LCConfig 구조체를 채움
 bool loadConfig(const std::string &filepath, ConfigCommon &config);
 
-#endif // MFR_CONFIG_H
+#endif // LC_CONFIG_H

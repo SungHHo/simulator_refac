@@ -133,7 +133,7 @@ namespace LCCommandHandler
             if (initial_bearing < 0.0) initial_bearing += 360.0;
 
             // 속도
-            const double missileSpeed = 1000.0 * 1000.0 / 3600.0; // m/s
+            const double missileSpeed = static_cast<double>(snapshot.ls.speed) * 1000.0 / 3600.0; // m/s
             const double targetSpeed = static_cast<double>(selectedTarget.speed) * 1000.0 / 3600.0;
 
             std::cout << "[LC] 타겟 속도: " << selectedTarget.speed << " km/h (" << targetSpeed << " m/s)\n";
@@ -200,6 +200,8 @@ namespace LCCommandHandler
                     << ", launchAngleXY: " << cmd.launchAngleXY
                     << ", launchAngleXZ: " << cmd.launchAngleXZ << " (더미값)\n";
             std::cout << "------------------------------------------------------" << std::endl;
+
+
             break;
         }
 

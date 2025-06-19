@@ -617,6 +617,7 @@ void LCManager::onLSStatusReceived(const Common::LSReport& ls) {
     internalLS.position.x = ls.posX;
     internalLS.position.y = ls.posY;
     internalLS.height = ls.height;  // ✅ 정확한 필드에 저장
+    internalLS.speed = ls.speed;
 
     updateStatus(internalLS);  // SystemStatus 안의 ls 항목 업데이트
 

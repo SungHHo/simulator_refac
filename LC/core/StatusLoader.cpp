@@ -55,7 +55,8 @@ SystemStatus loadSystemStatus(const std::string& iniPath) {
         t.posY = reader.GetInteger(section, "posY", 0);
         t.altitude = reader.GetInteger(section, "altitude", 0);
         t.speed = reader.GetReal(section, "speed", 0.0);
-        t.angle = reader.GetReal(section, "angle", 0.0);
+        t.angle1 = reader.GetReal(section, "angle", 0.0);
+        t.angle2 = reader.GetReal(section, "angle", 0.0);
         t.detectTime = reader.GetInteger(section, "detectTime", 0);
         t.priority = reader.GetInteger(section, "priority", 0);
         t.hit = reader.GetBoolean(section, "hit", false);
@@ -65,3 +66,5 @@ SystemStatus loadSystemStatus(const std::string& iniPath) {
 
     return status;
 }
+
+ 

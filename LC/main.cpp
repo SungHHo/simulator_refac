@@ -7,7 +7,7 @@
 
 int main() {
     LCManager manager;
-    manager.init("/home/donghyuk/project/ProtoMissileSimulator/ProtoMissileSimulator/src/LC/config/system_config.ini", "0.0.0.0", 8888);  // ✅ 먼저 초기화
+    manager.init("./config/system_config.ini", "0.0.0.0", 8888);  // ✅ 먼저 초기화
     manager.run();                                              // ✅ 이후 디버그 루프 백그라운드 실행
 
     while (true) {

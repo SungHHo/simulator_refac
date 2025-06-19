@@ -1,3 +1,0 @@
-/home/donghyuk/project/ProtoMissileSimulator/ProtoMissileSimulator/src/LC/build/CMakeFiles/lc.dir
-/home/donghyuk/project/ProtoMissileSimulator/ProtoMissileSimulator/src/LC/build/CMakeFiles/edit_cache.dir
-/home/donghyuk/project/ProtoMissileSimulator/ProtoMissileSimulator/src/LC/build/CMakeFiles/rebuild_cache.dir

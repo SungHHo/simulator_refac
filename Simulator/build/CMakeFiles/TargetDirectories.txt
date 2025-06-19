@@ -1,3 +1,0 @@
-/home/donghyuk/project/Surface-to-air-missiles/Simulator/build/CMakeFiles/SurfaceToAirWeaponSystem.dir
-/home/donghyuk/project/Surface-to-air-missiles/Simulator/build/CMakeFiles/edit_cache.dir
-/home/donghyuk/project/Surface-to-air-missiles/Simulator/build/CMakeFiles/rebuild_cache.dir

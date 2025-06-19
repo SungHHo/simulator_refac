@@ -120,7 +120,7 @@ namespace LCCommandHandler
 
             double dy = (lat_tg - lat_ls) * meters_per_deg_lat;
             double dx = (lon_tg - lon_ls) * meters_per_deg_lon;
-            double dz = static_cast<double>(selectedTarget.altitude - ls.height);
+            double dz = 0;
             std::cout << "dz: " << dz << "m\n";
             double dist_m = std::sqrt(dx * dx + dy * dy);
 
@@ -137,10 +137,10 @@ namespace LCCommandHandler
             const double targetSpeed = static_cast<double>(selectedTarget.speed) * 1000.0 / 3600.0;
 
             std::cout << "[LC] 타겟 속도: " << selectedTarget.speed << " km/h (" << targetSpeed << " m/s)\n";
-            std::cout << "[LC] 타겟 헤딩 : " << selectedTarget.angle << "도\n";
+            std::cout << "[LC] 타겟 헤딩 : " << selectedTarget.angle1 << "도\n";
 
             
-            double targetHeadingRad = selectedTarget.angle * M_PI / 180.0;
+            double targetHeadingRad = selectedTarget.angle1 * M_PI / 180.0;
             double vx_t = targetSpeed * std::sin(targetHeadingRad); // 경도 방향
             double vy_t = targetSpeed * std::cos(targetHeadingRad); // 위도 방향
 
@@ -166,8 +166,9 @@ namespace LCCommandHandler
                     interceptAngle = std::atan2(dx_f, dy_f) * 180.0 / M_PI;
                     if (interceptAngle < 0.0) interceptAngle += 360.0;
                     bestTime = t;
-                    foundSolution = true; 
-                    cmd.launchAngleXZ = std::atan2(dz, missileSpeed* t) * 180.0 / M_PI; // 수직 각도 계산
+                    foundSolution = true;
+                    dz = static_cast<double>(selectedTarget.altitude+ (tan(selectedTarget.angle2 * M_PI / 180.0) * missileSpeed * t) - ls.height);
+                    cmd.launchAngleXZ = std::atan2(dz, missileSpeed * t) * 180.0 / M_PI; // 수직 각도 계산
                     std::cout << "[Intercept] t=" << t << "s, 위치=(" << future_lat << ", " << future_lon << "), 각도=" << interceptAngle << "도\n";
                     break;
                 }

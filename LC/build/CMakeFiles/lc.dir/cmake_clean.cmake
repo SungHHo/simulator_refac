@@ -1,6 +1,6 @@
 file(REMOVE_RECURSE
-  "/home/sra235/2024/Surface-to-air-missiles/LC/bin/lc"
-  "/home/sra235/2024/Surface-to-air-missiles/LC/bin/lc.pdb"
+  "../bin/lc"
+  "../bin/lc.pdb"
   "CMakeFiles/lc.dir/Config/LCConfig.cpp.o"
   "CMakeFiles/lc.dir/Config/LCConfig.cpp.o.d"
   "CMakeFiles/lc.dir/comm/common/MessageParser.cpp.o"

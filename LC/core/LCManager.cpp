@@ -395,7 +395,7 @@ void LCManager::initialize(const std::string &iniPath)
 void LCManager::init(const std::string &configPath, const std::string &ip, int port)
 {
     ConfigCommon config;
-    loadConfig("../Config/LC.ini", config);
+    loadConfig("./Config/LC.ini", config);
 
     // 설정 파일 초기화 (필요 시 활성화)
     // initialize(configPath);

@@ -17,80 +17,59 @@ MockTarget::MockTarget(const TargetInfo &target_info, std::shared_ptr<MFRSendUDP
 MockTarget::~MockTarget()
 {
 }
+
 void MockTarget::updatePos()
 {
-	static auto last_time = std::chrono::steady_clock::now(); // 루프 시작 시간 저장
-	static double total_elapsed = 0.0;
-	static double accumulated_distance = 0.0;
+	static const auto start_time = std::chrono::steady_clock::now();
 
-	// 경과 시간 측정
-	auto now = std::chrono::steady_clock::now();
-	std::chrono::duration<double> elapsed = now - last_time;
-	last_time = now;
+	// 초기 위치 기록
+	const double init_lat = static_cast<double>(target_info_.x) / DEGREE_TO_INT;
+	const double init_lon = static_cast<double>(target_info_.y) / DEGREE_TO_INT;
+	const double init_alt = static_cast<double>(target_info_.z); // m 단위
 
-	double elapsed_seconds = elapsed.count();
-	total_elapsed += elapsed_seconds;
+	const double speed_mps = target_info_.speed * 0.27778;
+	const double angle_rad = target_info_.angle * M_PI / 180.0;
+	const double angle_z_rad = target_info_.angle2 * M_PI / 180.0;
 
-	// 시속 → m/s 변환
-	double speed_mps = target_info_.speed * 0.27778;
+	static double last_logged = 0.0;
 
-	// 이동 거리 계산
-	double distance = speed_mps * elapsed_seconds;
-	accumulated_distance += distance;
-
-	// 현재 위경도 (정수 → 실수)
-	double lat = static_cast<double>(target_info_.x) / DEGREE_TO_INT;
-	double lon = static_cast<double>(target_info_.y) / DEGREE_TO_INT;
-	double alt_start = static_cast<double>(target_info_.z);
-
-	// 위도, 경도 보정값 계산
-	double meters_per_deg_lon = METERS_PER_DEGREE_LAT * std::cos(lat * M_PI / 180.0);
-
-	double delta_lat = std::cos(target_info_.angle * M_PI / 180.0) * distance / METERS_PER_DEGREE_LAT;
-	double delta_lon = std::sin(target_info_.angle * M_PI / 180.0) * distance / meters_per_deg_lon;
-	double alt_change = std::tan(target_info_.angle2 * M_PI / 180.0) * distance;
-	
-	// 정수로 환산하여 위치 갱신
-	target_info_.x += static_cast<long long>(delta_lat * DEGREE_TO_INT);
-	target_info_.y += static_cast<long long>(delta_lon * DEGREE_TO_INT);
-	alt_start += alt_change;
-	target_info_.z = static_cast<long long>(alt_start);
-	// 4초마다 이동 거리 및 위치 출력
-	if (total_elapsed >= 4.0)
+	while (true)
 	{
-		std::cout << "[4 sec update] Target moved " << accumulated_distance << " meters.\n";
-		std::cout << " → Current lat: " << static_cast<double>(target_info_.x) / DEGREE_TO_INT
-				  << ", lon: " << static_cast<double>(target_info_.y) / DEGREE_TO_INT
-				  << ", alt: " << static_cast<double>(target_info_.z) << "\n\n";
+		auto now = std::chrono::steady_clock::now();
+		std::chrono::duration<double> elapsed = now - start_time;
+		double elapsed_sec = elapsed.count();
 
-		total_elapsed = 0.0;
-		accumulated_distance = 0.0;
+		// 총 이동 거리
+		double distance = speed_mps * elapsed_sec;
+
+		// 현재 위도 기준 경도 m/deg 계산
+		double meters_per_deg_lon = METERS_PER_DEGREE_LAT * std::cos(init_lat * M_PI / 180.0);
+
+		// 현재 위치 계산 (실수 단위)
+		double delta_lat = std::cos(angle_rad) * distance / METERS_PER_DEGREE_LAT;
+		double delta_lon = std::sin(angle_rad) * distance / meters_per_deg_lon;
+		double delta_alt = std::tan(angle_z_rad) * distance;
+
+		// 정수로 변환해 갱신
+		target_info_.x = static_cast<long long>((init_lat + delta_lat) * DEGREE_TO_INT);
+		target_info_.y = static_cast<long long>((init_lon + delta_lon) * DEGREE_TO_INT);
+		target_info_.z = static_cast<long long>(init_alt + delta_alt);
+
+		// 4초마다 출력
+		if (elapsed_sec - last_logged >= 4.0)
+		{
+			std::cout << "[4 sec update] Target moved " << distance << " meters.\n";
+			std::cout << " → Current lat: " << (init_lat + delta_lat)
+					  << ", lon: " << (init_lon + delta_lon)
+					  << ", alt: " << (init_alt + delta_alt) << " m\n\n";
+			last_logged = elapsed_sec;
+		}
+
+		sendData();
+		std::this_thread::sleep_for(std::chrono::milliseconds(100));
 	}
-
-	// 현재시간 출력
-	auto now_time = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-	//std::cout << "[Current time, MockTarget]: " << std::ctime(&now_time);
-
-	// 예측 위치 (10초 후)
-	double pred_distance = speed_mps * 10.0;
-	double pred_delta_lat = std::cos(target_info_.angle * M_PI / 180.0) * pred_distance / METERS_PER_DEGREE_LAT;
-	double pred_delta_lon = std::sin(target_info_.angle * M_PI / 180.0) * pred_distance / meters_per_deg_lon;
-
-	// std::cout << "[Target position now]: "
-	// 		  << "lat: " << static_cast<double>(target_info_.x) / DEGREE_TO_INT
-	// 		  << ", lon: " << static_cast<double>(target_info_.y) / DEGREE_TO_INT
-	// 		  << ", speed: " << target_info_.speed << " km/h\n";
-
-	// std::cout << "[Target position after 10 seconds]: "
-	// 		  << "lat: " << static_cast<double>(target_info_.x) / DEGREE_TO_INT + pred_delta_lat
-	// 		  << ", lon: " << static_cast<double>(target_info_.y) / DEGREE_TO_INT + pred_delta_lon
-	// 		  << std::endl;
-
-	// 데이터 전송
-	sendData();
-
-	std::this_thread::sleep_for(std::chrono::milliseconds(100));
 }
+
 
 
 void MockTarget::sendData()

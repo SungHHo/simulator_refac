@@ -222,30 +222,30 @@ void Mfr::parsingSimData(const std::vector<char>& payload)
     localSimData.speed = data.speed;
     localSimData.isHit = data.isHit;
     
-    // std::cout << "[Mfr::handleSimDataPayload] Sim Data 수신 -> ID: " << localSimData.mockId
-    //           << ", Latitude: " << localSimData.mockCoords.latitude
-    //           << ", Longitude: " << localSimData.mockCoords.longitude
-    //           << ", Altitude: " << localSimData.mockCoords.altitude
-    //           << ", Angle1: " << localSimData.angle
-    //           << ", Angle2: " << localSimData.angle2
-    //           << ", Speed: " << localSimData.speed 
-    //           << ", is Hit?: " << localSimData.isHit
-    //           << std::endl;
+    std::cout << "[Mfr::handleSimDataPayload] Sim Data 수신 -> ID: " << localSimData.mockId
+              << ", Latitude: " << localSimData.mockCoords.latitude
+              << ", Longitude: " << localSimData.mockCoords.longitude
+              << ", Altitude: " << localSimData.mockCoords.altitude
+              << ", Angle1: " << localSimData.angle
+              << ", Angle2: " << localSimData.angle2
+              << ", Speed: " << localSimData.speed 
+              << ", is Hit?: " << localSimData.isHit
+              << std::endl;
 
     if (localSimData.mockId >= 104001 && localSimData.mockId <= 104999)         // 표적 정보
     {
-        std::cout << "Target Detected!@!" 
-            << ", ID: " << localSimData.mockId        
-            << std::endl;
+        // std::cout << "Target Detected!@!" 
+        //     << ", ID: " << localSimData.mockId        
+        //     << std::endl;
             
         addMockTarget(localSimData);
     }
 
     else if (localSimData.mockId >= 105001 && localSimData.mockId <= 105999)    // 미사일 정보
     {
-        std::cout << "Missile Detected!@!"
-            << ", ID: " << localSimData.mockId        
-            << std::endl;
+        // std::cout << "Missile Detected!@!"
+        //     << ", ID: " << localSimData.mockId        
+        //     << std::endl;
 
         addMockMissile(localSimData);
     }
@@ -385,6 +385,7 @@ void Mfr::mfrDetectionAlgo()
             {
                 localDetectedTargets[id] = target;
                 targetDistances.emplace_back(id, distance);
+                std::cout << target.speed << std::endl;
             }
             else
             {
@@ -416,6 +417,7 @@ void Mfr::mfrDetectionAlgo()
             status.targetCoords = encode(target.mockCoords);
             status.targetSpeed = target.speed;
             status.targetAngle = target.angle;
+            status.targetAngle2 = target.angle2;
             status.firstDetectionTime = nowMs;
             status.prioirty = priority++;
             status.isHit = false;
@@ -490,6 +492,7 @@ void Mfr::mfrDetectionAlgo()
                     status.targetCoords = encode(target.mockCoords);
                     status.targetSpeed = target.speed;
                     status.targetAngle = target.angle;
+                    status.targetAngle2 = target.angle2;
                     status.firstDetectionTime = nowMs;
                     status.prioirty = 1;
                     status.isHit = false;

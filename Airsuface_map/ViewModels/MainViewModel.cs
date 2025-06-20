@@ -89,123 +89,122 @@ namespace Airsuface_map.ViewModels
         // C++ 서버에서 온 바이너리 데이터 파싱 예시
         public void OnDataReceived(byte[] rawData)
         {
-            if (rawData == null || rawData.Length == 0 || rawData.Length > 3072) return;
-
-            // 디버깅 프린트
-            System.Diagnostics.Debug.WriteLine($"[OnDataReceived] rawData size: {rawData.Length} bytes");
-
-            // 앞 4바이트가 0x51 0x01 0x01 0x01인지 확인
-            if (rawData.Length < 4 ||
-                rawData[0] != 0x51 ||
-                rawData[1] != 0x01 ||
-                rawData[2] != 0x01 ||
-                rawData[3] != 0x01)
+            if (rawData == null || rawData.Length < 8 || rawData.Length > 3072)
             {
-                System.Diagnostics.Debug.WriteLine("[OnDataReceived] 헤더가 51 01 01 01이 아님. 데이터 무시.");
+                System.Diagnostics.Debug.WriteLine("[OnDataReceived] 데이터가 너무 짧거나 깁니다. 무시.");
                 return;
             }
 
+            // 1. 시작 바이트 확인 (0x51)
+            if (rawData[0] != 0x51)
+            {
+                System.Diagnostics.Debug.WriteLine("[OnDataReceived] 시작 바이트가 0x51이 아님. 무시.");
+                return;
+            }
+
+            // 2. payload length 추출
+            int payloadLength = BitConverter.ToInt32(rawData, 1);
+            int totalLength = 1 + 4 + payloadLength;
+            if (rawData.Length < totalLength)
+            {
+                System.Diagnostics.Debug.WriteLine("[OnDataReceived] 전체 메시지가 아직 도착하지 않음. 무시.");
+                return;
+            }
+
+            // 3. flag (payload 내 시작 3바이트)가 0x01 0x01 0x01인지 확인
+            if (payloadLength < 3 || rawData[5] != 0x01 || rawData[6] != 0x01 || rawData[7] != 0x01)
+            {
+                System.Diagnostics.Debug.WriteLine("[OnDataReceived] radar/lc/ls flag가 유효하지 않음. 무시.");
+                return;
+            }
+
+            // ↓↓↓ 아래부터는 기존 파싱 유지 ↓↓↓
             using var ms = new MemoryStream(rawData);
             using var reader = new BinaryReader(ms);
 
-            // 1. Header 파싱
-            var commandType = reader.ReadByte(); // CommandType (1 byte)
+            // Header
+            var commandType = reader.ReadByte(); // 0x51
+            var length = reader.ReadInt32();     // payload length
+
             var numRadar = reader.ReadByte();    // 1
             var numLC = reader.ReadByte();       // 1
             var numLS = reader.ReadByte();       // 1
             var numTarget = reader.ReadByte();   // 최대 100
             var numMissile = reader.ReadByte();  // 1
 
-            // 2. RadarStatus 파싱
+            // MFR
             var mfr = new MFR {
-                Id = reader.ReadInt32(),                 // uint8_t
+                Id = reader.ReadInt32(),
                 X = ConvertLongToDouble(ReadCustomInt64(reader)),
                 Y = ConvertLongToDouble(ReadCustomInt64(reader)),
                 Z = reader.ReadInt64(),
-                Mode = reader.ReadByte(),               // uint8_t
-                Angle = reader.ReadDouble()            // double
+                Mode = reader.ReadByte(),
+                Angle = reader.ReadDouble()
             };
 
-
-            // 4. LSStatus 파싱
+            // LS
             var ls = new LS
             {
-                Id = reader.ReadInt32(),                    // uint8_t
-                X = ConvertLongToDouble(ReadCustomInt64(reader)),                 // long long
-                Y = ConvertLongToDouble(ReadCustomInt64(reader)),                // long long
-                Z = reader.ReadInt64(),                // long long
-                Mode = reader.ReadByte(),                  // uint8_t
-                Angle = reader.ReadDouble()               // double
+                Id = reader.ReadInt32(),
+                X = ConvertLongToDouble(ReadCustomInt64(reader)),
+                Y = ConvertLongToDouble(ReadCustomInt64(reader)),
+                Z = reader.ReadInt64(),
+                Mode = reader.ReadByte(),
+                Angle = reader.ReadDouble()
             };
 
-            // 3. LCStatus 파싱
+            // LC
             var lc = new LC {
-                Id = reader.ReadInt32(),                   // uint8_t
-                X = ConvertLongToDouble(ReadCustomInt64(reader)),                 // long long
-                Y = ConvertLongToDouble(ReadCustomInt64(reader)),                // long long
-                Z = reader.ReadInt64()                                           // long long
+                Id = reader.ReadInt32(),
+                X = ConvertLongToDouble(ReadCustomInt64(reader)),
+                Y = ConvertLongToDouble(ReadCustomInt64(reader)),
+                Z = reader.ReadInt64()
             };
 
+            // Missile
             MockMissile missile = null;
             if (numMissile > 0)
             {
-                // 6. MissileStatus 파싱
-                var missileId = reader.ReadInt32();               // uint8_t
-                var missilePosX = reader.ReadInt64();            // long long
-                var missilePosY = reader.ReadInt64();            // long long
-                var missileHeight = reader.ReadInt64();          // long long
-                var missileSpeed = reader.ReadInt32();           // long long
-                var missileAngle = reader.ReadDouble();          // double
-                var predicted_time = reader.ReadInt64();   // long long
-                var intercept_time = reader.ReadInt64();   // long long
-                var missileHit = reader.ReadByte();              // uint8_t
-
                 missile = new MockMissile
                 {
-                    Id = missileId,
-                    X = ConvertLongToDouble(missilePosX),
-                    Y = ConvertLongToDouble(missilePosY),
-                    Z = missileHeight,
-                    Angle = missileAngle,
-                    Speed = (int)missileSpeed
+                    Id = reader.ReadInt32(),
+                    X = ConvertLongToDouble(reader.ReadInt64()),
+                    Y = ConvertLongToDouble(reader.ReadInt64()),
+                    Z = reader.ReadInt64(),
+                    Speed = reader.ReadInt32(),
+                    Angle = reader.ReadDouble()
                 };
+                reader.ReadInt64(); // detectTime
+                reader.ReadInt64(); // interceptTime
+                reader.ReadByte();  // hit
 
                 MissileMapVM.UpdateMissiles(new[] { missile });
             }
             else
             {
-                // 미사일이 없으면 빈 배열 전달(또는 필요시 아무것도 하지 않음)
                 MissileMapVM.UpdateMissiles(Array.Empty<MockMissile>());
             }
 
-            // 5. TargetStatus 파싱 (numTarget 개)
+            // Targets
             var targets = new List<MockTarget>();
             for (int i = 0; i < numTarget; i++)
             {
-                var tId = reader.ReadInt32();                 // uint8_t
-                var tPosX = ReadCustomInt64(reader);              // long long
-                var tPosY = ReadCustomInt64(reader);              // long long
-                var tHeight = ReadCustomInt64(reader);            // long long
-                var tSpeed = reader.ReadInt32();             // long long
-                var tAngle = reader.ReadDouble();            // double
-                var first_detect_time = reader.ReadInt64();   // long long
-                var tPriority = reader.ReadByte();          // int
-                var tHit = reader.ReadByte();                // uint8_t
-
                 targets.Add(new MockTarget
                 {
-                    Id = tId,
-                    X = ConvertLongToDouble(tPosX),
-                    Y = ConvertLongToDouble(tPosY),
-                    Z = tHeight,
-                    Angle = tAngle,
-                    Speed = (int)tSpeed
+                    Id = reader.ReadInt32(),
+                    X = ConvertLongToDouble(ReadCustomInt64(reader)),
+                    Y = ConvertLongToDouble(ReadCustomInt64(reader)),
+                    Z = ReadCustomInt64(reader),
+                    Speed = reader.ReadInt32(),
+                    Angle = reader.ReadDouble()
                 });
+                reader.ReadInt64(); // detectTime
+                reader.ReadByte();  // priority
+                reader.ReadByte();  // hit
             }
 
-            // ViewModel에 데이터 전달
-            TargetMapVM.UpdateTargets(targets); // 주석 해제 필요
-            if (first_init == false)
+            TargetMapVM.UpdateTargets(targets);
+            if (!first_init)
             {
                 LCMapVM.UpdateLC(lc);
                 LSMapVM.UpdateLS(ls);
@@ -213,5 +212,6 @@ namespace Airsuface_map.ViewModels
                 first_init = true;
             }
         }
+
     }
 }

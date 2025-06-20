@@ -32,8 +32,8 @@ void LCManager::run()
     // });
     // lsLoop.detach();
 
-    status.lc.position.x = 3749828665;
-    status.lc.position.y = 12699302673;
+    status.lc.position.x = 374982866;
+    status.lc.position.y = 1269930267;
 
     // 상태 주기적으로 받아오기
     std::thread statusLoop([this]()
@@ -395,7 +395,7 @@ void LCManager::initialize(const std::string &iniPath)
 void LCManager::init(const std::string &configPath, const std::string &ip, int port)
 {
     ConfigCommon config;
-    loadConfig("./Config/LC.ini", config);
+    loadConfig("./../Config/LC.ini", config);
 
     // 설정 파일 초기화 (필요 시 활성화)
     // initialize(configPath);

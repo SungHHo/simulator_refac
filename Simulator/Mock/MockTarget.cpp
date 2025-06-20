@@ -6,7 +6,7 @@
 #include <iostream>
 #include <cstring>
 
-constexpr double DEGREE_TO_INT = 1e8;                     // 위도/경도를 정수로 저장할 때 사용하는 스케일
+constexpr double DEGREE_TO_INT = 1e7;                     // 위도/경도를 정수로 저장할 때 사용하는 스케일
 constexpr double METERS_PER_DEGREE_LAT = 111320.0;        // 위도 1도당 거리 (m)
 
 MockTarget::MockTarget(const TargetInfo &target_info, std::shared_ptr<MFRSendUDPManager> mfr_send_manager)

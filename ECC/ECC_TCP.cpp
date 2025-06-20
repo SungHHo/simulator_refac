@@ -40,8 +40,8 @@ bool ECC_TCP::connect(const char* ip, int port)
 
     ConfigCommon config;
     if (!loadConfig("ECCconfig.ini", config)) {
-      AfxMessageBox(_T("¼³Á¤ ÆÄÀÏÀ» ÀĞ¾î¿À´Â µ¥ ½ÇÆĞÇß½À´Ï´Ù."));
-      return FALSE;  // ÃÊ±âÈ­ ½ÇÆĞ
+      AfxMessageBox(_T("ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ğ¾ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ß½ï¿½ï¿½Ï´ï¿½."));
+      return FALSE;  // ï¿½Ê±ï¿½È­ ï¿½ï¿½ï¿½ï¿½
     }
 
     // Map Connect
@@ -73,49 +73,81 @@ void ECC_TCP::startReceiving() {
 
 unsigned __stdcall ECC_TCP::recvThread(void* arg) {
     ECC_TCP* self = static_cast<ECC_TCP*>(arg);
-    char buf[4096];
+    char tempBuf[4096];
+    std::vector<uint8_t> buffer;  // ëˆ„ì  ìˆ˜ì‹  ë²„í¼
 
-  while (self->m_bRunning) {
-    int len = recv(self->m_sock, buf, sizeof(buf), 0);
+    while (self->m_bRunning) {
+        int len = recv(self->m_sock, tempBuf, sizeof(tempBuf), 0);
+        if (len <= 0) break;  // ì†Œì¼“ ì¢…ë£Œ ë˜ëŠ” ì—ëŸ¬
 
-        // ¾Õ 4¹ÙÀÌÆ®°¡ 0x51 0x01 0x01 0x01ÀÎÁö È®ÀÎ
-    if (!(static_cast<unsigned char>(buf[0]) == 0x51 &&
-          static_cast<unsigned char>(buf[1]) == 0x01 &&
-          static_cast<unsigned char>(buf[2]) == 0x01 &&
-          static_cast<unsigned char>(buf[3]) == 0x01)) {
-      continue;  // Á¶°Ç ºÒÀÏÄ¡ ½Ã ¹«½Ã
-    }
+        // 1. ìˆ˜ì‹ ëœ ë°ì´í„° ëˆ„ì 
+        buffer.insert(buffer.end(), tempBuf, tempBuf + len);
 
-    if (len > 0 && self->m_receiver) {
-      self->m_receiver->receive(len, buf);
-      // ¹ŞÀº buf¸¦ ±×´ë·Î map_tcp·Î Àü¼Û
-      if (self->map_tcp) {
-        self->map_tcp->send(buf, len);
-        std::cout << "first 5 bytes (hex): ";
-        for (int i = 0; i < 5 && i < len; ++i) {
-          printf("%02X ", static_cast<unsigned char>(buf[i]));
+        // 2. ê°€ëŠ¥í•œ ë§Œí¼ ì™„ì „í•œ ë©”ì‹œì§€ë¥¼ ì²˜ë¦¬
+        while (true) {
+            if (buffer.size() < 5)
+                break;  // ìµœì†Œ í—¤ë”(1+4) ë¯¸ë§Œì´ë©´ break
+
+            // ì‹±í¬ ë§ì¶”ê¸°
+            if (buffer[0] != 0x51) {
+                buffer.erase(buffer.begin());
+                continue;
+            }
+
+            // ë©”ì‹œì§€ ê¸¸ì´ í™•ì¸
+            uint32_t payloadSize;
+            std::memcpy(&payloadSize, &buffer[1], 4);
+            size_t totalMsgSize = 1 + 4 + payloadSize;
+
+            // ì „ì²´ ë©”ì‹œì§€ê°€ ë„ì°©í•˜ì§€ ì•Šì•˜ë‹¤ë©´ ëŒ€ê¸°
+            if (buffer.size() < totalMsgSize)
+                break;
+
+            // í—¤ë” ë‹¤ìŒ 3ë°”ì´íŠ¸ (radar/lc/ls flag) ê²€ì¦
+            if (totalMsgSize < 8 ||  // 1+4+3ë³´ë‹¤ ì‘ë‹¤ë©´ êµ¬ì¡° ìì²´ê°€ ì´ìƒí•¨
+                buffer[5] != 0x01 || buffer[6] != 0x01 || buffer[7] != 0x01) {
+                std::cout << "[WARN] Invalid radar/lc/ls header flags. Dropping message.\n";
+                buffer.erase(buffer.begin(), buffer.begin() + totalMsgSize);
+                continue;
+            }
+
+            // ë©”ì‹œì§€ ìœ íš¨, ì²˜ë¦¬
+            const uint8_t* msgData = buffer.data();
+            size_t msgLen = totalMsgSize;
+
+            if (self->m_receiver) {
+                self->m_receiver->receive(msgLen, reinterpret_cast<const char*>(msgData));
+            }
+
+            if (self->map_tcp) {
+                self->map_tcp->send(reinterpret_cast<const char*>(msgData), msgLen);
+
+                std::cout << "first 5 bytes (hex): ";
+                for (int i = 0; i < 5 && i < msgLen; ++i) {
+                    printf("%02X ", msgData[i]);
+                }
+                std::cout << "buf size : " << msgLen << std::endl;
+            }
+
+            // ì²˜ë¦¬í•œ ë©”ì‹œì§€ë¥¼ ë²„í¼ì—ì„œ ì œê±°
+            buffer.erase(buffer.begin(), buffer.begin() + totalMsgSize);
         }
-        std::cout << "buf size : " << len << std::endl;
-      }
-    } else if (len == 0 || len == SOCKET_ERROR) {
-      break;  // ¿¬°á Á¾·á ¶Ç´Â ¿¡·¯ ¹ß»ı
     }
-  }
 
-  return 0;
+    return 0;
 }
 
 void ECC_TCP::stop() {
     m_bRunning = false;
 
     if (m_sock != INVALID_SOCKET) {
-        shutdown(m_sock, SD_BOTH);  // ¼ö½Å Â÷´Ü
+        shutdown(m_sock, SD_BOTH);  // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
         closesocket(m_sock);
         m_sock = INVALID_SOCKET;
     }
 
     if (m_hThread) {
-        WaitForSingleObject(m_hThread, 1000); // ÃÖ´ë 1ÃÊ ´ë±â
+        WaitForSingleObject(m_hThread, 1000); // ï¿½Ö´ï¿½ 1ï¿½ï¿½ ï¿½ï¿½ï¿½
         CloseHandle(m_hThread);
         m_hThread = nullptr;
     }

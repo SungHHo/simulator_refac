@@ -356,15 +356,8 @@ void Mfr::mfrDetectionAlgo()
     std::unordered_map<unsigned int, localMockSimData> localTargets;
     std::unordered_map<unsigned int, localMockSimData> localMissiles;
 
-    {
-        std::shared_lock<std::shared_mutex> lock(mockTargetMutex);
-        localTargets = mockTargets;
-    }
-
-    {
-        std::shared_lock<std::shared_mutex> lock(mockMissileMutex);
-        localMissiles = mockMissile;
-    }
+    localTargets = mockTargets;
+    localMissiles = mockMissile;
 
     std::unordered_map<unsigned int, localMockSimData> localDetectedTargets;
     std::unordered_map<unsigned int, localMockSimData> localDetectedMissile;
@@ -540,20 +533,12 @@ void Mfr::mfrDetectionAlgo()
         lcCommManager->send(packet);
     }
 
-    {
-        std::unique_lock<std::shared_mutex> lock(detectedTargetMutex);
-        detectedTargets = std::move(localDetectedTargets);
-    }    
-
-    {
-        std::unique_lock<std::shared_mutex> lock(detectedMissileMutex);
-        detectedMissile = std::move(localDetectedMissile);
-    }
+    detectedTargets = std::move(localDetectedTargets);
+    detectedMissile = std::move(localDetectedMissile);
 }
 
 void Mfr::addMockTarget(const localMockSimData& target) 
 {
-    std::unique_lock<std::shared_mutex> lock(mockTargetMutex);
     mockTargets[target.mockId] = target;
 }
 
@@ -562,48 +547,26 @@ void Mfr::addMockTarget(const localMockSimData& target)
 //
 localMockSimData* Mfr::getMockTargetById(unsigned int id) 
 {
-    std::shared_lock<std::shared_mutex> lock(detectedTargetMutex);
     auto it = detectedTargets.find(id);
     return (it != detectedTargets.end()) ? &it->second : nullptr;
 }
 
 void Mfr::removeMockTargetById(unsigned int id) 
 {
-    {
-        std::unique_lock<std::shared_mutex> lock(mockTargetMutex);
-        mockTargets.erase(id);
-    }
-
-    {
-        std::unique_lock<std::shared_mutex> lock(detectedTargetMutex);
-        detectedTargets.erase(id);
-    }
+    mockTargets.erase(id);
+    detectedTargets.erase(id);
 }
 
 void Mfr::clearMockTargets() 
 {
-    {
-        std::unique_lock<std::shared_mutex> lock(mockTargetMutex);
-        mockTargets.clear();
-    }
-
-    {
-        std::unique_lock<std::shared_mutex> lock(detectedTargetMutex);
-        detectedTargets.clear();
-    }
+    mockTargets.clear();
+    detectedTargets.clear();
 }
 
 void Mfr::addMockMissile(const localMockSimData& missile) 
 {
-    {
-        std::unique_lock<std::shared_mutex> lock(mockMissileMutex);
-        mockMissile[missile.mockId] = missile;
-    }
-
-    {
-        std::unique_lock<std::shared_mutex> lock(detectedMissileMutex);
-        detectedMissile[missile.mockId] = missile;
-    }
+    mockMissile[missile.mockId] = missile;
+    detectedMissile[missile.mockId] = missile;
 }
 
 //
@@ -611,33 +574,18 @@ void Mfr::addMockMissile(const localMockSimData& missile)
 //
 localMockSimData* Mfr::getMockMissileById(unsigned int id)
 {
-    std::shared_lock<std::shared_mutex> lock(detectedMissileMutex);
     auto it = detectedMissile.find(id);
     return (it != detectedMissile.end()) ? &it->second : nullptr;
 }
 
 void Mfr::removeMockMissileById(unsigned int id) 
 {
-    {
-        std::unique_lock<std::shared_mutex> lock(mockMissileMutex);
-        mockMissile.erase(id);
-    }
-
-    {
-        std::unique_lock<std::shared_mutex> lock(detectedMissileMutex);
-        detectedMissile.erase(id);
-    }
+    mockMissile.erase(id);
+    detectedMissile.erase(id);
 }
 
 void Mfr::clearMockMissiles() 
 {
-    {
-        std::unique_lock<std::shared_mutex> lock(mockMissileMutex);
-        mockMissile.clear();
-    }
-
-    {
-        std::unique_lock<std::shared_mutex> lock(detectedMissileMutex);
-        detectedMissile.clear();
-    }
+    mockMissile.clear();
+    detectedMissile.clear();
 }

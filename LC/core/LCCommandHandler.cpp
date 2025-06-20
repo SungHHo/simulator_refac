@@ -54,13 +54,13 @@ namespace LCCommandHandler
             std::cout << "[ECC] 발사대 모드 변경 수신 → lsId=" << payload.lsId
                       << ", mode=" << static_cast<int>(payload.lsMode) << "\n";
 
-            LauncherModeCommand cmd;
-            cmd.launcherId = payload.lsId;
-            cmd.newMode = static_cast<OperationMode>(payload.lsMode);
-
-            auto packet = Serializer::serializeModeChangeCommand(cmd);
-            if (manager.hasLSSender())
-            {
+                      LauncherModeCommand cmd;
+                      cmd.launcherId = payload.lsId;
+                      cmd.newMode = static_cast<OperationMode>(payload.lsMode);
+                      
+                      auto packet = Serializer::serializeModeChangeCommand(cmd);
+                      if (manager.hasLSSender())
+                      {
                 manager.sendToLS(packet);
             }
             break;
@@ -68,6 +68,7 @@ namespace LCCommandHandler
         //0x04
         case CommandType::FIRE_COMMAND_ECC_TO_LC:
         {
+            auto loop_start = std::chrono::high_resolution_clock::now();
             const auto& payload = std::get<FireCommand>(msg.payload);
             std::cout << "[ECC] 발사 명령 수신 → lsId=" << payload.lsId
                     << ", targetId=" << payload.targetId << "\n";
@@ -106,7 +107,7 @@ namespace LCCommandHandler
                 std::cerr << "[LC] 대상 타겟 없음 → targetId=" << payload.targetId << "\n";
                 break;
             }
-
+            
             LaunchCommand cmd;
             cmd.launcherId = ls.launchSystemId;
 
@@ -147,7 +148,7 @@ namespace LCCommandHandler
             double interceptAngle = initial_bearing;
             bool foundSolution = false;
 
-            for (double t = 1.0; t <= 120.0; t += 0.1) {
+            for (double t = 1.0; t <= 2000.0; t += 0.1) {
                 double future_lat = lat_tg + (vy_t * t) / meters_per_deg_lat;
                 double future_lon = lon_tg + (vx_t * t) / meters_per_deg_lon;
 
@@ -157,7 +158,7 @@ namespace LCCommandHandler
 
                 double required_time = dist_to_future / missileSpeed;
 
-                if (std::abs(required_time - t) < 0.1) {
+                if (std::abs(required_time - t) < 0.2) {
                     interceptAngle = std::atan2(dx_f, dy_f) * 180.0 / M_PI;
                     if (interceptAngle < 0.0) interceptAngle += 360.0;
                     bestTime = t;
@@ -166,7 +167,8 @@ namespace LCCommandHandler
                     double altitude_change = std::tan(selectedTarget.angle2 * M_PI / 180.0) * targetSpeed * t;
                     double target_altitude = selectedTarget.altitude + altitude_change;
                     dz = target_altitude - ls.height;
-                    cmd.launchAngleXZ = std::atan2(dz, missileSpeed * t) * 180.0 / M_PI;
+                    double horizontal_distance = std::sqrt(dx_f * dx_f + dy_f * dy_f);  // 실제 평면 거리
+                    cmd.launchAngleXZ = std::atan2(dz, horizontal_distance) * 180.0 / M_PI;
 
                     std::cout << "[고도 디버깅]\n";
                     std::cout << "  타겟 초기 고도: " << selectedTarget.altitude << " m\n";
@@ -181,26 +183,26 @@ namespace LCCommandHandler
                     break;
                 }
             }
-
+            
             if (foundSolution) {
                 cmd.launchAngleXY = interceptAngle;
                 std::cout << "[LC] 벡터 기반 요격 계산 결과\n";
                 std::cout << "  조준 각도 (XY): " << cmd.launchAngleXY << "도 (진북 기준)\n";
                 std::cout << "  조준 각도 (XZ): " << cmd.launchAngleXZ << "도 (수직 기준)\n";
                 std::cout << "  추정 요격 시간: " << bestTime << " 초\n";
-
+                
+                auto loop_end = std::chrono::high_resolution_clock::now();
+                std::chrono::duration<double> elapsed = loop_end - loop_start;
                 cmd.start_x = static_cast<long long>(
-                    (std::cos(cmd.launchAngleXY * M_PI / 180.0) * missileSpeed * 0.77 * 0.001 / 111.32) * 1e8
+                    (std::cos(cmd.launchAngleXY * M_PI / 180.0) * missileSpeed * (elapsed.count() + 0.15) * 0.001 / 111.32) * 1e8
                         + snapshot.ls.position.x);
 
                 double lat_deg = static_cast<double>(snapshot.ls.position.x) / 1e8;
                 cmd.start_y = static_cast<long long>(
-                    (std::sin(cmd.launchAngleXY * M_PI / 180.0) * missileSpeed * 0.77 * 0.001 / (111.32 * std::cos(lat_deg * M_PI / 180.0))) * 1e8
+                    (std::sin(cmd.launchAngleXY * M_PI / 180.0) * missileSpeed * (elapsed.count() + 0.15) * 0.001 / (111.32 * std::cos(lat_deg * M_PI / 180.0))) * 1e8
                         + snapshot.ls.position.y);
 
-                cmd.start_z = static_cast<long long>(
-                    (std::tan(cmd.launchAngleXZ * M_PI / 180.0) * missileSpeed * 0.77)
-                        + snapshot.ls.height);
+                cmd.start_z = static_cast<long long>(snapshot.ls.height);
             } else {
                 cmd.launchAngleXY = initial_bearing;
                 cmd.launchAngleXZ = 0.0;

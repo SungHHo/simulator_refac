@@ -395,6 +395,7 @@ void Mfr::mfrDetectionAlgo()
             {
                 localDetectedTargets[id] = target;
                 targetDistances.emplace_back(id, distance);
+                std::cout << target.speed << std::endl;
             }
             else
             {

@@ -264,6 +264,7 @@ CMakeFiles/lc.dir/core/LCManager.cpp.o: \
  /usr/include/c++/11/bits/locale_conv.h \
  /usr/include/c++/11/bits/quoted_string.h \
  /home/user/nex1/Surface-to-air-missiles/LC/core/LCCommandHandler.h \
+ /home/user/nex1/Surface-to-air-missiles/LC/core/ENU_Translator.hpp \
  /home/user/nex1/Surface-to-air-missiles/LC/Config/LCConfig.h \
  /usr/include/termios.h /usr/include/x86_64-linux-gnu/bits/termios.h \
  /usr/include/x86_64-linux-gnu/bits/termios-struct.h \

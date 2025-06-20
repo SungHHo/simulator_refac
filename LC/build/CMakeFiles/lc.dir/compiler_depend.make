@@ -1701,6 +1701,32 @@ CMakeFiles/lc.dir/core/LCCommandHandler.cpp.o: ../core/LCCommandHandler.cpp \
   /usr/include/c++/11/backward/auto_ptr.h \
   /usr/include/c++/11/pstl/glue_memory_defs.h \
   /usr/include/c++/11/pstl/execution_defs.h \
+  ../core/ENU_Translator.hpp \
+  /usr/include/c++/11/cmath \
+  /usr/include/math.h \
+  /usr/include/x86_64-linux-gnu/bits/math-vector.h \
+  /usr/include/x86_64-linux-gnu/bits/libm-simd-decl-stubs.h \
+  /usr/include/x86_64-linux-gnu/bits/flt-eval-method.h \
+  /usr/include/x86_64-linux-gnu/bits/fp-logb.h \
+  /usr/include/x86_64-linux-gnu/bits/fp-fast.h \
+  /usr/include/x86_64-linux-gnu/bits/mathcalls-helper-functions.h \
+  /usr/include/x86_64-linux-gnu/bits/mathcalls.h \
+  /usr/include/x86_64-linux-gnu/bits/mathcalls-narrow.h \
+  /usr/include/x86_64-linux-gnu/bits/iscanonical.h \
+  /usr/include/c++/11/bits/specfun.h \
+  /usr/include/c++/11/limits \
+  /usr/include/c++/11/tr1/gamma.tcc \
+  /usr/include/c++/11/tr1/special_function_util.h \
+  /usr/include/c++/11/tr1/bessel_function.tcc \
+  /usr/include/c++/11/tr1/beta_function.tcc \
+  /usr/include/c++/11/tr1/ell_integral.tcc \
+  /usr/include/c++/11/tr1/exp_integral.tcc \
+  /usr/include/c++/11/tr1/hypergeometric.tcc \
+  /usr/include/c++/11/tr1/legendre_function.tcc \
+  /usr/include/c++/11/tr1/modified_bessel_func.tcc \
+  /usr/include/c++/11/tr1/poly_hermite.tcc \
+  /usr/include/c++/11/tr1/poly_laguerre.tcc \
+  /usr/include/c++/11/tr1/riemann_zeta.tcc \
   ../core/LCManager.h \
   ../comm/common/SystemStatus.h \
   ../comm/common/IStatusSender.h \
@@ -1710,7 +1736,6 @@ CMakeFiles/lc.dir/core/LCCommandHandler.cpp.o: ../core/LCCommandHandler.cpp \
   /usr/include/c++/11/mutex \
   /usr/include/c++/11/chrono \
   /usr/include/c++/11/ratio \
-  /usr/include/c++/11/limits \
   /usr/include/c++/11/ctime \
   /usr/include/c++/11/system_error \
   /usr/include/x86_64-linux-gnu/c++/11/bits/error_constants.h \
@@ -1787,30 +1812,6 @@ CMakeFiles/lc.dir/core/LCCommandHandler.cpp.o: ../core/LCCommandHandler.cpp \
   /usr/include/x86_64-linux-gnu/bits/in.h \
   /usr/include/c++/11/atomic \
   ../comm/common/Serializer.h \
-  /usr/include/c++/11/cmath \
-  /usr/include/math.h \
-  /usr/include/x86_64-linux-gnu/bits/math-vector.h \
-  /usr/include/x86_64-linux-gnu/bits/libm-simd-decl-stubs.h \
-  /usr/include/x86_64-linux-gnu/bits/flt-eval-method.h \
-  /usr/include/x86_64-linux-gnu/bits/fp-logb.h \
-  /usr/include/x86_64-linux-gnu/bits/fp-fast.h \
-  /usr/include/x86_64-linux-gnu/bits/mathcalls-helper-functions.h \
-  /usr/include/x86_64-linux-gnu/bits/mathcalls.h \
-  /usr/include/x86_64-linux-gnu/bits/mathcalls-narrow.h \
-  /usr/include/x86_64-linux-gnu/bits/iscanonical.h \
-  /usr/include/c++/11/bits/specfun.h \
-  /usr/include/c++/11/tr1/gamma.tcc \
-  /usr/include/c++/11/tr1/special_function_util.h \
-  /usr/include/c++/11/tr1/bessel_function.tcc \
-  /usr/include/c++/11/tr1/beta_function.tcc \
-  /usr/include/c++/11/tr1/ell_integral.tcc \
-  /usr/include/c++/11/tr1/exp_integral.tcc \
-  /usr/include/c++/11/tr1/hypergeometric.tcc \
-  /usr/include/c++/11/tr1/legendre_function.tcc \
-  /usr/include/c++/11/tr1/modified_bessel_func.tcc \
-  /usr/include/c++/11/tr1/poly_hermite.tcc \
-  /usr/include/c++/11/tr1/poly_laguerre.tcc \
-  /usr/include/c++/11/tr1/riemann_zeta.tcc \
   /usr/include/c++/11/climits \
   /usr/lib/gcc/x86_64-linux-gnu/11/include/limits.h \
   /usr/lib/gcc/x86_64-linux-gnu/11/include/syslimits.h \
@@ -2144,6 +2145,7 @@ CMakeFiles/lc.dir/core/LCManager.cpp.o: ../core/LCManager.cpp \
   /usr/include/c++/11/bits/locale_conv.h \
   /usr/include/c++/11/bits/quoted_string.h \
   ../core/LCCommandHandler.h \
+  ../core/ENU_Translator.hpp \
   ../Config/LCConfig.h \
   /usr/include/termios.h \
   /usr/include/x86_64-linux-gnu/bits/termios.h \
@@ -2743,8 +2745,6 @@ CMakeFiles/lc.dir/main.cpp.o: ../main.cpp \
 
 ../inih/ini.c:
 
-../core/StatusLoader.cpp:
-
 ../inih/ini.h:
 
 ../main.cpp:
@@ -2802,6 +2802,10 @@ CMakeFiles/lc.dir/main.cpp.o: ../main.cpp \
 /usr/include/x86_64-linux-gnu/bits/flt-eval-method.h:
 
 /usr/include/x86_64-linux-gnu/bits/math-vector.h:
+
+../core/StatusLoader.cpp:
+
+../core/ENU_Translator.hpp:
 
 ../core/LCCommandHandler.h:
 

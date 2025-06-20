@@ -17,56 +17,53 @@ MockMissile::MockMissile(const MissileInfo &missile_info,
 
 void MockMissile::updatePosMissile()
 {
-	auto last_time = std::chrono::steady_clock::now();
-	double accumulated_distance = 0.0;
-	double total_elapsed = 0.0;
-	double alt_start = static_cast<double>(missile_info_.z);
+	const auto start_time = std::chrono::steady_clock::now();
+
+	const double start_lat = static_cast<double>(missile_info_.x) / DEGREE_TO_INT;
+	const double start_lon = static_cast<double>(missile_info_.y) / DEGREE_TO_INT;
+	const double start_alt = static_cast<double>(missile_info_.z); // 정수 고도(m)
+
+	const double speed_mps = missile_info_.speed * 0.27778;
+	const double launch_angle_rad = missile_info_.angle * M_PI / 180.0;
+	const double launch_angle_z_rad = missile_info_.angle2 * M_PI / 180.0;
+
 	while (true)
 	{
-		auto now = std::chrono::steady_clock::now();
-		std::chrono::duration<double> elapsed = now - last_time;
-		last_time = now;
-
+		// 경과 시간 계산
+		const auto now = std::chrono::steady_clock::now();
+		std::chrono::duration<double> elapsed = now - start_time;
 		double elapsed_seconds = elapsed.count();
-		total_elapsed += elapsed_seconds;
 
-		double speed_mps = missile_info_.speed * 0.27778;
+		// 이동 거리 계산
 		double distance = speed_mps * elapsed_seconds;
-		accumulated_distance += distance;
 
-		// 현재 위도, 경도 (실수 변환)
-		double lat = static_cast<double>(missile_info_.x) / DEGREE_TO_INT;
-		double lon = static_cast<double>(missile_info_.y) / DEGREE_TO_INT;
+		// 이동 거리 기반으로 새로운 위치 계산 (실수 단위)
+		double delta_lat = std::cos(launch_angle_rad) * distance / METERS_PER_DEGREE_LAT;
+		double meters_per_deg_lon = METERS_PER_DEGREE_LAT * std::cos(start_lat * M_PI / 180.0);
+		double delta_lon = std::sin(launch_angle_rad) * distance / meters_per_deg_lon;
+		double delta_alt = std::tan(launch_angle_z_rad) * distance;
 
-		// 위경도 1도당 m 계산
-		double meters_per_deg_lon = METERS_PER_DEGREE_LAT * std::cos(lat * M_PI / 180.0);
-		
-		// 위도/경도 증가량 계산 (도 단위)
-		double delta_lat = std::cos(missile_info_.angle * M_PI / 180.0) * distance / METERS_PER_DEGREE_LAT;
-		double delta_lon = std::sin(missile_info_.angle * M_PI / 180.0) * distance / meters_per_deg_lon;
-		double alt_change = std::tan(missile_info_.angle2 * M_PI / 180.0) * distance; 
-		alt_start += alt_change;
-		
-		// 정수형으로 환산해서 반영
-		missile_info_.x += static_cast<long long>(delta_lat * DEGREE_TO_INT);
-		missile_info_.y += static_cast<long long>(delta_lon * DEGREE_TO_INT);
-		missile_info_.z = static_cast<long long>(alt_start);
+		// 정수 환산
+		missile_info_.x = static_cast<long long>((start_lat + delta_lat) * DEGREE_TO_INT);
+		missile_info_.y = static_cast<long long>((start_lon + delta_lon) * DEGREE_TO_INT);
+		missile_info_.z = static_cast<long long>(start_alt + delta_alt);
 
-		// 4초마다 거리 출력
-		if (total_elapsed >= 4.0)
+		// 출력 (4초마다)
+		if (static_cast<int>(elapsed_seconds) % 4 == 0)
 		{
-			std::cout << "[4 sec update] Missile moved" << "Missile ID : " << missile_info_.id << " = " << accumulated_distance << " meters.\n";
+			std::cout << "[4 sec update] Missile ID " << missile_info_.id
+					  << " moved " << distance << " meters.\n";
 			std::cout << " → Current lat: " << static_cast<double>(missile_info_.x) / DEGREE_TO_INT
-					  << ", lon: " << static_cast<double>(missile_info_.y) / DEGREE_TO_INT << ", alt: " << static_cast<double>(missile_info_.z) / DEGREE_TO_INT << "\n";
-			total_elapsed = 0.0;
-			accumulated_distance = 0.0;
+					  << ", lon: " << static_cast<double>(missile_info_.y) / DEGREE_TO_INT
+					  << ", alt: " << static_cast<double>(missile_info_.z) << " m\n";
 		}
 
-		// 명중 여부 판단
+		// 명중 판정
 		if (mock_target_manager_->downTargetStatus(missile_info_) > 0)
 		{
 			std::cout << "Missile hit target!" << std::endl;
 			missile_info_.is_hit = true;
+			break;  // 명중했으면 루프 종료
 		}
 		else
 		{
@@ -79,6 +76,7 @@ void MockMissile::updatePosMissile()
 		std::this_thread::sleep_for(std::chrono::milliseconds(100));
 	}
 }
+
 
 void MockMissile::sendData()
 {

@@ -38,7 +38,7 @@ private:
     double goalMotorAngle;
 
     /// @brief MFR 탐지 범위 (m)
-    const long long limitDetectionRange = 100000;
+    const long long limitDetectionRange = 1000000;
 
     /// @brief MFR의 시야(FoV) 제한 각도
     const double limitedFoV = 15.0;

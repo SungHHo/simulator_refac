@@ -55,9 +55,7 @@ void Mfr::callBackData(const std::vector<char>& packet)
             break;
 
         case STATUS_REQ:
-            // std::cout << "[Mfr::recvData] 상태 요청 명령 수신됨" << std::endl;
             sendMfrStatus();
-            // std::cout << "[Mfr::recvData] 상태 요청 명령 전송됨" << std::endl;
             break;
 
         case MODE_CHANGE:
@@ -66,7 +64,6 @@ void Mfr::callBackData(const std::vector<char>& packet)
             break;
 
         case LC_INIT_RES:
-            // std::cout << "[Mfr::recvData] LC 최초 정보 수신" << std::endl;
             parsingLcInitData(dataPayload);
             break;
 

@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\user\\Surface-to-air-missiles\\Airsuface_map\\Airsuface_map.csproj": {}
+    "C:\\Users\\user\\OneDrive\\Desktop\\Surface-to-air-missiles\\Airsuface_map\\Airsuface_map.csproj": {}
   },
   "projects": {
-    "C:\\Users\\user\\Surface-to-air-missiles\\Airsuface_map\\Airsuface_map.csproj": {
+    "C:\\Users\\user\\OneDrive\\Desktop\\Surface-to-air-missiles\\Airsuface_map\\Airsuface_map.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\user\\Surface-to-air-missiles\\Airsuface_map\\Airsuface_map.csproj",
+        "projectUniqueName": "C:\\Users\\user\\OneDrive\\Desktop\\Surface-to-air-missiles\\Airsuface_map\\Airsuface_map.csproj",
         "projectName": "Airsuface_map",
-        "projectPath": "C:\\Users\\user\\Surface-to-air-missiles\\Airsuface_map\\Airsuface_map.csproj",
+        "projectPath": "C:\\Users\\user\\OneDrive\\Desktop\\Surface-to-air-missiles\\Airsuface_map\\Airsuface_map.csproj",
         "packagesPath": "C:\\Users\\user\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\user\\Surface-to-air-missiles\\Airsuface_map\\obj\\",
+        "outputPath": "C:\\Users\\user\\OneDrive\\Desktop\\Surface-to-air-missiles\\Airsuface_map\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

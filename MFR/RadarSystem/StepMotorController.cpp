@@ -7,32 +7,18 @@
 
 StepMotorController::StepMotorController()
 {
-<<<<<<< HEAD
     // if (loadMfrConfig("../config/MFR.ini", mfrConfig)) 
     // {
     //     std::cout << "Device: " << mfrConfig.device << ", BaudRate: " << mfrConfig.uartBaudRate << std::endl;
-=======
-    if (loadMfrConfig("../config/MFR.ini", mfrConfig))
-    {
-        std::cout << "Device: " << mfrConfig.device << ", BaudRate: " << mfrConfig.uartBaudRate << std::endl;
->>>>>>> ec543d8ad68aa990daecb0572e5288c974aa7620
 
     //     device = mfrConfig.device;
     //     uartBaudRate = mfrConfig.uartBaudRate;
 
-<<<<<<< HEAD
     //     if(!initUart())
     //     {
     //         std::cerr << "[StepMotorController::initUart] Uart Init Failed" << std::endl;
     //     }
     // }
-=======
-        if (!initUart())
-        {
-            std::cerr << "[StepMotorController::initUart] Uart Init Failed" << std::endl;
-        }
-    }
->>>>>>> ec543d8ad68aa990daecb0572e5288c974aa7620
 
     // else
     // {

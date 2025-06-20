@@ -246,7 +246,13 @@ CommonMessage parseRadarDetection(const std::vector<uint8_t>& data, SenderType s
         det.missiles.push_back(m);
         offset += 57;
     }
+    //
 
+    for (size_t i = 0; i < det.targets.size(); ++i) {
+        std::cout << "[Target#" << i << "] angle1: " << det.targets[i].angle1
+                  << ", angle2: " << det.targets[i].angle2 << std::endl;
+    }
+    
     msg.payload = det;
     return msg;
 }

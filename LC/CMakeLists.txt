@@ -45,7 +45,7 @@ add_executable(lc
     # Core components
     core/LCManager.cpp
     core/StatusLoader.cpp
-
+    core/timeTrans.cpp
     # Communication modules
     comm/ecc/TcpECC.cpp
     comm/ls/SerialLS.cpp

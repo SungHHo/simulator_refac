@@ -26,7 +26,7 @@ private:
     const unsigned int mfrId = 101001;
 
     /// @brief  MFR 좌표
-    const Pos3D mfrCoords = { 37.54811601, 126.99611663, 244.0};
+    const Pos3D mfrCoords = { 37.5481160, 126.9961166, 244.0};
 
     /// @brief MFR 모드 정보
     RadarMode mfrMode;

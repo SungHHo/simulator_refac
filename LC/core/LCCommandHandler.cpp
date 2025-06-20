@@ -194,12 +194,12 @@ namespace LCCommandHandler
                 auto loop_end = std::chrono::high_resolution_clock::now();
                 std::chrono::duration<double> elapsed = loop_end - loop_start;
                 cmd.start_x = static_cast<long long>(
-                    (std::cos(cmd.launchAngleXY * M_PI / 180.0) * missileSpeed * (elapsed.count() + 0.15) * 0.001 / 111.32) * 1e8
+                    (std::cos(cmd.launchAngleXY * M_PI / 180.0) * missileSpeed * (elapsed.count() + 0.15) * 0.001 / 111.32) * 1e7
                         + snapshot.ls.position.x);
 
-                double lat_deg = static_cast<double>(snapshot.ls.position.x) / 1e8;
+                double lat_deg = static_cast<double>(snapshot.ls.position.x) / 1e7;
                 cmd.start_y = static_cast<long long>(
-                    (std::sin(cmd.launchAngleXY * M_PI / 180.0) * missileSpeed * (elapsed.count() + 0.15) * 0.001 / (111.32 * std::cos(lat_deg * M_PI / 180.0))) * 1e8
+                    (std::sin(cmd.launchAngleXY * M_PI / 180.0) * missileSpeed * (elapsed.count() + 0.15) * 0.001 / (111.32 * std::cos(lat_deg * M_PI / 180.0))) * 1e7
                         + snapshot.ls.position.y);
 
                 cmd.start_z = static_cast<long long>(snapshot.ls.height);

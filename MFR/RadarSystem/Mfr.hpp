@@ -95,7 +95,7 @@ private:
     const double EARTH_RADIUS_M = 6'371'000.0; // 지구 반지름 (m)
     
     /// @brief 좌표 인코딩 및 디코딩에 사용되는 스케일링 상수
-    const double SCALE = 1e8;
+    const double SCALE = 1e7;
 
     bool motorRotationFlag = false;
 

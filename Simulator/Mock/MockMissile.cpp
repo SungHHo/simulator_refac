@@ -7,7 +7,7 @@
 
 #include "MockMissile.h"
 
-constexpr double DEGREE_TO_INT = 1e8; // 실수 → 정수 저장시 스케일
+constexpr double DEGREE_TO_INT = 1e7; // 실수 → 정수 저장시 스케일
 constexpr double METERS_PER_DEGREE_LAT = 111320.0;
 
 MockMissile::MockMissile(const MissileInfo &missile_info,

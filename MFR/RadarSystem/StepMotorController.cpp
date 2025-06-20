@@ -7,18 +7,32 @@
 
 StepMotorController::StepMotorController()
 {
+<<<<<<< HEAD
     // if (loadMfrConfig("../config/MFR.ini", mfrConfig)) 
     // {
     //     std::cout << "Device: " << mfrConfig.device << ", BaudRate: " << mfrConfig.uartBaudRate << std::endl;
+=======
+    if (loadMfrConfig("../config/MFR.ini", mfrConfig))
+    {
+        std::cout << "Device: " << mfrConfig.device << ", BaudRate: " << mfrConfig.uartBaudRate << std::endl;
+>>>>>>> ec543d8ad68aa990daecb0572e5288c974aa7620
 
     //     device = mfrConfig.device;
     //     uartBaudRate = mfrConfig.uartBaudRate;
 
+<<<<<<< HEAD
     //     if(!initUart())
     //     {
     //         std::cerr << "[StepMotorController::initUart] Uart Init Failed" << std::endl;
     //     }
     // }
+=======
+        if (!initUart())
+        {
+            std::cerr << "[StepMotorController::initUart] Uart Init Failed" << std::endl;
+        }
+    }
+>>>>>>> ec543d8ad68aa990daecb0572e5288c974aa7620
 
     // else
     // {
@@ -28,7 +42,7 @@ StepMotorController::StepMotorController()
 
 StepMotorController::~StepMotorController()
 {
-    if (uart_fd >= 0)            
+    if (uart_fd >= 0)
     {
         close(uart_fd);
     }
@@ -53,20 +67,21 @@ bool StepMotorController::initUart()
     cfsetospeed(&tty, uartBaudRate);
     cfsetispeed(&tty, uartBaudRate);
 
-    tty.c_cflag = (tty.c_cflag & ~CSIZE) | CS8;     // 8-bit chars
-    tty.c_iflag &= ~IGNBRK;                         // disable break processing
-    tty.c_lflag = 0;                                // no signaling chars, no echo
-    tty.c_oflag = 0;                                // no remapping, no delays
-    tty.c_cc[VMIN]  = 1;                            // read blocks
-    tty.c_cc[VTIME] = 1;                            // timeout 0.1s
+    tty.c_cflag = (tty.c_cflag & ~CSIZE) | CS8; // 8-bit chars
+    tty.c_iflag &= ~IGNBRK;                     // disable break processing
+    tty.c_lflag = 0;                            // no signaling chars, no echo
+    tty.c_oflag = 0;                            // no remapping, no delays
+    tty.c_cc[VMIN] = 1;                         // read blocks
+    tty.c_cc[VTIME] = 1;                        // timeout 0.1s
 
-    tty.c_iflag &= ~(IXON | IXOFF | IXANY);         // shut off xon/xoff ctrl
-    tty.c_cflag |= (CLOCAL | CREAD);                // ignore modem controls
-    tty.c_cflag &= ~(PARENB | PARODD);              // no parity
-    tty.c_cflag &= ~CSTOPB;                         // 1 stop bit
-    tty.c_cflag &= ~CRTSCTS;                        // no hardware flow control
+    tty.c_iflag &= ~(IXON | IXOFF | IXANY); // shut off xon/xoff ctrl
+    tty.c_cflag |= (CLOCAL | CREAD);        // ignore modem controls
+    tty.c_cflag &= ~(PARENB | PARODD);      // no parity
+    tty.c_cflag &= ~CSTOPB;                 // 1 stop bit
+    tty.c_cflag &= ~CRTSCTS;                // no hardware flow control
 
-    if (tcsetattr(uart_fd, TCSANOW, &tty) != 0) {
+    if (tcsetattr(uart_fd, TCSANOW, &tty) != 0)
+    {
         std::cerr << "[UART] Error setting termios attributes" << std::endl;
         return false;
     }
@@ -74,7 +89,7 @@ bool StepMotorController::initUart()
     return true;
 }
 
-void StepMotorController::sendCommand(const std::string& cmd)
+void StepMotorController::sendCommand(const std::string &cmd)
 {
     if (uart_fd < 0)
     {

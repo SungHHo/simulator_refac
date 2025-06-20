@@ -1,6 +1,8 @@
 ﻿#pragma once
+
 #include "afxdialogex.h"
 #include "MissileStatus.h"
+#include <chrono>  // ✅ UTC 시간 계산용
 
 // CMissileInfoDlg 대화 상자
 class CMissileInfoDlg : public CDialogEx
@@ -17,6 +19,8 @@ public:
 
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);
+	virtual BOOL OnInitDialog() override;
+	virtual void OnDestroy();  // ✅ 타이머 정리용
 
 	DECLARE_MESSAGE_MAP()
 
@@ -36,6 +40,8 @@ public:
 	afx_msg void OnStnClickedStaticMissileAngle2();
 	afx_msg void OnStnClickedStaticMissileShootdowntime2();
 
+	afx_msg void OnTimer(UINT_PTR nIDEvent);  // ✅ 타이머 콜백
+
 private:
 	MissileStatus m_missileStatus;
 
@@ -44,8 +50,13 @@ private:
 	CStatic m_staticPosX;
 	CStatic m_staticPosY;
 	CStatic m_staticPosZ;
-	//CStatic m_staticHeight;
 	CStatic m_staticSpeed;
 	CStatic m_staticAngle;
 	CStatic m_staticShootTime;
+
+	// ✅ 격추까지 남은 시간 (초 단위)
+	int m_secondsRemaining = 0;
+
+	// ✅ 타이머 ID
+	static const UINT_PTR TIMER_ID_MISSILE = 3001;
 };

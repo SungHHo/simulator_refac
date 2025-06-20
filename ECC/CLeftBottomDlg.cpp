@@ -95,8 +95,8 @@ void CLeftBottomDlg::UpdateLSStatusFromSelection()
 
 void CLeftBottomDlg::SetLSUI(const LSStatus& status)
 {
-	double posX = static_cast<double>(status.position.x) / 100000000.0;
-	double posY = static_cast<double>(status.position.y) / 100000000.0;
+	double posX = static_cast<double>(status.position.x) / 10000000.0;
+	double posY = static_cast<double>(status.position.y) / 10000000.0;
 	long posZ = static_cast<double>(status.position.z);
 	CString modeStr;
 	switch (status.mode) {

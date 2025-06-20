@@ -42,8 +42,8 @@ void CLaunchControlDlg::SetLCStatus(const LCStatus& status)
 // ✅ 내부 UI 업데이트 함수
 void CLaunchControlDlg::UpdateUI()
 {
-	double posX = static_cast<double>(m_lcStatus.position.x) / 100000000.0;
-	double posY = static_cast<double>(m_lcStatus.position.y) / 100000000.0;
+	double posX = static_cast<double>(m_lcStatus.position.x) / 10000000.0;
+	double posY = static_cast<double>(m_lcStatus.position.y) / 10000000.0;
 	long posZ = static_cast<double>(m_lcStatus.position.z);
 	CString idStr;
 	idStr.Format(_T("%d"), m_lcStatus.id);

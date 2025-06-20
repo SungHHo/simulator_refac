@@ -164,7 +164,7 @@ BOOL CSAMtestDlg::OnInitDialog()
 
 	m_tcp = std::make_unique<ECC_TCP>();
 	//if (!m_tcp->connect("127.0.0.1", 9000)) { // 127.0.0.1 192.168.1.110 8888
-	if (!m_tcp->connect("192.168.3.129", 8888)) { // 127.0.0.1 192.168.1.110 8888
+	if (!m_tcp->connect("192.168.1.110", 8888)) { // 127.0.0.1 192.168.1.110 8888
 			AfxMessageBox(_T("서버 연결 실패"));
 		return FALSE;
 	}

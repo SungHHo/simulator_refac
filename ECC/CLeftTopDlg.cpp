@@ -104,9 +104,9 @@ void CLeftTopDlg::UpdateRadarStatusFromSelection()
 
 void CLeftTopDlg::SetRadarUI(const RadarStatus& status)
 {
-	double posX = static_cast<double>(status.position.x) / 100000000.0;
-	double posY = static_cast<double>(status.position.y) / 100000000.0;
-	double posZ = static_cast<double>(status.position.z) / 100000000.0;
+	double posX = static_cast<double>(status.position.x) / 10000000.0;
+	double posY = static_cast<double>(status.position.y) / 10000000.0;
+	double posZ = static_cast<double>(status.position.z) / 10000000.0;
 	CString modeStr = (status.mode == RadarStatus::ROTATE) ? _T("회전") : _T("정지");
 
 	CString angleStr;

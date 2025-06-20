@@ -3,6 +3,11 @@
 #include "afxdialogex.h"
 #include "TargetStatus.h"  // 타겟 정보 구조체
 #include <vector>
+#include <ctime>
+#include <chrono>  // ✅ chrono 사용을 위한 헤더
+
+// ✅ UTC → KST 변환 함수 선언 (C++17 std::chrono 사용)
+CString FormatUtcToKST(unsigned long long utc_seconds);
 
 // CTargetInfoDlg 대화 상자
 class CTargetInfoDlg : public CDialogEx
@@ -33,7 +38,6 @@ private:
 	CStatic m_staticPosX;
 	CStatic m_staticPosY;
 	CStatic m_staticPosZ;
-	//CStatic m_staticHeight;
 	CStatic m_staticSpeed;
 	CStatic m_staticAngle1;
 	CStatic m_staticAngle2;

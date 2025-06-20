@@ -90,8 +90,8 @@ void CTargetListDlg::SetTargetList(const std::vector<TargetStatus>& targets)
 
 		CString idStr, xStr, yStr, hStr, sStr, aStr1, aStr2, pStr, hitStr;
 		idStr.Format(_T("%d"), t.id);
-		xStr.Format(_T("%.8f"), static_cast<double>(t.position.x) / 100000000.0);
-		yStr.Format(_T("%.8f"), static_cast<double>(t.position.y) / 100000000.0);
+		xStr.Format(_T("%.8f"), static_cast<double>(t.position.x) / 10000000.0);
+		yStr.Format(_T("%.8f"), static_cast<double>(t.position.y) / 10000000.0);
 		hStr.Format(_T("%lld"), t.position.z);
 		sStr.Format(_T("%d"), t.speed);
 		aStr1.Format(_T("%.1f"), t.angle1);

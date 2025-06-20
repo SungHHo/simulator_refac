@@ -1,7 +1,8 @@
 ﻿#include "pch.h"
 #include "SAMtest.h"
-#include "afxdialogex.h"
 #include "CMissileInfoDlg.h"
+#include "afxdialogex.h"
+#include <chrono>
 
 IMPLEMENT_DYNAMIC(CMissileInfoDlg, CDialogEx)
 
@@ -38,19 +39,36 @@ BEGIN_MESSAGE_MAP(CMissileInfoDlg, CDialogEx)
 	ON_STN_CLICKED(IDC_STATIC_MISSILE_SHOOTDOWNTIME2, &CMissileInfoDlg::OnStnClickedStaticMissileShootdowntime2)
 END_MESSAGE_MAP()
 
-// ✅ 외부에서 미사일 정보 전달
+BOOL CMissileInfoDlg::OnInitDialog()
+{
+	CDialogEx::OnInitDialog();
+	return TRUE;
+}
+
 void CMissileInfoDlg::SetMissileStatus(const MissileStatus& status)
 {
 	m_missileStatus = status;
+
+	// ✅ 현재 UTC 시간 (초 단위) 구하기
+	using namespace std::chrono;
+	auto now_utc = duration_cast<seconds>(system_clock::now().time_since_epoch()).count();
+
+	// ✅ 남은 초 계산
+	m_secondsRemaining = static_cast<int>(status.predicted_time - now_utc);
+	if (m_secondsRemaining < 0) m_secondsRemaining = 0;
+
 	UpdateUI();
+
+	// ✅ 타이머 시작 (1초 주기)
+	SetTimer(TIMER_ID_MISSILE, 1000, nullptr);
 }
 
-// ✅ UI에 값 업데이트
 void CMissileInfoDlg::UpdateUI()
 {
 	CString str;
-	double posX = static_cast<double>(m_missileStatus.position.x) / 100000000.0;
-	double posY = static_cast<double>(m_missileStatus.position.y) / 100000000.0;
+	double posX = static_cast<double>(m_missileStatus.position.x) / 10000000.0;
+	double posY = static_cast<double>(m_missileStatus.position.y) / 10000000.0;
+
 	str.Format(_T("%d"), m_missileStatus.id);
 	m_staticID.SetWindowText(str);
 
@@ -69,11 +87,44 @@ void CMissileInfoDlg::UpdateUI()
 	str.Format(_T("%.1f"), m_missileStatus.angle);
 	m_staticAngle.SetWindowText(str);
 
-	str.Format(_T("%lld"), m_missileStatus.predicted_time);
+	// ✅ 격추까지 남은 시간 출력
+	/*if (m_secondsRemaining > 0)
+	{
+		str.Format(_T("%d초 남음"), m_secondsRemaining);
+	}
+	else
+	{
+		str = _T("격추 완료 또는 시간 초과");
+	}*/
+	str.Format(_T("%llu"), m_missileStatus.predicted_time);
 	m_staticShootTime.SetWindowText(str);
 }
 
-// 클릭 핸들러 (필요 없으면 비워둬도 됨)
+void CMissileInfoDlg::OnTimer(UINT_PTR nIDEvent)
+{
+	if (nIDEvent == TIMER_ID_MISSILE)
+	{
+		if (m_secondsRemaining > 0)
+		{
+			--m_secondsRemaining;
+			UpdateUI();
+		}
+		else
+		{
+			KillTimer(TIMER_ID_MISSILE);  // 타이머 정지
+		}
+	}
+
+	CDialogEx::OnTimer(nIDEvent);
+}
+
+void CMissileInfoDlg::OnDestroy()
+{
+	CDialogEx::OnDestroy();
+	KillTimer(TIMER_ID_MISSILE);
+}
+
+// 클릭 핸들러 (비워둬도 됨)
 void CMissileInfoDlg::OnStnClickedStaticMissileId2() {}
 void CMissileInfoDlg::OnStnClickedStaticMissilePositionx() {}
 void CMissileInfoDlg::OnStnClickedStaticMissilePositiony() {}

@@ -47,7 +47,6 @@ protected:
 	afx_msg void OnSysCommand(UINT nID, LPARAM lParam);
 	afx_msg void OnPaint();
 	afx_msg HCURSOR OnQueryDragIcon();
-
 	afx_msg void OnTimer(UINT_PTR nIDEvent);   // ⏰ 상태 요청 타이머
 	afx_msg void OnDestroy();                 // ⛔ 타이머 해제 등 다른 자원 해제 용도
 

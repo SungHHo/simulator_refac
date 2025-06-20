@@ -14,9 +14,9 @@ namespace Airsuface_map.ViewModels
         private static double ConvertLongToDouble(long value)
         {
             // 8자리 소수부 분리
-            long intPart = value / 100_000_000L;
-            long fracPart = Math.Abs(value % 100_000_000L);
-            double result = intPart + fracPart / 100_000_000.0;
+            long intPart = value / 10_000_000L;
+            long fracPart = Math.Abs(value % 10_000_000L);
+            double result = intPart + fracPart / 10_000_000.0;
             // 음수 처리
             if (value < 0 && intPart == 0)
                 result *= -1;

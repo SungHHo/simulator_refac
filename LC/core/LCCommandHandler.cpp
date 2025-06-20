@@ -112,10 +112,10 @@ namespace LCCommandHandler
             cmd.launcherId = ls.launchSystemId;
 
             // 위도/경도 변환
-            double lat_ls = static_cast<double>(ls.position.x) / 1e8;
-            double lon_ls = static_cast<double>(ls.position.y) / 1e8;
-            double lat_tg = static_cast<double>(selectedTarget.posX) / 1e8;
-            double lon_tg = static_cast<double>(selectedTarget.posY) / 1e8;
+            double lat_ls = static_cast<double>(ls.position.x) / 1e7;
+            double lon_ls = static_cast<double>(ls.position.y) / 1e7;
+            double lat_tg = static_cast<double>(selectedTarget.posX) / 1e7;
+            double lon_tg = static_cast<double>(selectedTarget.posY) / 1e7;
 
             const double meters_per_deg_lat = 111320.0;
             const double meters_per_deg_lon = 111320.0 * std::cos(lat_ls * M_PI / 180.0);

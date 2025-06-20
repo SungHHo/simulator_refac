@@ -9,62 +9,45 @@ namespace Common {
 //0x01 상태 전송 -> 0x51로 보냄
 std::vector<uint8_t> Serializer::serializeStatusResponse(const SystemStatus& status) {
     std::vector<uint8_t> buf;
+
+    // 1. 명령 타입 (1바이트)
     buf.push_back(static_cast<uint8_t>(CommandType::STATUS_RESPONSE_LC_TO_ECC)); // 0x51
+
+    // 2. 사이즈 자리 확보용 (4바이트 dummy) → 나중에 overwrite
+    buf.resize(buf.size() + 4, 0);
+
+    // 3. 기본 시스템 플래그 및 개수
     buf.push_back(1);  // radar
     buf.push_back(1);  // lc
     buf.push_back(1);  // ls
     buf.push_back(static_cast<uint8_t>(status.targets.size()));
     buf.push_back(static_cast<uint8_t>(status.missiles.size()));
 
-    // MFR
-    buf.insert(buf.end(), reinterpret_cast<const uint8_t*>(&status.mfr.mfrId),
-            reinterpret_cast<const uint8_t*>(&status.mfr.mfrId) + 4);
-    buf.insert(buf.end(), reinterpret_cast<const uint8_t*>(&status.mfr.position.x),
-            reinterpret_cast<const uint8_t*>(&status.mfr.position.x) + 8);
-    buf.insert(buf.end(), reinterpret_cast<const uint8_t*>(&status.mfr.position.y),
-            reinterpret_cast<const uint8_t*>(&status.mfr.position.y) + 8);
-    buf.insert(buf.end(), reinterpret_cast<const uint8_t*>(&status.mfr.height),   
-            reinterpret_cast<const uint8_t*>(&status.mfr.height) + 8);
+    // 4. MFR 정보 (id, 위치, 고도, 모드, 각도)
+    buf.insert(buf.end(), reinterpret_cast<const uint8_t*>(&status.mfr.mfrId), reinterpret_cast<const uint8_t*>(&status.mfr.mfrId) + 4);
+    buf.insert(buf.end(), reinterpret_cast<const uint8_t*>(&status.mfr.position.x), reinterpret_cast<const uint8_t*>(&status.mfr.position.x) + 8);
+    buf.insert(buf.end(), reinterpret_cast<const uint8_t*>(&status.mfr.position.y), reinterpret_cast<const uint8_t*>(&status.mfr.position.y) + 8);
+    buf.insert(buf.end(), reinterpret_cast<const uint8_t*>(&status.mfr.height), reinterpret_cast<const uint8_t*>(&status.mfr.height) + 8);
     buf.push_back(static_cast<uint8_t>(status.mfr.mode));
-    buf.insert(buf.end(), reinterpret_cast<const uint8_t*>(&status.mfr.degree),
-            reinterpret_cast<const uint8_t*>(&status.mfr.degree) + 8);
+    buf.insert(buf.end(), reinterpret_cast<const uint8_t*>(&status.mfr.degree), reinterpret_cast<const uint8_t*>(&status.mfr.degree) + 8);
 
-        // LS
-        buf.insert(buf.end(), reinterpret_cast<const uint8_t*>(&status.ls.launchSystemId),
-                reinterpret_cast<const uint8_t*>(&status.ls.launchSystemId) + 4);
+    // 5. LS 정보
+    buf.insert(buf.end(), reinterpret_cast<const uint8_t*>(&status.ls.launchSystemId), reinterpret_cast<const uint8_t*>(&status.ls.launchSystemId) + 4);
+    buf.insert(buf.end(), reinterpret_cast<const uint8_t*>(&status.ls.position.x), reinterpret_cast<const uint8_t*>(&status.ls.position.x) + 8);
+    buf.insert(buf.end(), reinterpret_cast<const uint8_t*>(&status.ls.position.y), reinterpret_cast<const uint8_t*>(&status.ls.position.y) + 8);
+    buf.insert(buf.end(), reinterpret_cast<const uint8_t*>(&status.ls.height), reinterpret_cast<const uint8_t*>(&status.ls.height) + 8);
+    buf.push_back(static_cast<uint8_t>(status.ls.mode));
+    buf.insert(buf.end(), reinterpret_cast<const uint8_t*>(&status.ls.launchAngle), reinterpret_cast<const uint8_t*>(&status.ls.launchAngle) + 8);
 
-        buf.insert(buf.end(), reinterpret_cast<const uint8_t*>(&status.ls.position.x),
-                reinterpret_cast<const uint8_t*>(&status.ls.position.x) + 8);
+    // 6. LC 정보
+    buf.insert(buf.end(), reinterpret_cast<const uint8_t*>(&status.lc.LCId), reinterpret_cast<const uint8_t*>(&status.lc.LCId) + 4);
+    buf.insert(buf.end(), reinterpret_cast<const uint8_t*>(&status.lc.position.x), reinterpret_cast<const uint8_t*>(&status.lc.position.x) + 8);
+    buf.insert(buf.end(), reinterpret_cast<const uint8_t*>(&status.lc.position.y), reinterpret_cast<const uint8_t*>(&status.lc.position.y) + 8);
 
-        buf.insert(buf.end(), reinterpret_cast<const uint8_t*>(&status.ls.position.y),
-                reinterpret_cast<const uint8_t*>(&status.ls.position.y) + 8);
+    long long dummyHeight = 15;
+    buf.insert(buf.end(), reinterpret_cast<const uint8_t*>(&dummyHeight), reinterpret_cast<const uint8_t*>(&dummyHeight) + sizeof(long long));
 
-        buf.insert(buf.end(), reinterpret_cast<const uint8_t*>(&status.ls.height),  // ✅ height 추가
-                reinterpret_cast<const uint8_t*>(&status.ls.height) + 8);
-
-        buf.push_back(static_cast<uint8_t>(status.ls.mode));
-
-        buf.insert(buf.end(), reinterpret_cast<const uint8_t*>(&status.ls.launchAngle),
-                reinterpret_cast<const uint8_t*>(&status.ls.launchAngle) + 8);
-
-    // LC
-        buf.insert(buf.end(), reinterpret_cast<const uint8_t*>(&status.lc.LCId),
-                reinterpret_cast<const uint8_t*>(&status.lc.LCId) + 4);
-
-        buf.insert(buf.end(), reinterpret_cast<const uint8_t*>(&status.lc.position.x),
-                reinterpret_cast<const uint8_t*>(&status.lc.position.x) + 8);
-
-        buf.insert(buf.end(), reinterpret_cast<const uint8_t*>(&status.lc.position.y),
-                reinterpret_cast<const uint8_t*>(&status.lc.position.y) + 8);
-    // std::cout << "[SERIALIZER] missile count: " << status.missiles.size() << "\n";
-    // std::cout << "[SERIALIZER] expected total missile bytes: " << status.missiles.size() * 57 << "\n";
-    // std::cout << "[SERIALIZER] buffer size before missile: " << buf.size() << "\n";
-
-long long dummyHeight = 15;
-buf.insert(buf.end(), reinterpret_cast<const uint8_t*>(&dummyHeight),
-           reinterpret_cast<const uint8_t*>(&dummyHeight) + sizeof(long long));
-
-    // Missile
+    // 7. Missile 정보
     for (const auto& m : status.missiles) {
         buf.insert(buf.end(), reinterpret_cast<const uint8_t*>(&m.id), reinterpret_cast<const uint8_t*>(&m.id) + 4);
         buf.insert(buf.end(), reinterpret_cast<const uint8_t*>(&m.posX), reinterpret_cast<const uint8_t*>(&m.posX) + 8);
@@ -75,33 +58,26 @@ buf.insert(buf.end(), reinterpret_cast<const uint8_t*>(&dummyHeight),
         buf.insert(buf.end(), reinterpret_cast<const uint8_t*>(&m.detectTime), reinterpret_cast<const uint8_t*>(&m.detectTime) + 8);
         buf.insert(buf.end(), reinterpret_cast<const uint8_t*>(&m.interceptTime), reinterpret_cast<const uint8_t*>(&m.interceptTime) + 8);
         buf.push_back(static_cast<uint8_t>(m.hit));
-        // std::cout << "[DEBUG] missile ID " << m.id << " serialized, buf size: " << buf.size() << "\n";
-
     }
 
-    // Target
+    // 8. Target 정보
     for (const auto& t : status.targets) {
-        buf.insert(buf.end(), reinterpret_cast<const uint8_t*>(&t.id),         reinterpret_cast<const uint8_t*>(&t.id) + 4);
-        buf.insert(buf.end(), reinterpret_cast<const uint8_t*>(&t.posX),       reinterpret_cast<const uint8_t*>(&t.posX) + 8);
-        buf.insert(buf.end(), reinterpret_cast<const uint8_t*>(&t.posY),       reinterpret_cast<const uint8_t*>(&t.posY) + 8);
-        buf.insert(buf.end(), reinterpret_cast<const uint8_t*>(&t.altitude),   reinterpret_cast<const uint8_t*>(&t.altitude) + 8);
-        buf.insert(buf.end(), reinterpret_cast<const uint8_t*>(&t.speed),      reinterpret_cast<const uint8_t*>(&t.speed) + 4);
-        buf.insert(buf.end(), reinterpret_cast<const uint8_t*>(&t.angle1),     reinterpret_cast<const uint8_t*>(&t.angle1) + 8);  // angle1
-        buf.insert(buf.end(), reinterpret_cast<const uint8_t*>(&t.angle2),     reinterpret_cast<const uint8_t*>(&t.angle2) + 8);  // angle2
+        buf.insert(buf.end(), reinterpret_cast<const uint8_t*>(&t.id), reinterpret_cast<const uint8_t*>(&t.id) + 4);
+        buf.insert(buf.end(), reinterpret_cast<const uint8_t*>(&t.posX), reinterpret_cast<const uint8_t*>(&t.posX) + 8);
+        buf.insert(buf.end(), reinterpret_cast<const uint8_t*>(&t.posY), reinterpret_cast<const uint8_t*>(&t.posY) + 8);
+        buf.insert(buf.end(), reinterpret_cast<const uint8_t*>(&t.altitude), reinterpret_cast<const uint8_t*>(&t.altitude) + 8);
+        buf.insert(buf.end(), reinterpret_cast<const uint8_t*>(&t.speed), reinterpret_cast<const uint8_t*>(&t.speed) + 4);
+        buf.insert(buf.end(), reinterpret_cast<const uint8_t*>(&t.angle1), reinterpret_cast<const uint8_t*>(&t.angle1) + 8);
+        buf.insert(buf.end(), reinterpret_cast<const uint8_t*>(&t.angle2), reinterpret_cast<const uint8_t*>(&t.angle2) + 8);
         buf.insert(buf.end(), reinterpret_cast<const uint8_t*>(&t.detectTime), reinterpret_cast<const uint8_t*>(&t.detectTime) + 8);
         buf.push_back(t.priority);
         buf.push_back(static_cast<uint8_t>(t.hit));
     }
-    return buf;
-}
 
-std::vector<uint8_t> Serializer::serializeLauncherResponse(unsigned int lsId, uint8_t lsMode, bool ok, const std::string& msg) {
-    std::vector<uint8_t> buf(260, 0x00);
-    buf[0] = 0x03;
-    buf[1] = lsId;
-    buf[2] = lsMode;
-    buf[3] = static_cast<uint8_t>(ok);
-    std::memcpy(&buf[4], msg.c_str(), std::min((size_t)256, msg.size()));
+    // 9. 전체 payload 크기 계산 후 2~5바이트(1-indexed) 위치에 삽입
+    uint32_t payloadSize = static_cast<uint32_t>(buf.size() - 5); // 전체 - 명령 타입(1) - 길이 필드(4)
+    std::memcpy(&buf[1], &payloadSize, sizeof(uint32_t));         // 1~4번 인덱스에 크기 기록
+
     return buf;
 }
 
@@ -117,6 +93,13 @@ std::vector<uint8_t> Serializer::serializeLaunchCommand(const LaunchCommand& cmd
 
     buf.insert(buf.end(), reinterpret_cast<const uint8_t*>(&cmd.launchAngleXZ),
                reinterpret_cast<const uint8_t*>(&cmd.launchAngleXZ) + sizeof(double));
+
+    buf.insert(buf.end(), reinterpret_cast<const uint8_t*>(&cmd.start_x),
+                reinterpret_cast<const uint8_t*>(&cmd.start_x) + sizeof(long long));
+    buf.insert(buf.end(), reinterpret_cast<const uint8_t*>(&cmd.start_y),
+                reinterpret_cast<const uint8_t*>(&cmd.start_y) + sizeof(long long));
+    buf.insert(buf.end(), reinterpret_cast<const uint8_t*>(&cmd.start_z),
+                reinterpret_cast<const uint8_t*>(&cmd.start_z) + sizeof(long long));
 
     return buf;
 }

@@ -57,10 +57,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/donghyuk/project/ProtoMissileSimulator/ProtoMissileSimulator/src/LC
+CMAKE_SOURCE_DIR = /home/user/nex1/Surface-to-air-missiles/LC
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/donghyuk/project/ProtoMissileSimulator/ProtoMissileSimulator/src/LC/build
+CMAKE_BINARY_DIR = /home/user/nex1/Surface-to-air-missiles/LC/build
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -87,9 +87,9 @@ rebuild_cache/fast: rebuild_cache
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/donghyuk/project/ProtoMissileSimulator/ProtoMissileSimulator/src/LC/build/CMakeFiles /home/donghyuk/project/ProtoMissileSimulator/ProtoMissileSimulator/src/LC/build//CMakeFiles/progress.marks
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/user/nex1/Surface-to-air-missiles/LC/build/CMakeFiles /home/user/nex1/Surface-to-air-missiles/LC/build//CMakeFiles/progress.marks
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/donghyuk/project/ProtoMissileSimulator/ProtoMissileSimulator/src/LC/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/user/nex1/Surface-to-air-missiles/LC/build/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
@@ -128,6 +128,30 @@ lc: cmake_check_build_system
 lc/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/lc.dir/build.make CMakeFiles/lc.dir/build
 .PHONY : lc/fast
+
+Config/LCConfig.o: Config/LCConfig.cpp.o
+.PHONY : Config/LCConfig.o
+
+# target to build an object file
+Config/LCConfig.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lc.dir/build.make CMakeFiles/lc.dir/Config/LCConfig.cpp.o
+.PHONY : Config/LCConfig.cpp.o
+
+Config/LCConfig.i: Config/LCConfig.cpp.i
+.PHONY : Config/LCConfig.i
+
+# target to preprocess a source file
+Config/LCConfig.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lc.dir/build.make CMakeFiles/lc.dir/Config/LCConfig.cpp.i
+.PHONY : Config/LCConfig.cpp.i
+
+Config/LCConfig.s: Config/LCConfig.cpp.s
+.PHONY : Config/LCConfig.s
+
+# target to generate assembly for a file
+Config/LCConfig.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lc.dir/build.make CMakeFiles/lc.dir/Config/LCConfig.cpp.s
+.PHONY : Config/LCConfig.cpp.s
 
 comm/common/MessageParser.o: comm/common/MessageParser.cpp.o
 .PHONY : comm/common/MessageParser.o
@@ -378,6 +402,9 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... lc"
+	@echo "... Config/LCConfig.o"
+	@echo "... Config/LCConfig.i"
+	@echo "... Config/LCConfig.s"
 	@echo "... comm/common/MessageParser.o"
 	@echo "... comm/common/MessageParser.i"
 	@echo "... comm/common/MessageParser.s"

@@ -19,7 +19,7 @@ MockTargetManager::~MockTargetManager()
 
 void MockTargetManager::RaedTargetIni()
 {
-	std::ifstream file("/home/sra235/2024/Surface-to-air-missiles/target_list.ini");
+	std::ifstream file("../Config/target_list.ini");
 	if (!file.is_open())
 	{
 		std::cerr << "Failed to open target_list.ini" << std::endl;
@@ -38,7 +38,7 @@ void MockTargetManager::RaedTargetIni()
 			tokens.push_back(token);
 		}
 
-		if (tokens.size() == 6)
+		if (tokens.size() == 7)
 		{
 			try
 			{
@@ -50,8 +50,8 @@ void MockTargetManager::RaedTargetIni()
 				long long z = std::stoul(tokens[3]);
 				std::cout << "z : " << z << std::endl;
 				double angle = std::stod(tokens[4]);
-				double angle2 = std::stod(tokens[4]);
-				int speed = std::stoi(tokens[5]);
+				double angle2 = std::stod(tokens[5]);
+				int speed = std::stoi(tokens[6]);
 
 				// TargetInfo 객체 생성 및 데이터 설정
 				TargetInfo targetInfo;

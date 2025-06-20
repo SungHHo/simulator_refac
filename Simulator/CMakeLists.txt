@@ -28,6 +28,7 @@ endif()
 # Add include directories
 include_directories(
     ${CMAKE_SOURCE_DIR}/Simulator
+    ${CMAKE_SOURCE_DIR}/Config
     ${CMAKE_SOURCE_DIR}/UDPCommunicate
     ${CMAKE_SOURCE_DIR}/Mock
     ${CMAKE_SOURCE_DIR}/Mock/info
@@ -43,6 +44,7 @@ set(SOURCES
     Mock/MockTargetManager.cpp
     Mock/MockMissileManager.cpp
     Mock/MockMissile.cpp
+    Config/Config.cpp
 )
 
 # Add header files
@@ -54,6 +56,7 @@ set(HEADERS
     Mock/MockTarget.h
     Mock/MockMissileManager.h
     Mock/info/MissileInfo.h
+    Config/Config.h
 )
 
 # Create the executable

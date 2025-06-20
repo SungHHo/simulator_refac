@@ -1,8 +1,8 @@
 CMakeFiles/lc.dir/core/LCManager.cpp.o: \
- /home/donghyuk/project/ProtoMissileSimulator/ProtoMissileSimulator/src/LC/core/LCManager.cpp \
+ /home/user/nex1/Surface-to-air-missiles/LC/core/LCManager.cpp \
  /usr/include/stdc-predef.h \
- /home/donghyuk/project/ProtoMissileSimulator/ProtoMissileSimulator/src/LC/core/LCManager.h \
- /home/donghyuk/project/ProtoMissileSimulator/ProtoMissileSimulator/src/LC/comm/common/SystemStatus.h \
+ /home/user/nex1/Surface-to-air-missiles/LC/core/LCManager.h \
+ /home/user/nex1/Surface-to-air-missiles/LC/comm/common/SystemStatus.h \
  /usr/include/c++/11/string \
  /usr/include/x86_64-linux-gnu/c++/11/bits/c++config.h \
  /usr/include/x86_64-linux-gnu/c++/11/bits/os_defines.h \
@@ -135,19 +135,19 @@ CMakeFiles/lc.dir/core/LCManager.cpp.o: \
  /usr/include/c++/11/bits/stl_vector.h \
  /usr/include/c++/11/bits/stl_bvector.h \
  /usr/include/c++/11/bits/vector.tcc \
- /home/donghyuk/project/ProtoMissileSimulator/ProtoMissileSimulator/src/LC/comm/common/CommonMessage.h \
- /home/donghyuk/project/ProtoMissileSimulator/ProtoMissileSimulator/src/LC/comm/common/CommandType.h \
- /home/donghyuk/project/ProtoMissileSimulator/ProtoMissileSimulator/src/LC/comm/common/SenderType.h \
+ /home/user/nex1/Surface-to-air-missiles/LC/comm/common/CommonMessage.h \
+ /home/user/nex1/Surface-to-air-missiles/LC/comm/common/CommandType.h \
+ /home/user/nex1/Surface-to-air-missiles/LC/comm/common/SenderType.h \
  /usr/include/c++/11/variant /usr/include/c++/11/utility \
  /usr/include/c++/11/bits/stl_relops.h \
  /usr/include/c++/11/bits/enable_special_members.h \
  /usr/include/c++/11/bits/invoke.h \
  /usr/include/c++/11/ext/aligned_buffer.h \
  /usr/include/c++/11/bits/parse_numbers.h \
- /home/donghyuk/project/ProtoMissileSimulator/ProtoMissileSimulator/src/LC/comm/common/IStatusSender.h \
- /home/donghyuk/project/ProtoMissileSimulator/ProtoMissileSimulator/src/LC/comm/common/IReceiver.h \
- /home/donghyuk/project/ProtoMissileSimulator/ProtoMissileSimulator/src/LC/comm/common/IReceiverCallback.h \
- /home/donghyuk/project/ProtoMissileSimulator/ProtoMissileSimulator/src/LC/comm/mfr/TcpMFR.h \
+ /home/user/nex1/Surface-to-air-missiles/LC/comm/common/IStatusSender.h \
+ /home/user/nex1/Surface-to-air-missiles/LC/comm/common/IReceiver.h \
+ /home/user/nex1/Surface-to-air-missiles/LC/comm/common/IReceiverCallback.h \
+ /home/user/nex1/Surface-to-air-missiles/LC/comm/mfr/TcpMFR.h \
  /usr/include/c++/11/memory /usr/include/c++/11/bits/stl_tempbuf.h \
  /usr/include/c++/11/bits/stl_raw_storage_iter.h \
  /usr/include/c++/11/bits/align.h /usr/include/c++/11/bit \
@@ -181,7 +181,7 @@ CMakeFiles/lc.dir/core/LCManager.cpp.o: \
  /usr/include/c++/11/bits/algorithmfwd.h \
  /usr/include/c++/11/bits/stl_heap.h \
  /usr/include/c++/11/bits/uniform_int_dist.h \
- /home/donghyuk/project/ProtoMissileSimulator/ProtoMissileSimulator/src/LC/comm/ls/SerialLS.h \
+ /home/user/nex1/Surface-to-air-missiles/LC/comm/ls/SerialLS.h \
  /usr/include/c++/11/iostream /usr/include/c++/11/ostream \
  /usr/include/c++/11/ios /usr/include/c++/11/bits/ios_base.h \
  /usr/include/c++/11/bits/locale_classes.h \
@@ -247,14 +247,14 @@ CMakeFiles/lc.dir/core/LCManager.cpp.o: \
  /usr/include/c++/11/tr1/poly_laguerre.tcc \
  /usr/include/c++/11/tr1/riemann_zeta.tcc \
  /usr/include/c++/11/shared_mutex \
- /home/donghyuk/project/ProtoMissileSimulator/ProtoMissileSimulator/src/LC/inih/INIReader.h \
+ /home/user/nex1/Surface-to-air-missiles/LC/inih/INIReader.h \
  /usr/include/c++/11/map /usr/include/c++/11/bits/stl_tree.h \
  /usr/include/c++/11/bits/stl_map.h \
  /usr/include/c++/11/bits/stl_multimap.h /usr/include/c++/11/sstream \
  /usr/include/c++/11/bits/sstream.tcc \
- /home/donghyuk/project/ProtoMissileSimulator/ProtoMissileSimulator/src/LC/inih/ini.h \
- /home/donghyuk/project/ProtoMissileSimulator/ProtoMissileSimulator/src/LC/comm/common/Serializer.h \
- /home/donghyuk/project/ProtoMissileSimulator/ProtoMissileSimulator/src/LC/comm/ecc/TcpECC.h \
+ /home/user/nex1/Surface-to-air-missiles/LC/inih/ini.h \
+ /home/user/nex1/Surface-to-air-missiles/LC/comm/common/Serializer.h \
+ /home/user/nex1/Surface-to-air-missiles/LC/comm/ecc/TcpECC.h \
  /usr/include/c++/11/iomanip /usr/include/c++/11/locale \
  /usr/include/c++/11/bits/locale_facets_nonio.h \
  /usr/include/x86_64-linux-gnu/c++/11/bits/time_members.h \
@@ -263,4 +263,17 @@ CMakeFiles/lc.dir/core/LCManager.cpp.o: \
  /usr/include/c++/11/bits/locale_facets_nonio.tcc \
  /usr/include/c++/11/bits/locale_conv.h \
  /usr/include/c++/11/bits/quoted_string.h \
- /home/donghyuk/project/ProtoMissileSimulator/ProtoMissileSimulator/src/LC/core/LCCommandHandler.h
+ /home/user/nex1/Surface-to-air-missiles/LC/core/LCCommandHandler.h \
+ /home/user/nex1/Surface-to-air-missiles/LC/core/ENU_Translator.hpp \
+ /home/user/nex1/Surface-to-air-missiles/LC/Config/LCConfig.h \
+ /usr/include/termios.h /usr/include/x86_64-linux-gnu/bits/termios.h \
+ /usr/include/x86_64-linux-gnu/bits/termios-struct.h \
+ /usr/include/x86_64-linux-gnu/bits/termios-c_cc.h \
+ /usr/include/x86_64-linux-gnu/bits/termios-c_iflag.h \
+ /usr/include/x86_64-linux-gnu/bits/termios-c_oflag.h \
+ /usr/include/x86_64-linux-gnu/bits/termios-baud.h \
+ /usr/include/x86_64-linux-gnu/bits/termios-c_cflag.h \
+ /usr/include/x86_64-linux-gnu/bits/termios-c_lflag.h \
+ /usr/include/x86_64-linux-gnu/bits/termios-tcflow.h \
+ /usr/include/x86_64-linux-gnu/bits/termios-misc.h \
+ /usr/include/x86_64-linux-gnu/sys/ttydefaults.h

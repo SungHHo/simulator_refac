@@ -38,7 +38,7 @@ private:
     double goalMotorAngle;
 
     /// @brief MFR 탐지 범위 (m)
-    const long long limitDetectionRange = 100000;
+    const long long limitDetectionRange = 1000000;
 
     /// @brief MFR의 시야(FoV) 제한 각도
     const double limitedFoV = 15.0;
@@ -74,16 +74,16 @@ private:
     std::shared_mutex detectedMissileMutex;
 
     /// @brief 모의 표적 관리 자료구조
-    std::unordered_map<unsigned int, localTargetSimData> mockTargets;
+    std::unordered_map<unsigned int, localMockSimData> mockTargets;
 
     /// @brief 모의 미사일 관리 자료구조
-    std::unordered_map<unsigned int, localMissileSimData> mockMissile;
+    std::unordered_map<unsigned int, localMockSimData> mockMissile;
 
     /// @brief 탐지된 모의 표적 관리 자료구조
-    std::unordered_map<unsigned int, localTargetSimData> detectedTargets;
+    std::unordered_map<unsigned int, localMockSimData> detectedTargets;
 
     /// @brief 탐지된 모의 미사일 관리 자료구조
-    std::unordered_map<unsigned int, localMissileSimData> detectedMissile;
+    std::unordered_map<unsigned int, localMockSimData> detectedMissile;
 
     /// @brief 탐지 알고리즘 스레드
     std::thread detectionThread;
@@ -254,7 +254,7 @@ private:
      *
      * @param target 추가할 MockTarget
      */
-    void addMockTarget(const localTargetSimData& target);
+    void addMockTarget(const localMockSimData& target);
     
     /**
      * ID로 MockTarget을 검색
@@ -262,7 +262,7 @@ private:
      * @param id 해당 MockTarget의 고유 ID
      * @return 해당 ID를 가진 MockTarget 포인터 (없으면 nullptr)
      */
-    localTargetSimData* getMockTargetById(unsigned int id);
+    localMockSimData* getMockTargetById(unsigned int id);
 
     /**
      * 지정된 ID의 MockTarget을 목록에서 제거
@@ -281,7 +281,7 @@ private:
      *
      * @param target 추가할 MockMissile
      */
-    void addMockMissile(const localMissileSimData& missile);
+    void addMockMissile(const localMockSimData& missile);
 
     /**
      * ID로 MockMissile을 검색
@@ -289,7 +289,7 @@ private:
      * @param id 해당 MockMissile의 고유 ID
      * @return 해당 ID를 가진 MockMissile 포인터 (없으면 nullptr)
      */
-    localMissileSimData* getMockMissileById(unsigned int id);
+    localMockSimData* getMockMissileById(unsigned int id);
 
     /**
      * 지정된 ID의 MockMissile을 목록에서 제거

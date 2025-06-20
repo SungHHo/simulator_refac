@@ -1,4 +1,6 @@
 file(REMOVE_RECURSE
+  "CMakeFiles/SurfaceToAirWeaponSystem.dir/Config/Config.cpp.o"
+  "CMakeFiles/SurfaceToAirWeaponSystem.dir/Config/Config.cpp.o.d"
   "CMakeFiles/SurfaceToAirWeaponSystem.dir/Mock/MockMissile.cpp.o"
   "CMakeFiles/SurfaceToAirWeaponSystem.dir/Mock/MockMissile.cpp.o.d"
   "CMakeFiles/SurfaceToAirWeaponSystem.dir/Mock/MockMissileManager.cpp.o"

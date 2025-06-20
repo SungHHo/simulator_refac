@@ -5,13 +5,13 @@
 # compile CXX with /usr/bin/c++
 C_DEFINES = 
 
-C_INCLUDES = -I/home/donghyuk/project/ProtoMissileSimulator/ProtoMissileSimulator/src/LC/core -I/home/donghyuk/project/ProtoMissileSimulator/ProtoMissileSimulator/src/LC/comm/common -I/home/donghyuk/project/ProtoMissileSimulator/ProtoMissileSimulator/src/LC/comm/ecc -I/home/donghyuk/project/ProtoMissileSimulator/ProtoMissileSimulator/src/LC/comm/ls -I/home/donghyuk/project/ProtoMissileSimulator/ProtoMissileSimulator/src/LC/comm/mfr -I/home/donghyuk/project/ProtoMissileSimulator/ProtoMissileSimulator/src/LC/status -I/home/donghyuk/project/ProtoMissileSimulator/ProtoMissileSimulator/src/LC/inih
+C_INCLUDES = -I/home/user/nex1/Surface-to-air-missiles/LC/core -I/home/user/nex1/Surface-to-air-missiles/LC/comm/common -I/home/user/nex1/Surface-to-air-missiles/LC/comm/ecc -I/home/user/nex1/Surface-to-air-missiles/LC/comm/ls -I/home/user/nex1/Surface-to-air-missiles/LC/comm/mfr -I/home/user/nex1/Surface-to-air-missiles/LC/status -I/home/user/nex1/Surface-to-air-missiles/LC/inih -I/home/user/nex1/Surface-to-air-missiles/LC/Config
 
 C_FLAGS = -g
 
 CXX_DEFINES = 
 
-CXX_INCLUDES = -I/home/donghyuk/project/ProtoMissileSimulator/ProtoMissileSimulator/src/LC/core -I/home/donghyuk/project/ProtoMissileSimulator/ProtoMissileSimulator/src/LC/comm/common -I/home/donghyuk/project/ProtoMissileSimulator/ProtoMissileSimulator/src/LC/comm/ecc -I/home/donghyuk/project/ProtoMissileSimulator/ProtoMissileSimulator/src/LC/comm/ls -I/home/donghyuk/project/ProtoMissileSimulator/ProtoMissileSimulator/src/LC/comm/mfr -I/home/donghyuk/project/ProtoMissileSimulator/ProtoMissileSimulator/src/LC/status -I/home/donghyuk/project/ProtoMissileSimulator/ProtoMissileSimulator/src/LC/inih
+CXX_INCLUDES = -I/home/user/nex1/Surface-to-air-missiles/LC/core -I/home/user/nex1/Surface-to-air-missiles/LC/comm/common -I/home/user/nex1/Surface-to-air-missiles/LC/comm/ecc -I/home/user/nex1/Surface-to-air-missiles/LC/comm/ls -I/home/user/nex1/Surface-to-air-missiles/LC/comm/mfr -I/home/user/nex1/Surface-to-air-missiles/LC/status -I/home/user/nex1/Surface-to-air-missiles/LC/inih -I/home/user/nex1/Surface-to-air-missiles/LC/Config
 
 CXX_FLAGS = -g
 

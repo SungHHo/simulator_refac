@@ -1,4 +1,4 @@
-# Install script for directory: /home/donghyuk/project/ProtoMissileSimulator/ProtoMissileSimulator/src/LC
+# Install script for directory: /home/user/nex1/Surface-to-air-missiles/LC
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -50,5 +50,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "/home/donghyuk/project/ProtoMissileSimulator/ProtoMissileSimulator/src/LC/build/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "/home/user/nex1/Surface-to-air-missiles/LC/build/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")

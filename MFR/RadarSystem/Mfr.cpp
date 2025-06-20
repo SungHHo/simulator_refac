@@ -55,9 +55,7 @@ void Mfr::callBackData(const std::vector<char>& packet)
             break;
 
         case STATUS_REQ:
-            // std::cout << "[Mfr::recvData] 상태 요청 명령 수신됨" << std::endl;
             sendMfrStatus();
-            // std::cout << "[Mfr::recvData] 상태 요청 명령 전송됨" << std::endl;
             break;
 
         case MODE_CHANGE:
@@ -66,7 +64,6 @@ void Mfr::callBackData(const std::vector<char>& packet)
             break;
 
         case LC_INIT_RES:
-            // std::cout << "[Mfr::recvData] LC 최초 정보 수신" << std::endl;
             parsingLcInitData(dataPayload);
             break;
 
@@ -208,70 +205,54 @@ void Mfr::parsingLcInitData(const std::vector<char>& payload)
 
 void Mfr::parsingSimData(const std::vector<char>& payload)
 {
-    if (payload.size() != sizeof(TargetSimData) && payload.size() != sizeof(MissileSimData)) 
+    if (payload.size() != sizeof(MockSimData) && payload.size() != sizeof(MockSimData)) 
     {
         std::cerr << "[Mfr::handleSimDataPayload] SimData 크기 오류. 받은 크기: " << payload.size() << std::endl;
         return;
     }
-    
-    if (payload.size() == sizeof(TargetSimData))
-    {
-        TargetSimData data;
-        std::memcpy(&data, payload.data(), sizeof(TargetSimData)); 
-        
-        localTargetSimData localSimData;
-        localSimData.mockId = data.mockId;
-        localSimData.mockCoords = decode(data.mockCoords);
-        localSimData.angle = data.angle;    
-        localSimData.speed = data.speed;
 
-        std::cout << "[Mfr::handleSimDataPayload] Target Data 수신 -> ID: " << localSimData.mockId
+    MockSimData data;
+    std::memcpy(&data, payload.data(), sizeof(TargetSimData)); 
+    
+    localMockSimData localSimData;
+    localSimData.mockId = data.mockId;
+    localSimData.mockCoords = decode(data.mockCoords);
+    localSimData.angle = data.angle;
+    localSimData.angle2 = data.angle2;    
+    localSimData.speed = data.speed;
+    localSimData.isHit = data.isHit;
+    
+    std::cout << "[Mfr::handleSimDataPayload] Sim Data 수신 -> ID: " << localSimData.mockId
               << ", Latitude: " << localSimData.mockCoords.latitude
               << ", Longitude: " << localSimData.mockCoords.longitude
               << ", Altitude: " << localSimData.mockCoords.altitude
-              << ", Angle: " << localSimData.angle
+              << ", Angle1: " << localSimData.angle
+              << ", Angle2: " << localSimData.angle2
               << ", Speed: " << localSimData.speed 
               << ", is Hit?: " << localSimData.isHit
               << std::endl;
 
-        if (localSimData.mockId >= 104001 && localSimData.mockId <= 104999)         // 표적 정보
-        {
-            addMockTarget(localSimData);
-        }
-        else 
-        {
-            std::cerr << "[Mfr::handleSimDataPayload] 알 수 없는 ID 범위: " << localSimData.mockId << std::endl;
-        }
+    if (localSimData.mockId >= 104001 && localSimData.mockId <= 104999)         // 표적 정보
+    {
+        // std::cout << "Target Detected!@!" 
+        //     << ", ID: " << localSimData.mockId        
+        //     << std::endl;
+            
+        addMockTarget(localSimData);
     }
 
-    else if (payload.size() == sizeof(MissileSimData))
+    else if (localSimData.mockId >= 105001 && localSimData.mockId <= 105999)    // 미사일 정보
     {
-        MissileSimData data;
-        std::memcpy(&data, payload.data(), sizeof(MissileSimData));
-        localMissileSimData localSimData;
-        localSimData.mockId = data.mockId;
-        localSimData.mockCoords = decode(data.mockCoords);
-        localSimData.angle = data.angle;
-        localSimData.speed = data.speed;
+        // std::cout << "Missile Detected!@!"
+        //     << ", ID: " << localSimData.mockId        
+        //     << std::endl;
 
-        std::cout << "[Mfr::handleSimDataPayload] Missile Data 수신 -> ID: " << localSimData.mockId
-              << ", Latitude: " << localSimData.mockCoords.latitude
-              << ", Longitude: " << localSimData.mockCoords.longitude
-              << ", Altitude: " << localSimData.mockCoords.altitude
-              << ", Angle: " << localSimData.angle
-              << ", Angle2: " << localSimData.angle2
-              << ", Speed: " << localSimData.speed
-              << ", is Hit?: " << localSimData.isHit
-              << std::endl;
+        addMockMissile(localSimData);
+    }
 
-        if (localSimData.mockId >= 105001 && localSimData.mockId <= 105999)    // 미사일 정보
-        {
-            addMockMissile(localSimData);
-        }
-        else 
-        {
-            std::cerr << "[Mfr::handleSimDataPayload] 알 수 없는 ID 범위: " << localSimData.mockId << std::endl;
-        }
+    else 
+    {
+        std::cerr << "[Mfr::handleSimDataPayload] 알 수 없는 ID 범위: " << localSimData.mockId << std::endl;
     }
 }
 
@@ -372,21 +353,14 @@ double Mfr::angleDiff(double baseAngle, double targetAngle)
 
 void Mfr::mfrDetectionAlgo()
 {
-    std::unordered_map<unsigned int, localTargetSimData> localTargets;
-    std::unordered_map<unsigned int, localMissileSimData> localMissiles;
+    std::unordered_map<unsigned int, localMockSimData> localTargets;
+    std::unordered_map<unsigned int, localMockSimData> localMissiles;
 
-    {
-        std::shared_lock<std::shared_mutex> lock(mockTargetMutex);
-        localTargets = mockTargets;
-    }
+    localTargets = mockTargets;
+    localMissiles = mockMissile;
 
-    {
-        std::shared_lock<std::shared_mutex> lock(mockMissileMutex);
-        localMissiles = mockMissile;
-    }
-
-    std::unordered_map<unsigned int, localTargetSimData> localDetectedTargets;
-    std::unordered_map<unsigned int, localMissileSimData> localDetectedMissile;
+    std::unordered_map<unsigned int, localMockSimData> localDetectedTargets;
+    std::unordered_map<unsigned int, localMockSimData> localDetectedMissile;
 
     std::vector<MfrToLcTargetInfo> detectedTargetList;
     std::vector<MfrToLcMissileInfo> detectedMissileList;
@@ -396,10 +370,10 @@ void Mfr::mfrDetectionAlgo()
     
     if (mfrMode == ROTATION_MODE)
     {
-        if(!motorRotationFlag)
-        {
-            stepMotorManager->sendCommand("ROTATION_MODE");
-        }        
+        // if(!motorRotationFlag)
+        // {
+        //     stepMotorManager->sendCommand("ROTATION_MODE");
+        // }        
 
         std::vector<std::pair<unsigned int, long long>> targetDistances;
 
@@ -411,6 +385,7 @@ void Mfr::mfrDetectionAlgo()
             {
                 localDetectedTargets[id] = target;
                 targetDistances.emplace_back(id, distance);
+                std::cout << target.speed << std::endl;
             }
             else
             {
@@ -442,6 +417,7 @@ void Mfr::mfrDetectionAlgo()
             status.targetCoords = encode(target.mockCoords);
             status.targetSpeed = target.speed;
             status.targetAngle = target.angle;
+            status.targetAngle2 = target.angle2;
             status.firstDetectionTime = nowMs;
             status.prioirty = priority++;
             status.isHit = false;
@@ -494,7 +470,7 @@ void Mfr::mfrDetectionAlgo()
             
             std::ostringstream oss;
             oss << std::fixed << std::setprecision(2) << baseAz;
-            stepMotorManager->sendCommand("STOP_MODE:" + oss.str());
+            // stepMotorManager->sendCommand("STOP_MODE:" + oss.str());
 
             for (const auto& [id, target] : localTargets)
             {
@@ -516,6 +492,7 @@ void Mfr::mfrDetectionAlgo()
                     status.targetCoords = encode(target.mockCoords);
                     status.targetSpeed = target.speed;
                     status.targetAngle = target.angle;
+                    status.targetAngle2 = target.angle2;
                     status.firstDetectionTime = nowMs;
                     status.prioirty = 1;
                     status.isHit = false;
@@ -559,104 +536,59 @@ void Mfr::mfrDetectionAlgo()
         lcCommManager->send(packet);
     }
 
-    {
-        std::unique_lock<std::shared_mutex> lock(detectedTargetMutex);
-        detectedTargets = std::move(localDetectedTargets);
-    }    
-
-    {
-        std::unique_lock<std::shared_mutex> lock(detectedMissileMutex);
-        detectedMissile = std::move(localDetectedMissile);
-    }
+    detectedTargets = std::move(localDetectedTargets);
+    detectedMissile = std::move(localDetectedMissile);
 }
 
-void Mfr::addMockTarget(const localTargetSimData& target) 
+void Mfr::addMockTarget(const localMockSimData& target) 
 {
-    std::unique_lock<std::shared_mutex> lock(mockTargetMutex);
     mockTargets[target.mockId] = target;
 }
 
 //
 //  detected 된 데이터에서만 조회
 //
-localTargetSimData* Mfr::getMockTargetById(unsigned int id) 
+localMockSimData* Mfr::getMockTargetById(unsigned int id) 
 {
-    std::shared_lock<std::shared_mutex> lock(detectedTargetMutex);
     auto it = detectedTargets.find(id);
     return (it != detectedTargets.end()) ? &it->second : nullptr;
 }
 
 void Mfr::removeMockTargetById(unsigned int id) 
 {
-    {
-        std::unique_lock<std::shared_mutex> lock(mockTargetMutex);
-        mockTargets.erase(id);
-    }
-
-    {
-        std::unique_lock<std::shared_mutex> lock(detectedTargetMutex);
-        detectedTargets.erase(id);
-    }
+    mockTargets.erase(id);
+    detectedTargets.erase(id);
 }
 
 void Mfr::clearMockTargets() 
 {
-    {
-        std::unique_lock<std::shared_mutex> lock(mockTargetMutex);
-        mockTargets.clear();
-    }
-
-    {
-        std::unique_lock<std::shared_mutex> lock(detectedTargetMutex);
-        detectedTargets.clear();
-    }
+    mockTargets.clear();
+    detectedTargets.clear();
 }
 
-void Mfr::addMockMissile(const localMissileSimData& missile) 
+void Mfr::addMockMissile(const localMockSimData& missile) 
 {
-    {
-        std::unique_lock<std::shared_mutex> lock(mockMissileMutex);
-        mockMissile[missile.mockId] = missile;
-    }
-
-    {
-        std::unique_lock<std::shared_mutex> lock(detectedMissileMutex);
-        detectedMissile[missile.mockId] = missile;
-    }
+    mockMissile[missile.mockId] = missile;
+    detectedMissile[missile.mockId] = missile;
 }
 
 //
 //  detected 된 데이터에서만 조회
 //
-localMissileSimData* Mfr::getMockMissileById(unsigned int id)
+localMockSimData* Mfr::getMockMissileById(unsigned int id)
 {
-    std::shared_lock<std::shared_mutex> lock(detectedMissileMutex);
     auto it = detectedMissile.find(id);
     return (it != detectedMissile.end()) ? &it->second : nullptr;
 }
 
 void Mfr::removeMockMissileById(unsigned int id) 
 {
-    {
-        std::unique_lock<std::shared_mutex> lock(mockMissileMutex);
-        mockMissile.erase(id);
-    }
-
-    {
-        std::unique_lock<std::shared_mutex> lock(detectedMissileMutex);
-        detectedMissile.erase(id);
-    }
+    mockMissile.erase(id);
+    detectedMissile.erase(id);
 }
 
 void Mfr::clearMockMissiles() 
 {
-    {
-        std::unique_lock<std::shared_mutex> lock(mockMissileMutex);
-        mockMissile.clear();
-    }
-
-    {
-        std::unique_lock<std::shared_mutex> lock(detectedMissileMutex);
-        detectedMissile.clear();
-    }
+    mockMissile.clear();
+    detectedMissile.clear();
 }

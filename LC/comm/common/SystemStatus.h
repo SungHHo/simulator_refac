@@ -44,6 +44,8 @@ struct LSStatus
     double launchAngle = 0.0;
     Pos2D position;
     long long height = 0;
+    int speed = 0;
+
 };
 
 struct LCStatus

@@ -4,7 +4,7 @@
 # compile CXX with g++
 CXX_DEFINES = 
 
-CXX_INCLUDES = -I/home/donghyuk/project/Surface-to-air-missiles/Simulator/Simulator -I/home/donghyuk/project/Surface-to-air-missiles/Simulator/UDPCommunicate -I/home/donghyuk/project/Surface-to-air-missiles/Simulator/Mock -I/home/donghyuk/project/Surface-to-air-missiles/Simulator/Mock/info
+CXX_INCLUDES = -I/home/user/nex1/Surface-to-air-missiles/Simulator/Simulator -I/home/user/nex1/Surface-to-air-missiles/Simulator/Config -I/home/user/nex1/Surface-to-air-missiles/Simulator/UDPCommunicate -I/home/user/nex1/Surface-to-air-missiles/Simulator/Mock -I/home/user/nex1/Surface-to-air-missiles/Simulator/Mock/info
 
 CXX_FLAGS = 
 

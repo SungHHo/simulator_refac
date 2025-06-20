@@ -41,11 +41,15 @@ bool DeserializeStatusResponse(
 
     size_t offset = 0;
 
-    // CommandType (1¹ÙÀÌÆ®) skip
+    // CommandType (1ï¿½ï¿½ï¿½ï¿½Æ®) skip
     if (len < offset + 1) return false;
     offset += 1;
 
-    // radar, lc, ls count (°¢ 1¹ÙÀÌÆ®, »ç¿ëÇÏÁö ¾ÊÀ¸¸é skip)
+    // CommandLength
+    if (len < offset + 4) retunr false;
+    offset += 4;
+
+    // radar, lc, ls count (ï¿½ï¿½ 1ï¿½ï¿½ï¿½ï¿½Æ®, ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ skip)
     if (len < offset + 3) return false;
     uint8_t radarCount = data[offset++];
     uint8_t lcCount = data[offset++];
@@ -119,7 +123,7 @@ bool DeserializeStatusResponse(
  //   const StatusHeader* header = reinterpret_cast<const StatusHeader*>(data);
  //   offset += sizeof(StatusHeader);
 
- //   // ÃÑ ¿¹»ó ¹ÙÀÌÆ® ¼ö
+ //   // ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Æ® ï¿½ï¿½
  //   size_t expectedSize =
  //       sizeof(StatusHeader)
  //       + header->num_radar * sizeof(RadarStatus)
@@ -127,11 +131,11 @@ bool DeserializeStatusResponse(
  //       + header->num_ls * sizeof(LSStatus)
  //       + header->num_target * sizeof(TargetStatus)
  //       + header->num_missile * sizeof(MissileStatus);
-	//std::cout << "[µð¹ö±×] ¿¹»ó Å©±â: " << expectedSize << ", ½ÇÁ¦ Å©±â: " << len << "\n";
+	//std::cout << "[ï¿½ï¿½ï¿½ï¿½ï¿½] ï¿½ï¿½ï¿½ï¿½ Å©ï¿½ï¿½: " << expectedSize << ", ï¿½ï¿½ï¿½ï¿½ Å©ï¿½ï¿½: " << len << "\n";
 
  //   //if (len < expectedSize) return false;
 
- //   // ¾ÈÀüÇÑ ¹è¿­ º¹»ç ¶÷´Ù
+ //   // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½è¿­ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
  //   auto read_array = [&](auto& vec, size_t count, size_t itemSize) -> bool {
  //       if (offset + count * itemSize > len) return false;
 

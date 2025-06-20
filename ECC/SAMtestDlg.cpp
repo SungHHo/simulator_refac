@@ -12,6 +12,8 @@
 #include "ReceiveMessageTypes.h"
 #include "Deserializer.h"
 #include "PacketParser.h"
+#include "Config.h"
+
 #include <iostream>
 #include <variant>
 
@@ -161,13 +163,20 @@ BOOL CSAMtestDlg::OnInitDialog()
 	//m_leftBottom.SetLSList(dummyLSList);
 
 
-
+	ConfigCommon config;
+    if (!loadConfig("ECCconfig.ini", config)) {
+        AfxMessageBox(_T("설정 파일을 읽어오는 데 실패했습니다."));
+        return FALSE;  // 초기화 실패
+    }
 	m_tcp = std::make_unique<ECC_TCP>();
-	//if (!m_tcp->connect("127.0.0.1", 9000)) { // 127.0.0.1 192.168.1.110 8888
-	if (!m_tcp->connect("192.168.1.110", 8888)) { // 127.0.0.1 192.168.1.110 8888
-			AfxMessageBox(_T("서버 연결 실패"));
+	if (!m_tcp->connect(config.LCSendIP.c_str(), config.LCSendPort)) {
+		CString msg;
+		msg.Format(_T("서버 연결 실패\nIP: %S\nPort: %d"),
+				config.LCSendIP.c_str(), config.LCSendPort);
+		AfxMessageBox(msg);
 		return FALSE;
 	}
+
 
 	m_tcp->registerReceiver(this);
 	m_tcp->startReceiving();

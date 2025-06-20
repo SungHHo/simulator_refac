@@ -1,6 +1,8 @@
 file(REMOVE_RECURSE
   "../bin/lc"
   "../bin/lc.pdb"
+  "CMakeFiles/lc.dir/Config/LCConfig.cpp.o"
+  "CMakeFiles/lc.dir/Config/LCConfig.cpp.o.d"
   "CMakeFiles/lc.dir/comm/common/MessageParser.cpp.o"
   "CMakeFiles/lc.dir/comm/common/MessageParser.cpp.o.d"
   "CMakeFiles/lc.dir/comm/common/Serializer.cpp.o"

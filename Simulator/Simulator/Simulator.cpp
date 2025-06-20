@@ -13,6 +13,7 @@
 #include <stdexcept>
 #include <thread>
 
+#include "Config.h"
 #include "MissileInfo.h"
 #include "LSRecvUDPManager.h"
 #include "MFRSendUDPManager.h"
@@ -28,6 +29,13 @@ Simulator::~Simulator()
 
 bool Simulator::init()
 {
+	ConfigCommon config;
+	if (loadConfig("../Config/Simulator.ini", config) == false)
+	{
+		std::cerr << "Failed to load configuration from Simulator.ini." << std::endl;
+		return false;
+	}
+
 	// Constructor implementation
 	ls_recv_manager_ = std::make_unique<LSRecvUDPManager>();
 	mfr_send_manager_ = std::make_shared<MFRSendUDPManager>();
@@ -37,15 +45,13 @@ bool Simulator::init()
 		return false;
 	}
 
-	if (!ls_recv_manager_->LSSocketOpen(3001))
+	if (!ls_recv_manager_->LSSocketOpen(config.LSRecvPort))
 	{
 		std::cerr << "Failed to initialize ls_recv_manager socket." << std::endl;
 		return false;
 	}
 
-	// if (!mfr_send_manager_->MFRSocketOpen("192.168.2.176", 9000))
-	//  if(!mfr_send_manager_->MFRSocketOpen("172.30.1.30", 9000))
-	if (!mfr_send_manager_->MFRSocketOpen("127.0.0.1", 9000))
+	if (!mfr_send_manager_->MFRSocketOpen(config.MFRSendIP, config.MFRSendPort))
 	{
 		std::cerr << "Failed to initialize mfr_send_manager socket." << std::endl;
 		return false;

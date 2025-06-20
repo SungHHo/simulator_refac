@@ -6,7 +6,7 @@
 #include <ws2tcpip.h>
 #include <process.h>
 #include <iostream>
-
+#include <vector>
 #include "MAP_TCP.h"
 ECC_TCP::ECC_TCP() {}
 

@@ -46,7 +46,7 @@ bool DeserializeStatusResponse(
     offset += 1;
 
     // CommandLength
-    if (len < offset + 4) retunr false;
+    if (len < offset + 4) return false;
     offset += 4;
 
     // radar, lc, ls count (�� 1����Ʈ, ������� ������ skip)

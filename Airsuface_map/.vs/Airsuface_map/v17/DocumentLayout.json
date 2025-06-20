@@ -1,13 +1,24 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "C:\\Users\\user\\Surface-to-air-missiles\\Airsuface_map\\",
+  "WorkspaceRootPath": "C:\\Users\\user\\OneDrive\\Desktop\\Surface-to-air-missiles\\Airsuface_map\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{B4B76AB5-507D-4B5C-B9E3-78715744164E}|Airsuface_map.csproj|c:\\users\\user\\surface-to-air-missiles\\airsuface_map\\assemblyinfo.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\user\\OneDrive\\Desktop\\Surface-to-air-missiles\\ECC\\Deserializer.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B4B76AB5-507D-4B5C-B9E3-78715744164E}|Airsuface_map.csproj|c:\\users\\user\\onedrive\\desktop\\surface-to-air-missiles\\airsuface_map\\views\\gmapview.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B4B76AB5-507D-4B5C-B9E3-78715744164E}|Airsuface_map.csproj|solutionrelative:views\\gmapview.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B4B76AB5-507D-4B5C-B9E3-78715744164E}|Airsuface_map.csproj|c:\\users\\user\\onedrive\\desktop\\surface-to-air-missiles\\airsuface_map\\views\\gmapview.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{B4B76AB5-507D-4B5C-B9E3-78715744164E}|Airsuface_map.csproj|solutionrelative:views\\gmapview.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B4B76AB5-507D-4B5C-B9E3-78715744164E}|Airsuface_map.csproj|c:\\users\\user\\onedrive\\desktop\\surface-to-air-missiles\\airsuface_map\\assemblyinfo.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{B4B76AB5-507D-4B5C-B9E3-78715744164E}|Airsuface_map.csproj|solutionrelative:assemblyinfo.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{B4B76AB5-507D-4B5C-B9E3-78715744164E}|Airsuface_map.csproj|c:\\users\\user\\surface-to-air-missiles\\airsuface_map\\models\\lc.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{B4B76AB5-507D-4B5C-B9E3-78715744164E}|Airsuface_map.csproj|c:\\users\\user\\onedrive\\desktop\\surface-to-air-missiles\\airsuface_map\\models\\lc.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{B4B76AB5-507D-4B5C-B9E3-78715744164E}|Airsuface_map.csproj|solutionrelative:models\\lc.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
@@ -23,23 +34,58 @@
             {
               "$type": "Document",
               "DocumentIndex": 0,
-              "Title": "AssemblyInfo.cs",
-              "DocumentMoniker": "C:\\Users\\user\\Surface-to-air-missiles\\Airsuface_map\\AssemblyInfo.cs",
-              "RelativeDocumentMoniker": "AssemblyInfo.cs",
-              "ToolTip": "C:\\Users\\user\\Surface-to-air-missiles\\Airsuface_map\\AssemblyInfo.cs",
-              "RelativeToolTip": "AssemblyInfo.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAADwvwAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-05-28T10:48:53.764Z",
+              "Title": "Deserializer.cpp",
+              "DocumentMoniker": "C:\\Users\\user\\OneDrive\\Desktop\\Surface-to-air-missiles\\ECC\\Deserializer.cpp",
+              "RelativeDocumentMoniker": "..\\ECC\\Deserializer.cpp",
+              "ToolTip": "C:\\Users\\user\\OneDrive\\Desktop\\Surface-to-air-missiles\\ECC\\Deserializer.cpp",
+              "RelativeToolTip": "..\\ECC\\Deserializer.cpp",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAA4AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2025-06-20T07:39:10.77Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 1,
+              "Title": "gmapView.xaml.cs",
+              "DocumentMoniker": "C:\\Users\\user\\OneDrive\\Desktop\\Surface-to-air-missiles\\Airsuface_map\\Views\\gmapView.xaml.cs",
+              "RelativeDocumentMoniker": "Views\\gmapView.xaml.cs",
+              "ToolTip": "C:\\Users\\user\\OneDrive\\Desktop\\Surface-to-air-missiles\\Airsuface_map\\Views\\gmapView.xaml.cs",
+              "RelativeToolTip": "Views\\gmapView.xaml.cs",
+              "ViewState": "AgIAAI8AAAAAAAAAAAAUwJ4AAAAjAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-06-19T08:49:01.124Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "gmapView.xaml",
+              "DocumentMoniker": "C:\\Users\\user\\OneDrive\\Desktop\\Surface-to-air-missiles\\Airsuface_map\\Views\\gmapView.xaml",
+              "RelativeDocumentMoniker": "Views\\gmapView.xaml",
+              "ToolTip": "C:\\Users\\user\\OneDrive\\Desktop\\Surface-to-air-missiles\\Airsuface_map\\Views\\gmapView.xaml",
+              "RelativeToolTip": "Views\\gmapView.xaml",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2025-06-19T08:48:57.211Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "AssemblyInfo.cs",
+              "DocumentMoniker": "C:\\Users\\user\\OneDrive\\Desktop\\Surface-to-air-missiles\\Airsuface_map\\AssemblyInfo.cs",
+              "RelativeDocumentMoniker": "AssemblyInfo.cs",
+              "ToolTip": "C:\\Users\\user\\OneDrive\\Desktop\\Surface-to-air-missiles\\Airsuface_map\\AssemblyInfo.cs",
+              "RelativeToolTip": "AssemblyInfo.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAABlAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-05-28T10:48:53.764Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
               "Title": "LC.cs",
-              "DocumentMoniker": "C:\\Users\\user\\Surface-to-air-missiles\\Airsuface_map\\Models\\LC.cs",
+              "DocumentMoniker": "C:\\Users\\user\\OneDrive\\Desktop\\Surface-to-air-missiles\\Airsuface_map\\Models\\LC.cs",
               "RelativeDocumentMoniker": "Models\\LC.cs",
-              "ToolTip": "C:\\Users\\user\\Surface-to-air-missiles\\Airsuface_map\\Models\\LC.cs",
+              "ToolTip": "C:\\Users\\user\\OneDrive\\Desktop\\Surface-to-air-missiles\\Airsuface_map\\Models\\LC.cs",
               "RelativeToolTip": "Models\\LC.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAAlAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",

@@ -2,12 +2,12 @@
 #include <cstdint>
 #pragma pack(push, 1)
 
-struct PacketHeader 
+struct PacketHeader
 {
     unsigned char cmdType;
 };
 
-struct EncodedPos2D 
+struct EncodedPos2D
 {
     long long latitude;
     long long longitude;
@@ -80,13 +80,13 @@ struct MissileSimData // 4 + (8*3) + 8 + 4 = 40 bytes
 {
     unsigned int mockId;
     EncodedPos3D mockCoords;
-    int speed;  
+    int speed;
     double angle;
     double angle2;
     bool isHit;
 };
 
-struct MfrToLcMissileInfo   // 4 + (8*3) + 4 + 8 + 8 + 8 + 1 = 57 bytes
+struct MfrToLcMissileInfo // 4 + (8*3) + 4 + 8 + 8 + 8 + 1 = 57 bytes
 {
     unsigned int id;
     EncodedPos3D missileCoords;
@@ -97,9 +97,9 @@ struct MfrToLcMissileInfo   // 4 + (8*3) + 4 + 8 + 8 + 8 + 1 = 57 bytes
     bool isHit;
 };
 
-struct MfrToLcTargetInfo    // 4 + (8*3) + 4 + 8 + 8 + 1 + 1 = 50 bytes
+struct MfrToLcTargetInfo // 4 + (8*3) + 4 + 8 + 8 + 1 + 1 = 50 bytes
 {
-    unsigned int id;       
+    unsigned int id;
     EncodedPos3D targetCoords;
     int targetSpeed;
     double targetAngle;
@@ -109,7 +109,6 @@ struct MfrToLcTargetInfo    // 4 + (8*3) + 4 + 8 + 8 + 1 + 1 = 50 bytes
     bool isHit;
 };
 
-
 enum recvPacketType : uint8_t
 {
     SIM_MOCK_DATA = 0x01,
@@ -118,31 +117,31 @@ enum recvPacketType : uint8_t
     LC_INIT_RES = 0x13
 };
 
-enum sendPacketType : uint8_t 
+enum sendPacketType : uint8_t
 {
     STATUS_RES = 0x21,
     DETECTED_INFO = 0x22,
     LC_INIT_REQ = 0x23
 };
 
-enum RadarMode : uint8_t 
+enum RadarMode : uint8_t
 {
     ANGLE_MODE = 0x01,
     ROTATION_MODE = 0x02
 };
 
-enum isPriorityMode : uint8_t 
+enum isPriorityMode : uint8_t
 {
     PRIORITY_TARGET = 0x01,
     CUSTOMIZE_TARGET = 0x02
 };
 
-struct MfrStatus 
+struct MfrStatus
 {
     unsigned int radarId;
     EncodedPos3D radarPos;
     RadarMode radarMode;
-    double radarAngle;    
+    double radarAngle;
 };
 
 struct LcInitData
@@ -156,7 +155,7 @@ struct ReqLcInitData
     unsigned int radarId;
 };
 
-struct ModeCahngeData    // 4 + 1 + 1 + 4  = 10 bytes
+struct ModeCahngeData // 4 + 1 + 1 + 4  = 10 bytes
 {
     unsigned int radarId;
     unsigned char modeData;

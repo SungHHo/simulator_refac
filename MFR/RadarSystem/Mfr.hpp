@@ -91,16 +91,16 @@ private:
     std::shared_mutex detectedMissileMutex;
 
     /// @brief 모의 표적 관리 자료구조
-    std::unordered_map<unsigned int, localMockSimData> mockTargets;
+    std::unordered_map<unsigned int, MfrToLcTargetInfo> mockTargets;
 
     /// @brief 모의 미사일 관리 자료구조
-    std::unordered_map<unsigned int, localMockSimData> mockMissile;
+    std::unordered_map<unsigned int, MfrToLcMissileInfo> mockMissile;
 
     /// @brief 탐지된 모의 표적 관리 자료구조
-    std::unordered_map<unsigned int, localMockSimData> detectedTargets;
+    std::unordered_map<unsigned int, MfrToLcTargetInfo> detectedTargets;
 
     /// @brief 탐지된 모의 미사일 관리 자료구조
-    std::unordered_map<unsigned int, localMockSimData> detectedMissile;
+    std::unordered_map<unsigned int, MfrToLcMissileInfo> detectedMissile;
 #endif
 
     /// @brief 탐지 알고리즘 스레드
@@ -222,7 +222,7 @@ private:
      * @param tp 변환할 시간 포인트
      * @return 1970년 1월 1일 기준 경과 시간 (밀리초)
      */
-    unsigned long toEpochMillis(std::chrono::system_clock::time_point tp);
+    unsigned long toEpochMillis(const std::chrono::system_clock::time_point &tp);
 
     /**
      * 탐지 알고리즘을 백그라운드 스레드에서 실행
@@ -272,7 +272,7 @@ private:
      *
      * @param target 추가할 MockTarget
      */
-    void addMockTarget(const localMockSimData &target);
+    void addMockTarget(const MfrToLcTargetInfo &target);
 
     /**
      * ID로 MockTarget을 검색
@@ -280,7 +280,7 @@ private:
      * @param id 해당 MockTarget의 고유 ID
      * @return 해당 ID를 가진 MockTarget 포인터 (없으면 nullptr)
      */
-    localMockSimData *getMockTargetById(unsigned int id);
+    MfrToLcTargetInfo *getMockTargetById(unsigned int id);
 
     /**
      * 지정된 ID의 MockTarget을 목록에서 제거
@@ -299,7 +299,7 @@ private:
      *
      * @param target 추가할 MockMissile
      */
-    void addMockMissile(const localMockSimData &missile);
+    void addMockMissile(const MfrToLcMissileInfo &missile);
 
     /**
      * ID로 MockMissile을 검색
@@ -307,7 +307,7 @@ private:
      * @param id 해당 MockMissile의 고유 ID
      * @return 해당 ID를 가진 MockMissile 포인터 (없으면 nullptr)
      */
-    localMockSimData *getMockMissileById(unsigned int id);
+    MfrToLcMissileInfo *getMockMissileById(unsigned int id);
 
     /**
      * 지정된 ID의 MockMissile을 목록에서 제거

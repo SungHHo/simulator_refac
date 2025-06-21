@@ -51,10 +51,10 @@ void CMissileInfoDlg::SetMissileStatus(const MissileStatus& status)
 
 	// ✅ 현재 UTC 시간 (초 단위) 구하기
 	using namespace std::chrono;
-	auto now_utc = duration_cast<seconds>(system_clock::now().time_since_epoch()).count();
+	auto now_utc_ms = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
 
 	// ✅ 남은 초 계산
-	m_secondsRemaining = static_cast<int>(status.predicted_time - now_utc);
+	m_secondsRemaining = static_cast<int>((status.predicted_time - now_utc_ms) / 1000);
 	if (m_secondsRemaining < 0) m_secondsRemaining = 0;
 
 	UpdateUI();
@@ -88,15 +88,15 @@ void CMissileInfoDlg::UpdateUI()
 	m_staticAngle.SetWindowText(str);
 
 	// ✅ 격추까지 남은 시간 출력
-	/*if (m_secondsRemaining > 0)
+	if (m_secondsRemaining > 0)
 	{
 		str.Format(_T("%d초 남음"), m_secondsRemaining);
 	}
 	else
 	{
 		str = _T("격추 완료 또는 시간 초과");
-	}*/
-	str.Format(_T("%llu"), m_missileStatus.predicted_time);
+	}
+	// str.Format(_T("%llu"), m_missileStatus.predicted_time);
 	m_staticShootTime.SetWindowText(str);
 }
 

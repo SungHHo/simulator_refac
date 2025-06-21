@@ -151,36 +151,46 @@ void CTargetInfoDlg::UpdateUIFromSelection()
 	m_staticPriority.SetWindowText(str);
 
 	// ✅ UTC → KST 시간 변환
-	//str = FormatUtcToKST(t.first_detect_time);
-	str.Format(_T("%lld"), t.first_detect_time);  // 시간 출력
+	str = FormatUtcToKST(t.first_detect_time);
+	//str.Format(_T("%lld"), t.first_detect_time);  // 시간 출력
 	m_staticDetect.SetWindowText(str);
 
 	str.Format(_T("%d"), static_cast<int>(t.hit));
 	m_staticHit.SetWindowText(str);
 }
 
-// ✅ UTC → KST 변환 함수 (C++17 chrono 기반)
-//CString FormatUtcToKST(unsigned long long utc_seconds)
-//{
-//	using namespace std::chrono;
-//
-//	system_clock::time_point utc_time = system_clock::time_point(seconds(utc_seconds));
-//	system_clock::time_point kst_time = utc_time + hours(9);
-//
-//	time_t tt = system_clock::to_time_t(kst_time);
-//	struct tm tm_kst;
-//	localtime_s(&tm_kst, &tt);
-//
-//	CString result;
-//	result.Format(_T("%04d-%02d-%02d %02d:%02d:%02d"),
-//		tm_kst.tm_year + 1900,
-//		tm_kst.tm_mon + 1,
-//		tm_kst.tm_mday,
-//		tm_kst.tm_hour,
-//		tm_kst.tm_min,
-//		tm_kst.tm_sec);
-//	return result;
-//}
+#include <chrono>
+
+// ✅ UTC 밀리초(ms) → KST 문자열 (CString) 변환
+CString FormatUtcToKST(unsigned long long utc_milliseconds)
+{
+	using namespace std::chrono;
+
+	// 1. 밀리초 → system_clock::time_point
+	system_clock::time_point utc_time = system_clock::time_point(milliseconds(utc_milliseconds));
+
+	// 2. UTC + 9시간 → KST
+	system_clock::time_point kst_time = utc_time + hours(9);
+
+	// 3. time_t로 변환
+	time_t tt = system_clock::to_time_t(kst_time);
+
+	// 4. tm 구조체로 변환
+	struct tm tm_kst;
+	gmtime_s(&tm_kst, &tt);  // ✅ gmtime_s 사용 (이미 +9시간 되었기 때문에 지역 시간 불필요)
+
+	// 5. 문자열 생성
+	CString result;
+	result.Format(_T("%04d-%02d-%02d %02d:%02d:%02d"),
+		tm_kst.tm_year + 1900,
+		tm_kst.tm_mon + 1,
+		tm_kst.tm_mday,
+		tm_kst.tm_hour,
+		tm_kst.tm_min,
+		tm_kst.tm_sec);
+
+	return result;
+}
 
 // 클릭 핸들러 (비워둠 또는 로그 출력용)
 void CTargetInfoDlg::OnCbnSelchangeComboTargetId() { UpdateUIFromSelection(); }

@@ -13,6 +13,9 @@ if(BUILD_FOR_PETALINUX)
 
     set(CMAKE_C_COMPILER arm-xilinx-linux-gnueabi-gcc)
     set(CMAKE_CXX_COMPILER arm-xilinx-linux-gnueabi-g++)
+
+    # DCMAKE BUILD_FOR_PETALINUX
+    add_definitions(-DBUILD_FOR_PETALINUX)
 else()
     # Ubuntu(x86) 빌드 환경
     message(STATUS "Building for Ubuntu x86 environment")

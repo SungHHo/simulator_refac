@@ -67,16 +67,16 @@ private:
 
 #ifdef BUILD_FOR_PETALINUX
     /// @brief 모의 표적 관리 자료구조
-    std::map<unsigned int, localMockSimData> mockTargets;
+    std::map<unsigned int, MfrToLcTargetInfo> mockTargets;
 
     /// @brief 모의 미사일 관리 자료구조
-    std::map<unsigned int, localMockSimData> mockMissile;
+    std::map<unsigned int, MfrToLcMissileInfo> mockMissile;
 
     /// @brief 탐지된 모의 표적 관리 자료구조
-    std::map<unsigned int, localMockSimData> detectedTargets;
+    std::map<unsigned int, MfrToLcTargetInfo> detectedTargets;
 
     /// @brief 탐지된 모의 미사일 관리 자료구조
-    std::map<unsigned int, localMockSimData> detectedMissile;
+    std::map<unsigned int, MfrToLcMissileInfo> detectedMissile;
 #else
     /// @brief 모의 타겟 공유 자원 관리
     std::shared_mutex mockTargetMutex;

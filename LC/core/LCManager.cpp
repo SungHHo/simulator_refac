@@ -250,8 +250,9 @@ void LCManager::sendStatus()
         // std::cout << "- [MFR] ID: " << snapshot.mfr.mfrId
         //           << ", Mode: " << static_cast<int>(snapshot.mfr.mode)
         //           << ", Degree: " << snapshot.mfr.degree
+        //           << ", Detect Time : " << snapshot.mfr.detectTime
         //           << ", Pos: (" << snapshot.mfr.position.x << ", " << snapshot.mfr.position.y
-        //           << ", " << snapshot.mfr.height << ")\n";  // ✅ height 출력도 추가 가능
+        //           << ", " << snapshot.mfr.height << ")\n";
 
         // // LS 상태 출력
         // std::cout << "- [LS] ID: " << snapshot.ls.launchSystemId
@@ -261,19 +262,23 @@ void LCManager::sendStatus()
         //           << ", " << snapshot.ls.height << ")\n";
 
         // // LC 상태 출력
-        // std::cout << "- [LC] ID: " << snapshot.lc.LCId
-        //           << ", Pos: (" << snapshot.lc.position.x << ", " << snapshot.lc.position.y
-        //           << ", " << snapshot.lc.height << ")\n";
+        std::cout << "- [LC] ID: " << snapshot.lc.LCId
+                  << ", Pos: (" << snapshot.lc.position.x << ", " << snapshot.lc.position.y
+                  << ", " << snapshot.lc.height << ")\n";
 
-        // 미사일 / 타겟 수 출력
-        // std::cout << "- 미사일 수: " << snapshot.missiles.size() << "\n";
-        // std::cout << "- 타겟 수: " << snapshot.targets.size() << "\n";
-        // std::cout << "- 미사일 수: " << snapshot.missiles.size() << "\n";
-        // std::cout << "- 타겟 수: " << snapshot.targets.size() << "\n";
-        // std::cout << "- 미사일 수: " << snapshot.missiles.size() << "\n";
-        // std::cout << "- 타겟 수: " << snapshot.targets.size() << "\n";
-        // std::cout << "- 미사일 수: " << snapshot.missiles.size() << "\n";
-        // std::cout << "- 타겟 수: " << snapshot.targets.size() << "\n";
+        // 타겟 정보출력
+        for (const auto target : snapshot.targets)
+        {
+            std::cout << "- [Target] ID: " << target.id
+                      << ", Pos: (" << target.posX << ", " << target.posY
+                      << "), Altitude: " << target.altitude
+                      << ", Speed: " << target.speed
+                      << ", Angle1: " << target.angle1
+                      << ", Angle2: " << target.angle2
+                      << ", Detect Time: " << target.detectTime
+                      << ", Priority: " << static_cast<int>(target.priority)
+                      << ", Hit: " << (target.hit ? "Yes" : "No") << "\n";
+        }
     }
 
     // 직렬화 및 전송
@@ -447,7 +452,7 @@ TargetStatus *LCManager::findTargetById(std::vector<TargetStatus> &targets, unsi
     return nullptr;
 }
 
-void LCManager::updateCalTime(const unsigned long long& calTime)
+void LCManager::updateCalTime(const unsigned long long &calTime)
 {
     status.lc.calculated_time = calTime;
 }
@@ -537,15 +542,15 @@ void LCManager::onRadarDetectionReceived(const Common::RadarDetection &d)
         ts.hit = t.hit;
         targets.push_back(ts);
 
-        std::cout << "[MFR] 타겟 정보: ID=" << ts.id
-                  << ", Pos=(" << ts.posX << ", " << ts.posY << ")"
-                  << ", Altitude=" << ts.altitude
-                  << ", Speed=" << ts.speed
-                  << ", Angle1=" << ts.angle1
-                  << ", Angle2=" << ts.angle2
-                  << ", DetectTime=" << ts.detectTime
-                  << ", Priority=" << static_cast<int>(ts.priority)
-                  << ", Hit=" << static_cast<int>(ts.hit) << "\n";
+        // std::cout << "[MFR] 타겟 정보: ID=" << ts.id
+        //           << ", Pos=(" << ts.posX << ", " << ts.posY << ")"
+        //           << ", Altitude=" << ts.altitude
+        //           << ", Speed=" << ts.speed
+        //           << ", Angle1=" << ts.angle1
+        //           << ", Angle2=" << ts.angle2
+        //           << ", DetectTime=" << ts.detectTime
+        //           << ", Priority=" << static_cast<int>(ts.priority)
+        //           << ", Hit=" << static_cast<int>(ts.hit) << "\n";
     }
     updateStatus(targets);
     std::cout << "[MFR] 타겟 정보 갱신 완료 (총 " << targets.size() << "개)\n";

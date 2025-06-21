@@ -348,6 +348,7 @@ double Mfr::angleDiff(double baseAngle, double targetAngle)
     return diff;
 }
 
+#ifdef BUILD_FOR_PETALINUX
 void Mfr::mfrDetectionAlgo()
 {
     std::map<unsigned int, localMockSimData> localTargets;
@@ -591,3 +592,285 @@ void Mfr::clearMockMissiles()
     mockMissile.clear();
     detectedMissile.clear();
 }
+#else
+void Mfr::mfrDetectionAlgo()
+{
+    std::unordered_map<unsigned int, localMockSimData> localTargets;
+    std::unordered_map<unsigned int, localMockSimData> localMissiles;
+
+    localTargets = mockTargets;
+    localMissiles = mockMissile;
+
+    std::unordered_map<unsigned int, localMockSimData> localDetectedTargets;
+    std::unordered_map<unsigned int, localMockSimData> localDetectedMissile;
+
+    std::vector<MfrToLcTargetInfo> detectedTargetList;
+    std::vector<MfrToLcMissileInfo> detectedMissileList;
+
+    auto now = std::chrono::system_clock::now();
+    uint64_t nowMs = toEpochMillis(now);
+
+    if (mfrMode == ROTATION_MODE)
+    {
+        // if(!motorRotationFlag)
+        // {
+        //     stepMotorManager->sendCommand("ROTATION_MODE");
+        // }
+
+        std::vector<std::pair<unsigned int, long long>> targetDistances;
+
+        for (const auto &[id, target] : localTargets)
+        {
+            double distance = calcDistance(mfrCoords, target.mockCoords);
+
+            if (distance <= limitDetectionRange && !target.isHit)
+            {
+                localDetectedTargets[id] = target;
+                targetDistances.emplace_back(id, distance);
+                // std::cout << target.speed << std::endl;
+            }
+            else
+            {
+                localDetectedTargets.erase(id);
+                auto it = std::remove_if(targetDistances.begin(), targetDistances.end(),
+                                         [id](const std::pair<int, double> &p)
+                                         { return p.first == id; });
+
+                targetDistances.erase(it, targetDistances.end());
+            }
+        }
+
+        std::sort(targetDistances.begin(), targetDistances.end(), [](const auto &a, const auto &b)
+                  { return a.second < b.second; });
+
+        unsigned char priority = 1;
+        for (const auto &[id, distance] : targetDistances)
+        {
+            const auto &target = localDetectedTargets[id];
+
+            if (priority == 1)
+            {
+                goalTargetId = id;
+            }
+
+            MfrToLcTargetInfo status{};
+            status.id = target.mockId;
+            status.targetCoords = encode(target.mockCoords);
+            status.targetSpeed = target.speed;
+            status.targetAngle = target.angle;
+            status.targetAngle2 = target.angle2;
+            status.firstDetectionTime = nowMs;
+            status.prioirty = priority++;
+            status.isHit = false;
+
+            detectedTargetList.push_back(status);
+        }
+
+        for (const auto &[id, missile] : localMissiles)
+        {
+            long long distance = calcDistance(mfrCoords, missile.mockCoords);
+
+            if (distance <= limitDetectionRange && !missile.isHit)
+            {
+                localDetectedMissile[id] = missile;
+
+                MfrToLcMissileInfo status{};
+                status.id = missile.mockId;
+                status.missileCoords = encode(missile.mockCoords);
+                status.missileSpeed = missile.speed;
+                status.missileAngle = missile.angle;
+                status.firstDetectionTime = nowMs;
+                status.timeToIntercept = 10;
+                status.isHit = false;
+
+                detectedMissileList.push_back(status);
+            }
+            else
+            {
+                localDetectedMissile.erase(id);
+                detectedMissile.erase(id);
+            }
+        }
+    }
+
+    //
+    // ######################################################################################
+    //
+
+    else if (mfrMode == ANGLE_MODE)
+    {
+        std::cout << "mfrMode: ANGLE_MODE" << std::endl;
+        detectedTargetList.clear();
+        detectedMissileList.clear();
+        std::cout << "goalTargetId: " << goalTargetId << std::endl;
+        if (localTargets.find(goalTargetId) != localTargets.end())
+        {
+            std::cout << "[Mfr::mfrDetectionAlgo] 목표 표적 ID: " << goalTargetId << std::endl;
+            const auto &goalTarget = localTargets[goalTargetId];
+            double baseAz = calcBearing(mfrCoords, goalTarget.mockCoords);
+
+            std::ostringstream oss;
+            oss << std::fixed << std::setprecision(2) << baseAz;
+            // stepMotorManager->sendCommand("STOP_MODE:" + oss.str());
+
+            for (const auto &[id, target] : localTargets)
+            {
+                long long distance = calcDistance(mfrCoords, target.mockCoords);
+                if (distance > limitDetectionRange)
+                {
+                    continue;
+                }
+
+                double az = calcBearing(mfrCoords, target.mockCoords);
+                double diff = angleDiff(baseAz, az);
+
+                if (std::abs(diff) <= 15.0)
+                {
+                    localDetectedTargets[id] = target;
+
+                    MfrToLcTargetInfo status{};
+                    status.id = target.mockId;
+                    status.targetCoords = encode(target.mockCoords);
+                    status.targetSpeed = target.speed;
+                    status.targetAngle = target.angle;
+                    status.targetAngle2 = target.angle2;
+                    status.firstDetectionTime = nowMs;
+                    status.prioirty = 1;
+                    status.isHit = false;
+
+                    detectedTargetList.push_back(status);
+                }
+            }
+
+            for (const auto &[id, missile] : localMissiles)
+            {
+                long long distance = calcDistance(mfrCoords, missile.mockCoords);
+                if (distance > limitDetectionRange)
+                {
+                    continue;
+                }
+
+                double az = calcBearing(mfrCoords, missile.mockCoords);
+                double diff = angleDiff(baseAz, az);
+
+                if (std::abs(diff) <= 15.0)
+                {
+                    localDetectedMissile[id] = missile;
+
+                    MfrToLcMissileInfo status{};
+                    status.id = missile.mockId;
+                    status.missileCoords = encode(missile.mockCoords);
+                    status.missileSpeed = missile.speed;
+                    status.missileAngle = missile.angle;
+                    status.firstDetectionTime = nowMs;
+                    status.isHit = false;
+
+                    detectedMissileList.push_back(status);
+                }
+            }
+        }
+    }
+
+    if (!detectedTargetList.empty() || !detectedMissileList.empty())
+    {
+        std::vector<char> packet = serializeDetectionPacket(detectedTargetList, detectedMissileList);
+        lcCommManager->send(packet);
+    }
+
+    detectedTargets = std::move(localDetectedTargets);
+    detectedMissile = std::move(localDetectedMissile);
+}
+//
+//  detected 된 데이터에서만 조회
+//
+void Mfr::addMockTarget(const localMockSimData &target)
+{
+    std::unique_lock<std::shared_mutex> lock(mockTargetMutex);
+    mockTargets[target.mockId] = target;
+}
+
+//
+//  detected 된 데이터에서만 조회
+//
+localMockSimData *Mfr::getMockTargetById(unsigned int id)
+{
+    std::shared_lock<std::shared_mutex> lock(detectedTargetMutex);
+    auto it = detectedTargets.find(id);
+    return (it != detectedTargets.end()) ? &it->second : nullptr;
+}
+
+void Mfr::removeMockTargetById(unsigned int id)
+{
+    {
+        std::unique_lock<std::shared_mutex> lock(mockTargetMutex);
+        mockTargets.erase(id);
+    }
+
+    {
+        std::unique_lock<std::shared_mutex> lock(detectedTargetMutex);
+        detectedTargets.erase(id);
+    }
+}
+
+void Mfr::clearMockTargets()
+{
+    {
+        std::unique_lock<std::shared_mutex> lock(mockTargetMutex);
+        mockTargets.clear();
+    }
+
+    {
+        std::unique_lock<std::shared_mutex> lock(detectedTargetMutex);
+        detectedTargets.clear();
+    }
+}
+
+void Mfr::addMockMissile(const localMockSimData &missile)
+{
+    {
+        std::unique_lock<std::shared_mutex> lock(mockMissileMutex);
+        mockMissile[missile.mockId] = missile;
+    }
+
+    {
+        std::unique_lock<std::shared_mutex> lock(detectedMissileMutex);
+        detectedMissile[missile.mockId] = missile;
+    }
+}
+
+//
+//  detected 된 데이터에서만 조회
+//
+localMockSimData *Mfr::getMockMissileById(unsigned int id)
+{
+    std::shared_lock<std::shared_mutex> lock(detectedMissileMutex);
+    auto it = detectedMissile.find(id);
+    return (it != detectedMissile.end()) ? &it->second : nullptr;
+}
+
+void Mfr::removeMockMissileById(unsigned int id)
+{
+    {
+        std::unique_lock<std::shared_mutex> lock(mockMissileMutex);
+        mockMissile.erase(id);
+    }
+
+    {
+        std::unique_lock<std::shared_mutex> lock(detectedMissileMutex);
+        detectedMissile.erase(id);
+    }
+}
+
+void Mfr::clearMockMissiles()
+{
+    {
+        std::unique_lock<std::shared_mutex> lock(mockMissileMutex);
+        mockMissile.clear();
+    }
+
+    {
+        std::unique_lock<std::shared_mutex> lock(detectedMissileMutex);
+        detectedMissile.clear();
+    }
+}
+#endif

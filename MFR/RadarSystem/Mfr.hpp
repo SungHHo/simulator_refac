@@ -4,11 +4,14 @@
 #include "MfrLcCommManager.hpp"
 #include "MfrSimCommManager.hpp"
 #include "IReceiver.hpp"
-
 #include "PacketProtocol.hpp"
 #include <iostream>
 #include <vector>
+#ifdef BUILD_FOR_PETALINUX
 #include <map>
+#else
+#include <unordered_map>
+#endif
 #include <cmath>
 #include <algorithm>
 #include <cstring>
@@ -62,19 +65,7 @@ private:
     /// @brief Simulator 통신 매니저 - UDP/IP
     MfrSimCommManager *simCommManager;
 
-    // /// @brief 모의 타겟 공유 자원 관리
-    // std::mutex mockTargetMutex;
-
-    // /// @brief 모의 미사일 공유 자원 관리
-    // std::mutex mockMissileMutex;
-
-    // /// @brief 탐지된 모의 타겟 공유 자원 관리
-    // std::mutex detectedTargetMutex;
-
-    // /// @brief 탐지된 모의 미사일 공유 자원 관리
-    // std::mutex detectedMissileMutex;
-
-    // 공유자원
+#ifdef BUILD_FOR_PETALINUX
     /// @brief 모의 표적 관리 자료구조
     std::map<unsigned int, localMockSimData> mockTargets;
 
@@ -86,7 +77,31 @@ private:
 
     /// @brief 탐지된 모의 미사일 관리 자료구조
     std::map<unsigned int, localMockSimData> detectedMissile;
-    // 공유자원
+#else
+    /// @brief 모의 타겟 공유 자원 관리
+    std::shared_mutex mockTargetMutex;
+
+    /// @brief 모의 미사일 공유 자원 관리
+    std::shared_mutex mockMissileMutex;
+
+    /// @brief 탐지된 모의 타겟 공유 자원 관리
+    std::shared_mutex detectedTargetMutex;
+
+    /// @brief 탐지된 모의 미사일 공유 자원 관리
+    std::shared_mutex detectedMissileMutex;
+
+    /// @brief 모의 표적 관리 자료구조
+    std::unordered_map<unsigned int, localMockSimData> mockTargets;
+
+    /// @brief 모의 미사일 관리 자료구조
+    std::unordered_map<unsigned int, localMockSimData> mockMissile;
+
+    /// @brief 탐지된 모의 표적 관리 자료구조
+    std::unordered_map<unsigned int, localMockSimData> detectedTargets;
+
+    /// @brief 탐지된 모의 미사일 관리 자료구조
+    std::unordered_map<unsigned int, localMockSimData> detectedMissile;
+#endif
 
     /// @brief 탐지 알고리즘 스레드
     std::thread detectionThread;

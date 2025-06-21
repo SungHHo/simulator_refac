@@ -10,8 +10,8 @@ namespace {
 
 using namespace Common;
 
-uint64_t be64toh(const uint8_t* data) {
-    uint64_t val = 0;
+unsigned long be64toh(const uint8_t* data) {
+    unsigned long val = 0;
     for (int i = 0; i < 8; ++i)
         val = (val << 8) | data[i];
     return val;
@@ -79,7 +79,7 @@ CommonMessage parseLSStatus(const std::vector<uint8_t>& data, CommonMessage& msg
     ls.posY  = be64toh(&data[13]);
     ls.height = be64toh(&data[21]);  // ✅ height 추가
 
-    uint64_t angleBits = be64toh(&data[29]);           // 위치 주의: 기존 21 → 29
+    unsigned long angleBits = be64toh(&data[29]);           // 위치 주의: 기존 21 → 29
     std::memcpy(&ls.launchAngle, &angleBits, sizeof(double));
 
     ls.speed = be32toh(&data[37]);                     // 위치 주의: 기존 29 → 37

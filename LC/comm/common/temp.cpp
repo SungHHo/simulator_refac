@@ -10,8 +10,8 @@
 
 // using namespace Common;
 
-// uint64_t be64toh(const uint8_t* data) {
-//     uint64_t val = 0;
+// unsigned long be64toh(const uint8_t* data) {
+//     unsigned long val = 0;
 //     for (int i = 0; i < 8; ++i)
 //         val = (val << 8) | data[i];
 //     return val;
@@ -88,7 +88,7 @@
 //     ls.lsId  = be32toh(&data[1]);
 //     ls.posX  = be64toh(&data[5]);
 //     ls.posY  = be64toh(&data[13]);
-//     uint64_t angleBits = be64toh(&data[21]);
+//     unsigned long angleBits = be64toh(&data[21]);
 //     std::memcpy(&ls.angle, &angleBits, sizeof(double));
 //     ls.speed = be32toh(&data[29]);
 //     ls.mode  = static_cast<OperationMode>(data[33]);

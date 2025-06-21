@@ -18,11 +18,11 @@ MfrLcCommManager::MfrLcCommManager(IReceiver* receiver) : receiver(receiver), so
 
 void MfrLcCommManager::initMfrLcCommManager()
 {
-    std::cout << "[Mfr::startTcp] TCP 통신 수신 시작" << std::endl;
+    // std::cout << "[Mfr::startTcp] TCP 통신 수신 시작" << std::endl;
 
     if (loadMfrConfig("../config/MFR.ini", mfrConfig)) 
     {
-        std::cout << "Device: " << mfrConfig.device << ", BaudRate: " << mfrConfig.uartBaudRate << std::endl;
+        // std::cout << "Device: " << mfrConfig.device << ", BaudRate: " << mfrConfig.uartBaudRate << std::endl;
 
         lcIp = mfrConfig.launchControllerIP;
         lcPort = mfrConfig.launchControllerPort;
@@ -35,20 +35,20 @@ void MfrLcCommManager::initMfrLcCommManager()
 
     else
     {
-        std::cerr << "[MfrLcCommManager::initMfrLcCommManager] ini Read Failed" << std::endl;
+        // std::cerr << "[MfrLcCommManager::initMfrLcCommManager] ini Read Failed" << std::endl;
     }
 }
 
 bool MfrLcCommManager::connectToLc() 
 {
-    std::cout << "[MfrLcCommManager] 서버 연결 시도 중..." << std::endl;
+    // std::cout << "[MfrLcCommManager] 서버 연결 시도 중..." << std::endl;
 
     while (true)
     {
         sockfd = socket(AF_INET, SOCK_STREAM, 0);
         if (sockfd < 0) 
         {
-            std::cerr << "[MfrLcCommManager::connectToLc] 소켓 생성 실패" << std::endl;
+            // std::cerr << "[MfrLcCommManager::connectToLc] 소켓 생성 실패" << std::endl;
             return false;  // 소켓 자체가 안되면 포기
         }
 
@@ -59,12 +59,12 @@ bool MfrLcCommManager::connectToLc()
 
         if (connect(sockfd, (sockaddr*)&serverAddr, sizeof(serverAddr)) == 0) 
         {
-            std::cout << "[MfrLcCommManager] LC 서버에 연결 성공" << std::endl;
+            // std::cout << "[MfrLcCommManager] LC 서버에 연결 성공" << std::endl;
             return true;
         }
         else
         {
-            perror("[MfrLcCommManager] 서버 연결 실패 - 재시도");
+            // perror("[MfrLcCommManager] 서버 연결 실패 - 재시도");
             close(sockfd);
             sockfd = -1;
         }
@@ -78,14 +78,14 @@ void MfrLcCommManager::startTcpReceiver()
     std::thread([this]() {
         char buffer[BUFFER_SIZE];
 
-        std::cout << "[MfrLcCommManager::startTcpReceiver] TcpReceiver 스레드 시작" << std::endl;
+        // std::cout << "[MfrLcCommManager::startTcpReceiver] TcpReceiver 스레드 시작" << std::endl;
 
         while (true)
         {
             ssize_t len = read(this->sockfd, buffer, sizeof(buffer));
             if (len <= 0)
             {
-                std::cerr << "[MfrLcCommManager::startTcpReceiver] 연결 종료 또는 수신 실패" << std::endl;
+                // std::cerr << "[MfrLcCommManager::startTcpReceiver] 연결 종료 또는 수신 실패" << std::endl;
                 break;
             }
 
@@ -98,7 +98,7 @@ void MfrLcCommManager::startTcpReceiver()
             }
             else
             {
-                std::cerr << "[MfrLcCommManager::startTcpReceiver] receiver가 null임" << std::endl;
+                // std::cerr << "[MfrLcCommManager::startTcpReceiver] receiver가 null임" << std::endl;
             }
         }
     }).detach();
@@ -108,7 +108,7 @@ void MfrLcCommManager::send(const std::vector<char>& packet)
 {
     if (sockfd < 0) 
     {
-        std::cerr << "[MfrLcCommManager::send] 소켓이 미 Open" << std::endl;
+        // std::cerr << "[MfrLcCommManager::send] 소켓이 미 Open" << std::endl;
         return;
     }
 
@@ -116,7 +116,7 @@ void MfrLcCommManager::send(const std::vector<char>& packet)
     // std::cout << "[MfrLcCommManager::send] 전송 시도, size: " << packet.size() << " bytes" << std::endl;
     if (sent != packet.size()) 
     {
-        std::cerr << "[MfrLcCommManager::send] 전송 실패" << std::endl;
+        // std::cerr << "[MfrLcCommManager::send] 전송 실패" << std::endl;
     }
 
     else 

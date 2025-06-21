@@ -22,7 +22,7 @@ void MfrSimCommManager::initMfrSimCommManager()
     
     if (loadMfrConfig("../config/MFR.ini", mfrConfig)) 
     {
-        std::cout << "Simulator Port: " <<mfrConfig.simulatorPort << std::endl;
+        // std::cout << "Simulator Port: " <<mfrConfig.simulatorPort << std::endl;
 
         simPort = mfrConfig.simulatorPort;
 
@@ -68,7 +68,7 @@ void MfrSimCommManager::startUdpReceiver()
     std::thread([this]() {
         char buffer[BUFFER_SIZE];
         
-        std::cout << "[MfrSimCommManager::startUdpReceiver] UdpReceiver 스레드 시작" << std::endl;
+        // std::cout << "[MfrSimCommManager::startUdpReceiver] UdpReceiver 스레드 시작" << std::endl;
 
         while (true) 
         {
@@ -85,13 +85,13 @@ void MfrSimCommManager::startUdpReceiver()
                     std::memcpy(&data, buffer + 1, sizeof(TargetSimData)); // +1로 수정
                     if (this->receiver != nullptr) 
                     {
-                        std::cout << "target data recv" << std::endl;
+                        // std::cout << "target data recv" << std::endl;
                         std::vector<char> packet(buffer, buffer + len);
                         receiver->callBackData(packet);
                     }
                     else
                     {
-                        std::cout << "[MfrSimCommManager::startUdpReceiver] receiver null" << "\n";
+                        // std::cout << "[MfrSimCommManager::startUdpReceiver] receiver null" << "\n";
                     }
                 }
 
@@ -101,13 +101,13 @@ void MfrSimCommManager::startUdpReceiver()
                     std::memcpy(&data, buffer + 1, sizeof(MissileSimData)); // +1로 수정
                     if (this->receiver != nullptr) 
                     {
-                        std::cout << "missile data recv" << std::endl;
+                        // std::cout << "missile data recv" << std::endl;
                         std::vector<char> packet(buffer, buffer + len);
                         receiver->callBackData(packet);
                     }
                     else
                     {
-                        std::cout << "[MfrSimCommManager::startUdpReceiver] receiver null" << "\n";
+                        // std::cout << "[MfrSimCommManager::startUdpReceiver] receiver null" << "\n";
                     }
                 }
 

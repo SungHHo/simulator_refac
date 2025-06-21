@@ -8,7 +8,7 @@
 #include <byteswap.h>
 #include <cstdint>
 
-LSStatusManager::LSStatusManager(const std::string& launcherConfigPath)
+LSStatusManager::LSStatusManager(const std::string &launcherConfigPath)
 {
     init(launcherConfigPath);
 }
@@ -24,9 +24,9 @@ LSStatusManager::~LSStatusManager()
     }
 }
 
-void LSStatusManager::init(const std::string& launcherConfigPath) 
+void LSStatusManager::init(const std::string &launcherConfigPath)
 {
-    try 
+    try
     {
 
         status.id = ConfigParser::getInt("Launcher", "ID", launcherConfigPath);
@@ -37,10 +37,14 @@ void LSStatusManager::init(const std::string& launcherConfigPath)
         status.speed = ConfigParser::getInt("Launcher", "LaunchSpeed", launcherConfigPath);
 
         std::string modeStr = ConfigParser::getValue("Launcher", "Mode", launcherConfigPath);
-        if (modeStr == "STOP_MODE") status.mode = OperationMode::STOP_MODE;
-        else if (modeStr == "MOVE_MODE") status.mode = OperationMode::MOVE_MODE;
-        else if (modeStr == "WAR_MODE")  status.mode = OperationMode::WAR_MODE;
-        else throw std::invalid_argument("Invalid Launcher Mode: " + modeStr);
+        if (modeStr == "STOP_MODE")
+            status.mode = OperationMode::STOP_MODE;
+        else if (modeStr == "MOVE_MODE")
+            status.mode = OperationMode::MOVE_MODE;
+        else if (modeStr == "WAR_MODE")
+            status.mode = OperationMode::WAR_MODE;
+        else
+            throw std::invalid_argument("Invalid Launcher Mode: " + modeStr);
 
         // Motor 핀 설정 읽기
         std::string motorType = ConfigParser::getValue("Motor", "Type", launcherConfigPath);
@@ -50,37 +54,35 @@ void LSStatusManager::init(const std::string& launcherConfigPath)
         motorManager = MotorManagerFactory::create(motorType, canInterface, canId);
 
         std::cout << "[LSStatusManager] Initialized from config: " << launcherConfigPath << "\n";
-
     }
 
-    catch (const std::exception& e)
+    catch (const std::exception &e)
     {
         std::cerr << "[LSStatusManager] Config error: " << e.what() << "\n";
     }
 }
 
-
-void LSStatusManager::updatePosition(long long x, long long y) 
+void LSStatusManager::updatePosition(long long x, long long y)
 {
     std::cout << "[LSStatusManager] Position updated: (" << x << ", " << y << ")\n";
     status.position.x = x;
     status.position.y = y;
 }
 
-void LSStatusManager::updateLaunchAngle(double angle) 
+void LSStatusManager::updateLaunchAngle(double angle)
 {
     std::cout << "[LSStatusManager] Launch angle updated: " << angle << "°\n";
     status.angle = angle;
 }
 
-void LSStatusManager::changeMode(OperationMode mode) 
+void LSStatusManager::changeMode(OperationMode mode)
 {
     std::cout << "[LSStatusManager] Mode changed from "
               << static_cast<int>(status.mode) << " to " << static_cast<int>(mode) << "\n";
     status.mode = mode;
 }
 
-void LSStatusManager::positionBriefing(long long& x, long long& y, long long& z) const
+void LSStatusManager::positionBriefing(long long &x, long long &y, long long &z) const
 {
     x = this->status.position.x;
     y = this->status.position.y;
@@ -88,23 +90,22 @@ void LSStatusManager::positionBriefing(long long& x, long long& y, long long& z)
     return;
 }
 
-void LSStatusManager::speedBriefing(int& speed) const
+void LSStatusManager::speedBriefing(int &speed) const
 {
     speed = status.speed;
     return;
 }
 
-
-void LSStatusManager::serializeStatus(std::vector<uint8_t>& out) const 
+void LSStatusManager::serializeStatus(std::vector<uint8_t> &out) const
 {
     out.clear();
-    out.reserve(sizeof(LSStatus)  + 1);
+    out.reserve(sizeof(LSStatus) + 1);
 
-    const LSStatus& s = status;
+    const LSStatus &s = status;
 
-    auto append = [&](const void* data, size_t size)
+    auto append = [&](const void *data, size_t size)
     {
-        const uint8_t* bytes = static_cast<const uint8_t*>(data);
+        const uint8_t *bytes = static_cast<const uint8_t *>(data);
         out.insert(out.end(), bytes, bytes + size);
     };
 
@@ -117,17 +118,17 @@ void LSStatusManager::serializeStatus(std::vector<uint8_t>& out) const
     append(&net_id, sizeof(net_id));
 
     // Position X/Y (int64_t → big-endian)
-    int64_t net_x = static_cast<int64_t>(bswap_64(static_cast<uint64_t>(s.position.x)));
-    int64_t net_y = static_cast<int64_t>(bswap_64(static_cast<uint64_t>(s.position.y)));
-    int64_t net_z = static_cast<int64_t>(bswap_64(static_cast<uint64_t>(s.position.z)));
+    int64_t net_x = static_cast<int64_t>(bswap_64(static_cast<unsigned long>(s.position.x)));
+    int64_t net_y = static_cast<int64_t>(bswap_64(static_cast<unsigned long>(s.position.y)));
+    int64_t net_z = static_cast<int64_t>(bswap_64(static_cast<unsigned long>(s.position.z)));
     append(&net_x, sizeof(net_x));
     append(&net_y, sizeof(net_y));
     append(&net_z, sizeof(net_z));
 
-    // Angle (double → uint64_t로 reinterpret 후 big-endian 변환)
-    uint64_t angle_raw;
+    // Angle (double → unsigned long로 reinterpret 후 big-endian 변환)
+    unsigned long angle_raw;
     std::memcpy(&angle_raw, &s.angle, sizeof(s.angle));
-    uint64_t net_angle = bswap_64(angle_raw);
+    unsigned long net_angle = bswap_64(angle_raw);
     append(&net_angle, sizeof(net_angle));
 
     // Speed (int → uint32_t → htonl)
@@ -162,7 +163,8 @@ void LSStatusManager::moveLS(long long x, long long y)
         moveCV.notify_all();
 
         // 이전 스레드 종료
-        if (moveThread.joinable()) {
+        if (moveThread.joinable())
+        {
             moveThread.join();
         }
 
@@ -175,7 +177,7 @@ void LSStatusManager::moveLS(long long x, long long y)
 
 void LSStatusManager::moveRoutine(long long destX, long long destY)
 {
-    constexpr double speed_m_per_s = 13.8889;  // 50 km/h
+    constexpr double speed_m_per_s = 13.8889; // 50 km/h
     constexpr int update_interval_ms = 1000;
 
     while (moveFlag)
@@ -204,9 +206,7 @@ void LSStatusManager::moveRoutine(long long destX, long long destY)
 
         std::unique_lock<std::mutex> lock(moveMutex);
         moveCV.wait_for(lock, std::chrono::milliseconds(update_interval_ms), [&]()
-        {
-            return !moveFlag;
-        });
+                        { return !moveFlag; });
     }
 }
 
@@ -235,4 +235,3 @@ bool LSStatusManager::rotateToAngle(double targetAngle)
 
     return success;
 }
-

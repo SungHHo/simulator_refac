@@ -13,6 +13,7 @@
 #include <chrono>
 #include <mutex>
 #include <shared_mutex>
+#include <map>
 
 class Mfr : public IReceiver, public std::enable_shared_from_this<Mfr>
 {
@@ -28,14 +29,11 @@ private:
 
     // shared data
 private:
-    std::unordered_map<unsigned int, localMockSimData> mockTargets;
+    std::map<unsigned int, localMockSimData> mockTargets;
     std::unordered_map<unsigned int, localMockSimData> mockMissile;
 
     std::unordered_map<unsigned int, localMockSimData> detectedTargets;
     std::unordered_map<unsigned int, localMockSimData> detectedMissile;
-
-    mutable std::mutex mockTargetMutex;
-    mutable std::mutex mockMissileMutex;
 
     void addMockMissile(const localMockSimData &missile);
     void addMockTarget(const localMockSimData &target);

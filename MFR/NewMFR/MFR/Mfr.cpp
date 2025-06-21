@@ -46,7 +46,7 @@ void Mfr::startDetectionAlgoThread()
 
 void Mfr::mfrDetectionAlgo()
 {
-    std::unordered_map<unsigned int, localMockSimData> localTargets;
+    std::map<unsigned int, localMockSimData> localTargets;
     std::unordered_map<unsigned int, localMockSimData> localMissiles;
 
     localTargets = mockTargets;
@@ -73,7 +73,7 @@ void Mfr::mfrDetectionAlgo()
             {
                 localDetectedTargets[id] = target;
                 targetDistances.emplace_back(id, distance);
-                Logger::log("Target ID: " + std::to_string(id) + ", Distance: " + std::to_string(distance) + " m, Sppeed: " + std::to_string(target.speed));
+                // Logger::log("Target ID: " + std::to_string(id) + ", Distance: " + std::to_string(distance) + " m, Sppeed: " + std::to_string(target.speed));
             }
             else
             {
@@ -113,6 +113,9 @@ void Mfr::mfrDetectionAlgo()
             status.isHit = false;
 
             detectedTargetList.push_back(status);
+            Logger::log("Detected Target ID: " + std::to_string(status.id) +
+                        ", Distance: " + std::to_string(distance) +
+                        " m, Speed: " + std::to_string(status.targetSpeed));
         }
 
         for (const auto &[id, missile] : localMissiles)
@@ -221,6 +224,7 @@ void Mfr::mfrDetectionAlgo()
     if (!detectedTargetList.empty() || !detectedMissileList.empty())
     {
         std::vector<char> packet = serializeDetectionPacket(detectedTargetList, detectedMissileList);
+        Logger::log("[Mfr::mfrDetectionAlgo] Sending detection data to LC, Targets: " + std::to_string(detectedTargetList.size()) + ", Missiles: " + std::to_string(detectedMissileList.size()));
         lcCommManager->send(packet);
     }
 
@@ -477,21 +481,20 @@ std::vector<char> Mfr::serializePacketforSend(const T &status)
 // shared data
 void Mfr::addMockTarget(const localMockSimData &target)
 {
-    Logger::log("[Mfr::addMockTarget] Mock Target ID: " + std::to_string(target.mockId) +
-                ", Latitude: " + std::to_string(target.mockCoords.latitude) +
-                ", Longitude: " + std::to_string(target.mockCoords.longitude) +
-                ", Altitude: " + std::to_string(target.mockCoords.altitude) +
-                ", Angle1: " + std::to_string(target.angle) +
-                ", Angle2: " + std::to_string(target.angle2) +
-                ", Speed: " + std::to_string(target.speed) +
-                ", is Hit?: " + (target.isHit ? "true" : "false"));
-    // std::lock_guard<std::mutex> lock(mockTargetMutex);
-    // mockTargets[target.mockId] = target;
+    // Logger::log("[Mfr::addMockTarget] Mock Target ID: " + std::to_string(target.mockId) +
+    //             ", Latitude: " + std::to_string(target.mockCoords.latitude) +
+    //             ", Longitude: " + std::to_string(target.mockCoords.longitude) +
+    //             ", Altitude: " + std::to_string(target.mockCoords.altitude) +
+    //             ", Angle1: " + std::to_string(target.angle) +
+    //             ", Angle2: " + std::to_string(target.angle2) +
+    //             ", Speed: " + std::to_string(target.speed) +
+    //             ", is Hit?: " + (target.isHit ? "true" : "false"));
+    mockTargets[target.mockId] = target;
 }
 
 void Mfr::addMockMissile(const localMockSimData &missile)
 {
-    std::lock_guard<std::mutex> lock(mockMissileMutex);
+    // std::lock_guard<std::mutex> lock(mockMissileMutex);
     mockMissile[missile.mockId] = missile;
     detectedMissile[missile.mockId] = missile;
 }

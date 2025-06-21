@@ -51,7 +51,7 @@ struct MissileInfoRecv
 	// double을 8바이트로 변환
 	static void appendDouble(std::vector<uint8_t> &buffer, double value)
 	{
-		uint64_t bits;
+		unsigned long bits;
 		std::memcpy(&bits, &value, sizeof(bits));
 		appendInt64(buffer, static_cast<int64_t>(bits));
 	}
@@ -82,7 +82,7 @@ struct MissileInfoRecv
 		{
 			if (offset + sizeof(int64_t) <= buffer.size())
 			{
-				uint64_t tmp;
+				unsigned long tmp;
 				std::memcpy(&tmp, buffer.data() + offset, sizeof(int64_t));
 				tmp = bswap_64(tmp);
 				val = static_cast<int64_t>(tmp);
@@ -106,7 +106,7 @@ struct MissileInfoRecv
 		{
 			if (offset + sizeof(double) <= buffer.size())
 			{
-				uint64_t tmp;
+				unsigned long tmp;
 				std::memcpy(&tmp, buffer.data() + offset, sizeof(double));
 				tmp = bswap_64(tmp);
 				std::memcpy(&val, &tmp, sizeof(double));

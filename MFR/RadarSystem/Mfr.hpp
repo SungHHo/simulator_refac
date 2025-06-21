@@ -4,10 +4,11 @@
 #include "MfrLcCommManager.hpp"
 #include "MfrSimCommManager.hpp"
 #include "IReceiver.hpp"
+
 #include "PacketProtocol.hpp"
 #include <iostream>
 #include <vector>
-#include <unordered_map>
+#include <map>
 #include <cmath>
 #include <algorithm>
 #include <cstring>
@@ -19,14 +20,14 @@
 #include <sstream>
 #include <iomanip>
 
-
-class Mfr : public IReceiver {
+class Mfr : public IReceiver
+{
 private:
     /// MFR(다기능 레이더)의 고유 ID
     const unsigned int mfrId = 101001;
 
     /// @brief  MFR 좌표
-    const Pos3D mfrCoords = { 37.5481160, 126.9961166, 244.0};
+    const Pos3D mfrCoords = {37.5481160, 126.9961166, 244.0};
 
     /// @brief MFR 모드 정보
     RadarMode mfrMode;
@@ -53,37 +54,39 @@ private:
     MfrStatus mfrStatus;
 
     /// @brief 모터 관리 Manager
-    StepMotorController* stepMotorManager;
-    
+    StepMotorController *stepMotorManager;
+
     /// @brief LC(발사통제기) 통신 매니저 - TCP/IP
-    MfrLcCommManager* lcCommManager;
-    
+    MfrLcCommManager *lcCommManager;
+
     /// @brief Simulator 통신 매니저 - UDP/IP
-    MfrSimCommManager* simCommManager;
-    
-    /// @brief 모의 타겟 공유 자원 관리
-    std::shared_mutex mockTargetMutex;
-    
-    /// @brief 모의 미사일 공유 자원 관리
-    std::shared_mutex mockMissileMutex;
+    MfrSimCommManager *simCommManager;
 
-    /// @brief 탐지된 모의 타겟 공유 자원 관리
-    std::shared_mutex detectedTargetMutex;
-    
-    /// @brief 탐지된 모의 미사일 공유 자원 관리
-    std::shared_mutex detectedMissileMutex;
+    // /// @brief 모의 타겟 공유 자원 관리
+    // std::mutex mockTargetMutex;
 
+    // /// @brief 모의 미사일 공유 자원 관리
+    // std::mutex mockMissileMutex;
+
+    // /// @brief 탐지된 모의 타겟 공유 자원 관리
+    // std::mutex detectedTargetMutex;
+
+    // /// @brief 탐지된 모의 미사일 공유 자원 관리
+    // std::mutex detectedMissileMutex;
+
+    // 공유자원
     /// @brief 모의 표적 관리 자료구조
-    std::unordered_map<unsigned int, localMockSimData> mockTargets;
+    std::map<unsigned int, localMockSimData> mockTargets;
 
     /// @brief 모의 미사일 관리 자료구조
-    std::unordered_map<unsigned int, localMockSimData> mockMissile;
+    std::map<unsigned int, localMockSimData> mockMissile;
 
     /// @brief 탐지된 모의 표적 관리 자료구조
-    std::unordered_map<unsigned int, localMockSimData> detectedTargets;
+    std::map<unsigned int, localMockSimData> detectedTargets;
 
     /// @brief 탐지된 모의 미사일 관리 자료구조
-    std::unordered_map<unsigned int, localMockSimData> detectedMissile;
+    std::map<unsigned int, localMockSimData> detectedMissile;
+    // 공유자원
 
     /// @brief 탐지 알고리즘 스레드
     std::thread detectionThread;
@@ -93,7 +96,7 @@ private:
 
     /// @brief Haversine Formula에 사용되는 상수(r)
     const double EARTH_RADIUS_M = 6'371'000.0; // 지구 반지름 (m)
-    
+
     /// @brief 좌표 인코딩 및 디코딩에 사용되는 스케일링 상수
     const double SCALE = 1e7;
 
@@ -112,11 +115,11 @@ public:
 
     /**
      * Simulator 또는 LC(발사통제기) 통신 매니저로부터 수신한 메시지를 처리
-     * 
+     *
      * @param packet 수신된 메시지 데이터. 명령어(1 byte)와 직렬화된 페이로드로 구성
      */
-    void callBackData(const std::vector<char>& packet) override;
-    
+    void callBackData(const std::vector<char> &packet) override;
+
 private:
     /**
      * @brief deg -> rad 변환 함수
@@ -134,11 +137,11 @@ private:
 
     /**
      * @brief Pos3D 구조체를 EncodedPos3D 구조체로 변환
-     * 
+     *
      * @param e EncodedPos3D 구조체를 디코딩하여 Pos3D 구조체로 변환
      * @return Pos3D 구조체
      */
-    Pos3D decode(const EncodedPos3D& e);
+    Pos3D decode(const EncodedPos3D &e);
 
     /**
      * @brief MFR의 상태 정보를 인코딩
@@ -146,7 +149,7 @@ private:
      * @param p Pos3D 구조체를 인코딩하여 EncodedPos3D 구조체로 변환
      * @return EncodedPos3D 구조체
      */
-    EncodedPos3D encode(const Pos3D& p);
+    EncodedPos3D encode(const Pos3D &p);
 
     /**
      * 전달된 구조체 T를 직렬화하여 바이트 벡터로 변환
@@ -156,7 +159,7 @@ private:
      * @return 직렬화된 바이트 배열(std::vector<char>)
      */
     template <typename T>
-    std::vector<char> serializePacketforSend(const T& status);
+    std::vector<char> serializePacketforSend(const T &status);
 
     /**
      * LC(발사통제기)로부터 초기 설정 데이터를 요청하는 패킷을 전송
@@ -164,8 +167,8 @@ private:
     void requestLcInitData();
 
     /**
-    * 현재 MFR의 상태 정보를 LC로 전송
-    */
+     * 현재 MFR의 상태 정보를 LC로 전송
+     */
     void sendMfrStatus();
 
     /**
@@ -175,28 +178,28 @@ private:
      * @param missiles 탐지된 미사일 정보 목록
      * @return 직렬화된 바이트 배열(std::vector<char>)
      */
-    std::vector<char> serializeDetectionPacket(const std::vector<MfrToLcTargetInfo>& targets, const std::vector<MfrToLcMissileInfo>& missiles);
+    std::vector<char> serializeDetectionPacket(const std::vector<MfrToLcTargetInfo> &targets, const std::vector<MfrToLcMissileInfo> &missiles);
 
     /**
      * Lㅊ(발사통제기)로부터 수신한 ModeCahngeData 패킷을 파싱하고 모터 제어 Manager 호출
      *
      * @param packet 수신된 데이터 패킷. 명령어를 제외한 ModeCahngeData 구조체 직렬화된 형태
      */
-    void parsingModeChangeData(const std::vector<char>& payload);
+    void parsingModeChangeData(const std::vector<char> &payload);
 
     /**
-    * LC로부터 수신한 초기화 데이터 패킷을 파싱하여 내부 상태를 초기화
-    *
-    * @param payload 수신된 초기화 데이터 페이로드
-    */
-    void parsingLcInitData(const std::vector<char>& payload);
+     * LC로부터 수신한 초기화 데이터 패킷을 파싱하여 내부 상태를 초기화
+     *
+     * @param payload 수신된 초기화 데이터 페이로드
+     */
+    void parsingLcInitData(const std::vector<char> &payload);
 
     /**
      * Simulator로부터 수신한 SimData 패킷을 파싱하고 내부 객체(MockTarget 등)를 갱신
      *
      * @param packet 수신된 데이터 패킷. 명령어를 제외한 SimData 구조체 직렬화된 형태
      */
-    void parsingSimData(const std::vector<char>& packet);    
+    void parsingSimData(const std::vector<char> &packet);
 
     /**
      * std::chrono::system_clock::time_point를 밀리초 단위의 epoch 시간으로 변환
@@ -205,17 +208,17 @@ private:
      * @return 1970년 1월 1일 기준 경과 시간 (밀리초)
      */
     unsigned long toEpochMillis(std::chrono::system_clock::time_point tp);
-    
+
     /**
      * 탐지 알고리즘을 백그라운드 스레드에서 실행
-     * 
+     *
      * 내부적으로 무한 루프를 실행하며 표적 탐지를 수행
      */
     void startDetectionAlgoThread();
-    
+
     /**
-    * 실행 중인 탐지 알고리즘 스레드를 종료
-    */
+     * 실행 중인 탐지 알고리즘 스레드를 종료
+     */
     void stopDetectionAlgoThread();
 
     /**
@@ -237,7 +240,7 @@ private:
 
     /**
      * 기준 각도(baseAngle)와 목표 각도(targetAngle) 간의 차이를 계산
-     * 
+     *
      * @param baseAngle 기준 각도 (도 단위, -180 ~ 180)
      * @param targetAngle 목표 각도 (도 단위, -180 ~ 180)
      * @return 두 각도 간의 차이 (도 단위, -180 ~ 180)
@@ -254,15 +257,15 @@ private:
      *
      * @param target 추가할 MockTarget
      */
-    void addMockTarget(const localMockSimData& target);
-    
+    void addMockTarget(const localMockSimData &target);
+
     /**
      * ID로 MockTarget을 검색
      *
      * @param id 해당 MockTarget의 고유 ID
      * @return 해당 ID를 가진 MockTarget 포인터 (없으면 nullptr)
      */
-    localMockSimData* getMockTargetById(unsigned int id);
+    localMockSimData *getMockTargetById(unsigned int id);
 
     /**
      * 지정된 ID의 MockTarget을 목록에서 제거
@@ -281,7 +284,7 @@ private:
      *
      * @param target 추가할 MockMissile
      */
-    void addMockMissile(const localMockSimData& missile);
+    void addMockMissile(const localMockSimData &missile);
 
     /**
      * ID로 MockMissile을 검색
@@ -289,7 +292,7 @@ private:
      * @param id 해당 MockMissile의 고유 ID
      * @return 해당 ID를 가진 MockMissile 포인터 (없으면 nullptr)
      */
-    localMockSimData* getMockMissileById(unsigned int id);
+    localMockSimData *getMockMissileById(unsigned int id);
 
     /**
      * 지정된 ID의 MockMissile을 목록에서 제거

@@ -529,8 +529,19 @@ void LCManager::onRadarDetectionReceived(const Common::RadarDetection &d)
         ts.priority = t.priority;
         ts.hit = t.hit;
         targets.push_back(ts);
+
+        std::cout << "[MFR] 타겟 정보: ID=" << ts.id
+                  << ", Pos=(" << ts.posX << ", " << ts.posY << ")"
+                  << ", Altitude=" << ts.altitude
+                  << ", Speed=" << ts.speed
+                  << ", Angle1=" << ts.angle1
+                  << ", Angle2=" << ts.angle2
+                  << ", DetectTime=" << ts.detectTime
+                  << ", Priority=" << static_cast<int>(ts.priority)
+                  << ", Hit=" << static_cast<int>(ts.hit) << "\n";
     }
     updateStatus(targets);
+    std::cout << "[MFR] 타겟 정보 갱신 완료 (총 " << targets.size() << "개)\n";
 
     std::vector<MissileStatus> missiles;
     for (const auto &m : d.missiles)

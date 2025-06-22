@@ -90,7 +90,8 @@ void CMissileInfoDlg::UpdateUI()
 	// ✅ 격추까지 남은 시간 출력
 	if (m_secondsRemaining > 0)
 	{
-		str.Format(_T("%d초 남음"), m_secondsRemaining);
+		int roundedSeconds = (m_secondsRemaining / 3) * 3;
+		str.Format(_T("약%d초 남음"), roundedSeconds+3);
 	}
 	else
 	{

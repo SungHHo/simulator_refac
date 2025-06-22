@@ -35,6 +35,12 @@ void MockTarget::updatePos()
 
 	while (true)
 	{
+		if (target_info_.is_hit) {
+			sendData();
+			std::cout << "[Target ID " << target_info_.id << "] 격추됨. 전송 및 위치 갱신 중단.\n";
+			return;
+		}
+
 		auto now = std::chrono::steady_clock::now();
 		std::chrono::duration<double> elapsed = now - start_time;
 		double elapsed_sec = elapsed.count();
@@ -67,6 +73,7 @@ void MockTarget::updatePos()
 
 		sendData();
 		std::this_thread::sleep_for(std::chrono::milliseconds(100));
+			
 	}
 }
 

@@ -63,6 +63,7 @@ void MockMissile::updatePosMissile()
 		{
 			std::cout << "Missile hit target!" << std::endl;
 			missile_info_.is_hit = true;
+			sendData();
 			break;  // 명중했으면 루프 종료
 		}
 		else

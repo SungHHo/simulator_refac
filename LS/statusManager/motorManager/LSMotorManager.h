@@ -2,7 +2,9 @@
 #include <cstdint>
 #include <vector>
 #include <string>
+#include <termios.h>
 #include "MotorManagerInterface.h"
+
 class LSMotorManager : public MotorManagerInterface
 {
 private:

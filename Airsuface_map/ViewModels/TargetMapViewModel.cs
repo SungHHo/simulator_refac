@@ -25,6 +25,7 @@ namespace Airsuface_map.ViewModels
                     existing.Z = newTarget.Z;
                     existing.Angle = newTarget.Angle;
                     existing.Speed = newTarget.Speed;
+                    existing.isHit = newTarget.isHit;
                 }
                 else
                 {

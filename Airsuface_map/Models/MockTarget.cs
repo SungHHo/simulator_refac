@@ -8,5 +8,7 @@
         public long Z { get; set; }      // 고도
         public double Angle { get; set; }  // 발사각
         public int Speed { get; set; }    // 속도
+        public bool isHit { get; set; }   // 격추 여부
+
     }
 }

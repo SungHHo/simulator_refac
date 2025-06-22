@@ -176,7 +176,7 @@ namespace Airsuface_map.ViewModels
                 };
                 reader.ReadInt64(); // detectTime
                 reader.ReadInt64(); // interceptTime
-                reader.ReadByte();  // hit
+                missile.isHit = reader.ReadBoolean();  // hit
 
                 MissileMapVM.UpdateMissiles(new[] { missile });
             }
@@ -189,18 +189,19 @@ namespace Airsuface_map.ViewModels
             var targets = new List<MockTarget>();
             for (int i = 0; i < numTarget; i++)
             {
-                targets.Add(new MockTarget
-                {
-                    Id = reader.ReadInt32(),
-                    X = ConvertLongToDouble(ReadCustomInt64(reader)),
-                    Y = ConvertLongToDouble(ReadCustomInt64(reader)),
-                    Z = ReadCustomInt64(reader),
-                    Speed = reader.ReadInt32(),
-                    Angle = reader.ReadDouble()
-                });
+                MockTarget target = new MockTarget();
+                target.Id = reader.ReadInt32();
+                target.X = ConvertLongToDouble(ReadCustomInt64(reader));
+                target.Y = ConvertLongToDouble(ReadCustomInt64(reader));
+                target.Z = ReadCustomInt64(reader);
+                target.Speed = reader.ReadInt32();
+                target.Angle = reader.ReadDouble();
+                reader.ReadInt64(); // 상승각
                 reader.ReadInt64(); // detectTime
                 reader.ReadByte();  // priority
-                reader.ReadByte();  // hit
+                target.isHit = reader.ReadBoolean();
+                if(!target.isHit)
+                    targets.Add(target);
             }
 
             TargetMapVM.UpdateTargets(targets);

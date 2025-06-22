@@ -13,6 +13,7 @@ using System.Windows.Media.Imaging;
 using Airsuface_map.Models;
 using GMap.NET.MapProviders;
 using System.Reflection;
+using WpfAnimatedGif;
 
 namespace Airsuface_map.Views
 {
@@ -66,6 +67,7 @@ namespace Airsuface_map.Views
             if (MissileViewModel != null)
             {
                 MissileViewModel.Missiles.CollectionChanged += Missiles_CollectionChanged;
+                MissileViewModel.OnMissileRemovedWithHit += HandleMissileExplosion;
                 UpdateMissileMarkers();
             }
 
@@ -105,6 +107,40 @@ namespace Airsuface_map.Views
             };
             _updateTimer.Start();
         }
+
+        private void HandleMissileExplosion(int missileId, double x, double y)
+        {
+            var lat = x; // 위도
+            var lon = y; // 경도
+            var position = new PointLatLng(lat, lon);
+
+            // 폭발 마커 표시 (3초 후 자동 제거)
+            _ = CreateExplosionMarker(position, missileId);
+        }
+        private async Task CreateExplosionMarker(PointLatLng position, int id)
+        {
+            var gifImage = new Image
+            {
+                Width = 60,
+                Height = 60
+            };
+            var uri = new Uri(System.IO.Path.GetFullPath("explosion.gif"));
+            var image = new BitmapImage(uri);
+            ImageBehavior.SetAnimatedSource(gifImage, image);
+
+            var marker = new GMapMarker(position)
+            {
+                Shape = gifImage,
+                Offset = new Point(-30, -30),
+                Tag = $"Explosion_{id}"
+            };
+
+            MapControl.Markers.Add(marker);
+
+            await Task.Delay(3000); // 3초 대기
+            Application.Current.Dispatcher.Invoke(() => MapControl.Markers.Remove(marker));
+        }
+
 
         private void Missiles_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
@@ -160,18 +196,20 @@ namespace Airsuface_map.Views
             MockMissile lastMissile = null;
             foreach (var missile in vm.Missiles)
             {
+                var position = new PointLatLng(missile.X, missile.Y);
+
                 // 미사일 마커
                 var marker = CreateMissileMarker(missile);
                 MapControl.Markers.Add(marker);
 
                 // 폭격 범위 원(circle)
-                var center = new PointLatLng(missile.X, missile.Y);
-                var circle = CreateCircle(center, 0.1, 72, Brushes.Red);
+                var circle = CreateCircle(position, 0.1, 72, Brushes.Red);
                 circle.Tag = $"MISSILE_CIRCLE_{missile.Id}";
                 MapControl.Markers.Add(circle);
 
                 lastMissile = missile;
             }
+
 
             // 5. 점선 추가 (최초/마지막 미사일 Id가 같을 때)
             if (lastMissile != null)

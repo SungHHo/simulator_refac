@@ -48,5 +48,5 @@ private:
     bool initUart();
     /// @brief 
     /// @return 
-    bool connectToServer();
+    void connectToServer();
 };

@@ -17,6 +17,11 @@ struct MfrConfig
 
     std::string device;
     int uartBaudRate = B9600;  // termios 매크로 값으로 초기화
+
+    /// @brief Socket 서버 IP
+    std::string motorServerIp;
+    /// @brief Socket 서버 Port
+    uint16_t motorServerPort;
 };
 
 // 공백 제거 및 문자열 처리 유틸 함수 선언

@@ -619,7 +619,7 @@ void Mfr::mfrDetectionAlgo()
         // {
         //     stepMotorManager->sendCommand("ROTATION_MODE");
         // }
-
+        stepMotorManager->sendCmd("ROTATION_MODE");
         std::vector<std::pair<unsigned int, long long>> targetDistances;
 
         for (const auto &[id, target] : localTargets)
@@ -703,7 +703,7 @@ void Mfr::mfrDetectionAlgo()
 
             std::ostringstream oss;
             oss << std::fixed << std::setprecision(2) << baseAz;
-            // stepMotorManager->sendCommand("STOP_MODE:" + oss.str());
+            stepMotorManager->sendCmd("STOP_MODE:" + oss.str());
 
             for (const auto &[id, target] : localTargets)
             {

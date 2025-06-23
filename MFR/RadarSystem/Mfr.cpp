@@ -587,7 +587,6 @@ void Mfr::clearMockMissiles()
 #else
 void Mfr::mfrDetectionAlgo()
 {
-    Logger::log("ubuntu MFR 탐지 알고리즘 실행");
     std::unordered_map<unsigned int, MfrToLcTargetInfo> localTargets;
     std::unordered_map<unsigned int, MfrToLcMissileInfo> localMissiles;
 
@@ -777,7 +776,6 @@ void Mfr::addMockTarget(const MfrToLcTargetInfo &target)
         tmpTarget.firstDetectionTime = mockTargets[target.id].firstDetectionTime;
     }
 
-    std::cout << "Real First Mock Target : " << tmpTarget.firstDetectionTime << "!!!!!!!!!!!!!!!" << std::endl;
     mockTargets[target.id] = tmpTarget;
 }
 

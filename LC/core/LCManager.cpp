@@ -33,8 +33,9 @@ void LCManager::run()
     // });
     // lsLoop.detach();
 
-    status.lc.position.x = 374982866;
-    status.lc.position.y = 1269930267;
+    status.lc.LCId = 103001;
+    status.lc.position.x = 367233200;
+    status.lc.position.y = 1291738128;
 
     // 상태 주기적으로 받아오기
     std::thread statusLoop([this]()

@@ -601,7 +601,6 @@ void Mfr::clearMockMissiles()
 #else
 void Mfr::mfrDetectionAlgo()
 {
-    Logger::log("ubuntu MFR 탐지 알고리즘 실행");
     std::unordered_map<unsigned int, MfrToLcTargetInfo> localTargets;
     std::unordered_map<unsigned int, MfrToLcMissileInfo> localMissiles;
 
@@ -627,7 +626,7 @@ void Mfr::mfrDetectionAlgo()
         {
             double distance = calcDistance(mfrCoords, decode(target.targetCoords));
 
-            if (distance <= limitDetectionRange && !target.isHit)
+            if (distance <= limitDetectionRange)
             {
                 localDetectedTargets[id] = target;
                 targetDistances.emplace_back(id, distance);
@@ -635,12 +634,16 @@ void Mfr::mfrDetectionAlgo()
             }
             else
             {
-                localDetectedTargets.erase(id);
-                auto it = std::remove_if(targetDistances.begin(), targetDistances.end(),
-                                         [id](const std::pair<int, double> &p)
-                                         { return p.first == id; });
+                if (target.isHit == true)
+                {
+                    std::cout << "타겟 격추정보 수신" << std::endl;
+                }
+                // localDetectedTargets.erase(id);
+                // auto it = std::remove_if(targetDistances.begin(), targetDistances.end(),
+                //                          [id](const std::pair<int, double> &p)
+                //                          { return p.first == id; });
 
-                targetDistances.erase(it, targetDistances.end());
+                // targetDistances.erase(it, targetDistances.end());
             }
         }
 
@@ -664,15 +667,19 @@ void Mfr::mfrDetectionAlgo()
         {
             long long distance = calcDistance(mfrCoords, decode(missile.missileCoords));
 
-            if (distance <= limitDetectionRange && !missile.isHit)
+            if (distance <= limitDetectionRange)
             {
                 localDetectedMissile[id] = missile;
                 detectedMissileList.push_back(missile);
             }
             else
             {
-                localDetectedMissile.erase(id);
-                detectedMissile.erase(id);
+                if (missile.isHit == true)
+                {
+                    std::cout << "미사일 격추정보 수신" << std::endl;
+                }
+                // localDetectedMissile.erase(id);
+                // detectedMissile.erase(id);
             }
         }
     }
@@ -740,26 +747,63 @@ void Mfr::mfrDetectionAlgo()
     if (!detectedTargetList.empty() || !detectedMissileList.empty())
     {
         std::vector<char> packet = serializeDetectionPacket(detectedTargetList, detectedMissileList);
-        // for (const auto &target : detectedTargetList)
+        // for (const auto &missile : detectedMissileList)
         // {
-        //     // Convert epoch milliseconds to time_t
-        //     time_t time = target.firstDetectionTime / 1000;
-        //     // Convert to local time
-        //     struct tm *ltm = localtime(&time);
-
-        //     char timeStr[32];
-        //     strftime(timeStr, sizeof(timeStr), "%Y-%m-%d %H:%M:%S", ltm);
-
-        //     // Print milliseconds part
-        //     int ms = target.firstDetectionTime % 1000;
-
-        //     std::cout << "send Mock Target  Time ulong: " << target.firstDetectionTime << "!!!!!!!!!!!!!!!" << std::endl;
-        //     std::cout << "Detected Target ID: " << target.id
-        //               << " First Detection Time: " << timeStr
-        //               << "." << std::setfill('0') << std::setw(3) << ms
-        //               << std::endl;
+        // std::cout << "Missile Detected! ID: " << missile.id
+        //           << ", Coords: (" << decode(missile.missileCoords).latitude << ", "
+        //           << decode(missile.missileCoords).longitude << ", "
+        //           << decode(missile.missileCoords).altitude << ")"
+        //           << ", Speed: " << missile.missileSpeed
+        //           << ", Angle: " << missile.missileAngle
+        //           << ", Time to Intercept: " << missile.timeToIntercept
+        //           << ", is Hit?: " << missile.isHit
+        //           << std::endl;
         // }
+
+        std::cout << "[Mfr::mfrDetectionAlgo] Detected Targets: " << detectedTargetList.size()
+                  << ", Detected Missiles: " << detectedMissileList.size() << std::endl;
+
+        std::vector<unsigned int> removedTargets;
+        std::vector<unsigned int> removedMissiles;
+        for (const auto &target : detectedTargetList)
+        {
+            if (target.isHit == true)
+            {
+                removedTargets.push_back(target.id);
+            }
+        }
+
+        for (const auto &missile : detectedMissileList)
+        {
+            if (missile.isHit == true)
+            {
+                removedMissiles.push_back(missile.id);
+            }
+        }
+
         lcCommManager->send(packet);
+
+        if (!removedTargets.empty())
+        {
+            std::cout << "[Mfr::mfrDetectionAlgo] Removed Targets: ";
+            for (const auto &id : removedTargets)
+            {
+                std::cout << id << " ";
+                removeMockTargetById(id);
+            }
+            std::cout << std::endl;
+        }
+
+        if (!removedMissiles.empty())
+        {
+            std::cout << "[Mfr::mfrDetectionAlgo] Removed Missiles: ";
+            for (const auto &id : removedMissiles)
+            {
+                std::cout << id << " ";
+                removeMockMissileById(id);
+            }
+            std::cout << std::endl;
+        }
     }
 
     detectedTargets = std::move(localDetectedTargets);
@@ -791,7 +835,6 @@ void Mfr::addMockTarget(const MfrToLcTargetInfo &target)
         tmpTarget.firstDetectionTime = mockTargets[target.id].firstDetectionTime;
     }
 
-    std::cout << "Real First Mock Target : " << tmpTarget.firstDetectionTime << "!!!!!!!!!!!!!!!" << std::endl;
     mockTargets[target.id] = tmpTarget;
 }
 

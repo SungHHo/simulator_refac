@@ -137,6 +137,11 @@ namespace Airsuface_map.Views
 
             MapControl.Markers.Add(marker);
 
+            var soundPlayer = new MediaPlayer();
+            soundPlayer.Open(new Uri(System.IO.Path.GetFullPath("explosion.wav")));
+            soundPlayer.Volume = 1.0;  // 필요시 조절
+            soundPlayer.Play();
+
             await Task.Delay(3000); // 3초 대기
             Application.Current.Dispatcher.Invoke(() => MapControl.Markers.Remove(marker));
         }

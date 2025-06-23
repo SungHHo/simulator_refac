@@ -29,13 +29,6 @@ void MockMissileManager::updateMissileID()
 
 void MockMissileManager::flightMissile(const MissileInfo &MissileInfo)
 {
-	last_missile_info_ = MissileInfo;
-	last_missile_info_.cmd = recvPacketType::SIM_DATA;
-
-	updateMissileID();
-
-	std::cout << last_missile_info_.id << std::endl;
-
 	if (is_flight_)
 	{
 		std::cout << "Missile is already in flight." << std::endl;
@@ -46,13 +39,20 @@ void MockMissileManager::flightMissile(const MissileInfo &MissileInfo)
 		std::cout << "Missile flight success." << std::endl;
 	}
 
+	// flight_thread동작중인지 체크
+	last_missile_info_ = MissileInfo;
+	last_missile_info_.cmd = recvPacketType::SIM_DATA;
+
+	updateMissileID();
+
+	std::cout << last_missile_info_.id << std::endl;
+
 	is_flight_ = true;
 
 	// Start the flight thread
 	flight_thread_ = std::thread([this, MissileInfo]()
 								 {
-        MockMissile missile(last_missile_info_, mfr_send_manager_, mock_target_manager_);
+        MockMissile missile(last_missile_info_, mfr_send_manager_, mock_target_manager_, this->shared_from_this());
         missile.updatePosMissile(); });
-
 	flight_thread_.detach();
 }

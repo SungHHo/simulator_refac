@@ -16,7 +16,8 @@ namespace LCCommandHandler
     {
         switch (msg.commandType)
         {
-        case CommandType::STATUS_REQUEST_ECC_TO_LC: {
+        case CommandType::STATUS_REQUEST_ECC_TO_LC:
+        {
             static int eccRequestCounter = 0;
             eccRequestCounter++;
 
@@ -26,103 +27,113 @@ namespace LCCommandHandler
             manager.sendStatus();
             break;
         }
-        //0x02
+        // 0x02
         case CommandType::SET_RADAR_MODE_ECC_TO_LC:
         {
-            const auto& payload = std::get<RadarModeCommand>(msg.payload);
+            const auto &payload = std::get<RadarModeCommand>(msg.payload);
 
             std::cout << "[ECC] 레이더 모드 변경 수신 → "
-                    << "radarId=" << payload.radarId
-                    << ", mode=" << static_cast<int>(payload.radarMode)
-                    << ", priority_select=" << static_cast<int>(payload.priority_select)
-                    << ", targetId=" << payload.targetId << "\n";
+                      << "radarId=" << payload.radarId
+                      << ", mode=" << static_cast<int>(payload.radarMode)
+                      << ", priority_select=" << static_cast<int>(payload.priority_select)
+                      << ", targetId=" << payload.targetId << "\n";
 
             // 직렬화 및 전송
             auto packet = Serializer::serializeRadarModeChange(payload);
-            if (manager.hasMFRSender()) {
+            if (manager.hasMFRSender())
+            {
                 manager.sendToMFR(packet);
-                std::cout << "레이더에게 모드변경 요청, 전송 Byte : " << packet.size() << "\n";  
-            } else {
+                std::cout << "레이더에게 모드변경 요청, 전송 Byte : " << packet.size() << "\n";
+            }
+            else
+            {
                 std::cerr << "[LCCommandHandler] MFR 송신자 없음. 전송 실패\n";
             }
             break;
         }
-        //0x03
+        // 0x03
         case CommandType::SET_LAUNCHER_MODE_ECC_TO_LC:
         {
             const auto &payload = std::get<LauncherCommand>(msg.payload);
             std::cout << "[ECC] 발사대 모드 변경 수신 → lsId=" << payload.lsId
                       << ", mode=" << static_cast<int>(payload.lsMode) << "\n";
 
-                      LauncherModeCommand cmd;
-                      cmd.launcherId = payload.lsId;
-                      cmd.newMode = static_cast<OperationMode>(payload.lsMode);
-                      
-                      auto packet = Serializer::serializeModeChangeCommand(cmd);
-                      if (manager.hasLSSender())
-                      {
+            LauncherModeCommand cmd;
+            cmd.launcherId = payload.lsId;
+            cmd.newMode = static_cast<OperationMode>(payload.lsMode);
+
+            auto packet = Serializer::serializeModeChangeCommand(cmd);
+            if (manager.hasLSSender())
+            {
                 manager.sendToLS(packet);
             }
             break;
         }
-        //0x04
+        // 0x04
         case CommandType::FIRE_COMMAND_ECC_TO_LC:
         {
             auto loop_start = std::chrono::high_resolution_clock::now();
-            const auto& payload = std::get<FireCommand>(msg.payload);
+            const auto &payload = std::get<FireCommand>(msg.payload);
             std::cout << "[ECC] 발사 명령 수신 → lsId=" << payload.lsId
-                    << ", targetId=" << payload.targetId << "\n";
+                      << ", targetId=" << payload.targetId << "\n";
 
             SystemStatus snapshot = manager.getStatusCopy();
-            const auto& ls = snapshot.ls;
-            const auto& targets = snapshot.targets;
+            const auto &ls = snapshot.ls;
+            const auto &targets = snapshot.targets;
 
             TargetStatus selectedTarget{};
             bool found = false;
 
-            if (payload.targetId == 0) {
+            if (payload.targetId == 0)
+            {
                 long long minDistSq = LLONG_MAX;
-                for (const auto& t : targets) {
+                for (const auto &t : targets)
+                {
                     long long dx = t.posX - ls.position.x;
                     long long dy = t.posY - ls.position.y;
                     long long distSq = dx * dx + dy * dy;
-                    if (distSq < minDistSq) {
+                    if (distSq < minDistSq)
+                    {
                         minDistSq = distSq;
                         selectedTarget = t;
                         found = true;
                     }
                 }
-            } else {
-                for (const auto& t : targets) {
-                    if (t.id == payload.targetId) {
+            }
+            else
+            {
+                for (const auto &t : targets)
+                {
+                    if (t.id == payload.targetId)
+                    {
                         selectedTarget = t;
                         found = true;
                         break;
                     }
                 }
             }
-            
 
-            if (!found) {
+            if (!found)
+            {
                 std::cerr << "[LC] 대상 타겟 없음 → targetId=" << payload.targetId << "\n";
                 break;
             }
-            
+
             // 레이더 정지모드 전환
-            manager.setTargetLock(selectedTarget.id); // 타겟 잠금
-            RadarModeCommand radarCmd;
-            radarCmd.radarId = snapshot.mfr.mfrId;
-            radarCmd.radarMode = 0x01;  // STOP
-            radarCmd.flag = 0x00;       // 사용 안 할 경우라도 초기화
-            radarCmd.priority_select = 0x02; // targetId 있음
-            radarCmd.targetId = selectedTarget.id;
-            auto radarPacket = Serializer::serializeRadarModeChange(radarCmd);
-            if (manager.hasMFRSender())
-            {
-                manager.sendToMFR(radarPacket);
-                std::cout << "[LC] 레이더 정지모드 전송 → radarId=" << radarCmd.radarId
-                        << ", targetId=" << radarCmd.targetId << "\n";
-            }
+            // manager.setTargetLock(selectedTarget.id); // 타겟 잠금
+            // RadarModeCommand radarCmd;
+            // radarCmd.radarId = snapshot.mfr.mfrId;
+            // radarCmd.radarMode = 0x01;  // STOP
+            // radarCmd.flag = 0x00;       // 사용 안 할 경우라도 초기화
+            // radarCmd.priority_select = 0x02; // targetId 있음
+            // radarCmd.targetId = selectedTarget.id;
+            // auto radarPacket = Serializer::serializeRadarModeChange(radarCmd);
+            // if (manager.hasMFRSender())
+            // {
+            //     manager.sendToMFR(radarPacket);
+            //     std::cout << "[LC] 레이더 정지모드 전송 → radarId=" << radarCmd.radarId
+            //             << ", targetId=" << radarCmd.targetId << "\n";
+            // }
 
             LaunchCommand cmd;
             cmd.launcherId = ls.launchSystemId;
@@ -146,7 +157,8 @@ namespace LCCommandHandler
             std::cout << "[LC] 거리 계산 결과 → dx: " << dx << "m, dy: " << dy << "m, 총거리: " << dist_m << "m\n";
 
             double initial_bearing = std::atan2(dx, dy) * 180.0 / M_PI;
-            if (initial_bearing < 0.0) initial_bearing += 360.0;
+            if (initial_bearing < 0.0)
+                initial_bearing += 360.0;
 
             const double missileSpeed = static_cast<double>(snapshot.ls.speed) * 1000.0 / 3600.0;
             const double targetSpeed = static_cast<double>(selectedTarget.speed) * 1000.0 / 3600.0;
@@ -164,7 +176,8 @@ namespace LCCommandHandler
             double interceptAngle = initial_bearing;
             bool foundSolution = false;
 
-            for (double t = 1.0; t <= 2000.0; t += 0.1) {
+            for (double t = 1.0; t <= 2000.0; t += 0.1)
+            {
                 double future_lat = lat_tg + (vy_t * t) / meters_per_deg_lat;
                 double future_lon = lon_tg + (vx_t * t) / meters_per_deg_lon;
 
@@ -174,16 +187,18 @@ namespace LCCommandHandler
 
                 double required_time = dist_to_future / missileSpeed;
 
-                if (std::abs(required_time - t) < 0.2) {
+                if (std::abs(required_time - t) < 0.2)
+                {
                     interceptAngle = std::atan2(dx_f, dy_f) * 180.0 / M_PI;
-                    if (interceptAngle < 0.0) interceptAngle += 360.0;
+                    if (interceptAngle < 0.0)
+                        interceptAngle += 360.0;
                     bestTime = t;
                     foundSolution = true;
 
                     double altitude_change = std::tan(selectedTarget.angle2 * M_PI / 180.0) * targetSpeed * t;
                     double target_altitude = selectedTarget.altitude + altitude_change;
                     dz = target_altitude - ls.height;
-                    double horizontal_distance = std::sqrt(dx_f * dx_f + dy_f * dy_f);  // 실제 평면 거리
+                    double horizontal_distance = std::sqrt(dx_f * dx_f + dy_f * dy_f); // 실제 평면 거리
                     cmd.launchAngleXZ = std::atan2(dz, horizontal_distance) * 180.0 / M_PI;
 
                     std::cout << "[고도 디버깅]\n";
@@ -199,31 +214,31 @@ namespace LCCommandHandler
                     break;
                 }
             }
-            
-            if (foundSolution) {
+
+            if (foundSolution)
+            {
                 cmd.launchAngleXY = interceptAngle;
                 std::cout << "[LC] 벡터 기반 요격 계산 결과\n";
                 std::cout << "  조준 각도 (XY): " << cmd.launchAngleXY << "도 (진북 기준)\n";
                 std::cout << "  조준 각도 (XZ): " << cmd.launchAngleXZ << "도 (수직 기준)\n";
                 std::cout << "  추정 요격 시간: " << bestTime << " 초\n";
-                
+
                 auto loop_end = std::chrono::high_resolution_clock::now();
                 std::chrono::duration<double> elapsed = loop_end - loop_start;
                 cmd.start_x = static_cast<long long>(
-                    (std::cos(cmd.launchAngleXY * M_PI / 180.0) * missileSpeed * (elapsed.count() + 0.15) * 0.001 / 111.32) * 1e7
-                        + snapshot.ls.position.x);
+                    (std::cos(cmd.launchAngleXY * M_PI / 180.0) * missileSpeed * (elapsed.count() + 0.15) * 0.001 / 111.32) * 1e7 + snapshot.ls.position.x);
 
                 double lat_deg = static_cast<double>(snapshot.ls.position.x) / 1e7;
                 cmd.start_y = static_cast<long long>(
-                    (std::sin(cmd.launchAngleXY * M_PI / 180.0) * missileSpeed * (elapsed.count() + 0.15) * 0.001 / (111.32 * std::cos(lat_deg * M_PI / 180.0))) * 1e7
-                        + snapshot.ls.position.y);
+                    (std::sin(cmd.launchAngleXY * M_PI / 180.0) * missileSpeed * (elapsed.count() + 0.15) * 0.001 / (111.32 * std::cos(lat_deg * M_PI / 180.0))) * 1e7 + snapshot.ls.position.y);
                 cmd.start_z = static_cast<long long>(snapshot.ls.height);
                 TimeStamp now_ms = getCurrentTimeMillis();
                 TimeStamp intercept_time_ms = static_cast<TimeStamp>(now_ms + (bestTime - elapsed.count()) * 1000.0);
 
                 manager.updateCalTime(intercept_time_ms);
             }
-            else {
+            else
+            {
                 cmd.launchAngleXY = initial_bearing;
                 cmd.launchAngleXZ = 0.0;
                 cmd.start_x = 0;
@@ -234,26 +249,27 @@ namespace LCCommandHandler
             }
 
             auto packet = Serializer::serializeLaunchCommand(cmd);
-            if (manager.hasLSSender()) {
+            if (manager.hasLSSender())
+            {
                 manager.sendToLS(packet);
-            } else {
+            }
+            else
+            {
                 std::cerr << "[LC] LS 송신자 없음. 전송 실패\n";
             }
 
             std::cout << std::dec;
             std::cout << "------------------------------------------------------" << std::endl;
             std::cout << "발사명령 정보\n"
-                    << "  lsId: " << cmd.launcherId
-                    << ", launchAngleXY: " << cmd.launchAngleXY
-                    << ", launchAngleXZ: " << cmd.launchAngleXZ << " (수직 기준)\n";
+                      << "  lsId: " << cmd.launcherId
+                      << ", launchAngleXY: " << cmd.launchAngleXY
+                      << ", launchAngleXZ: " << cmd.launchAngleXZ << " (수직 기준)\n";
             std::cout << "------------------------------------------------------" << std::endl;
 
             break;
         }
 
-
-
-        //0x05
+        // 0x05
         case CommandType::MOVE_COMMAND_ECC_TO_LC:
         {
             const auto &payload = std::get<MoveCommand>(msg.payload);
@@ -287,7 +303,8 @@ namespace LCCommandHandler
         case CommandType::STATUS_RESPONSE_MFR_TO_LC:
             manager.onRadarStatusReceived(std::get<RadarStatus>(msg.payload));
             break;
-        case CommandType::DETECTION_MFR_TO_LC:  {
+        case CommandType::DETECTION_MFR_TO_LC:
+        {
             manager.onRadarDetectionReceived(std::get<RadarDetection>(msg.payload));
             break;
         }
@@ -320,30 +337,29 @@ namespace LCCommandHandler
         }
     }
     // LC 위치 요청 처리
-        // void handleLCPositionRequest(LCManager &manager)
-        // {
-        //     manager.onLCPositionRequest();  // 내부에서 직렬화, sendToMFR()까지 처리
-        // }
-        // 통합 명령 처리 진입점
-        void handleCommand(SenderType sender, const CommonMessage &msg, LCManager &manager)
+    // void handleLCPositionRequest(LCManager &manager)
+    // {
+    //     manager.onLCPositionRequest();  // 내부에서 직렬화, sendToMFR()까지 처리
+    // }
+    // 통합 명령 처리 진입점
+    void handleCommand(SenderType sender, const CommonMessage &msg, LCManager &manager)
+    {
+        switch (sender)
         {
-            switch (sender)
-            {
-            case SenderType::ECC:
-                handleECCCommand(msg, manager);
-                break;
-            case SenderType::MFR:
-                handleMFRCommand(msg, manager);
-                break;
-            case SenderType::LS:
-                handleLSCommand(msg, manager);
-                break;
-            default:
-                std::cerr << "[LCCommandHandler] 알 수 없는 송신자\n";
-                break;
-            }
+        case SenderType::ECC:
+            handleECCCommand(msg, manager);
+            break;
+        case SenderType::MFR:
+            handleMFRCommand(msg, manager);
+            break;
+        case SenderType::LS:
+            handleLSCommand(msg, manager);
+            break;
+        default:
+            std::cerr << "[LCCommandHandler] 알 수 없는 송신자\n";
+            break;
         }
-
+    }
 
     // void handleLSCommand(const CommonMessage& msg, LCManager& manager) {
     //     switch (msg.commandType) {
@@ -381,7 +397,5 @@ namespace LCCommandHandler
     //         break;
     //     }
     // }
-
-  
 
 } // namespace LCCommandHandler

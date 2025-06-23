@@ -159,6 +159,26 @@ void LCManager::updateStatus(const std::vector<TargetStatus> &targets)
                      { s.targets = targets; });
 }
 
+void LCManager::deleteTargetById(unsigned int targetId)
+{
+    withLockedStatus([&](SystemStatus &s)
+                     {
+        auto &targets = s.targets;
+        targets.erase(std::remove_if(targets.begin(), targets.end(),
+                                      [targetId](const TargetStatus &t) { return t.id == targetId; }),
+                      targets.end()); });
+}
+
+void LCManager::deleteMissileById(unsigned int missileId)
+{
+    withLockedStatus([&](SystemStatus &s)
+                     {
+        auto &missiles = s.missiles;
+        missiles.erase(std::remove_if(missiles.begin(), missiles.end(),
+                                       [missileId](const MissileStatus &m) { return m.id == missileId; }),
+                       missiles.end()); });
+}
+
 void LCManager::onMessage(const Common::CommonMessage &msg)
 {
     dispatch(msg);
@@ -284,6 +304,23 @@ void LCManager::sendStatus()
 
     // 직렬화 및 전송
     std::vector<uint8_t> packet = Common::Serializer::serializeStatusResponse(snapshot);
+    for (const auto &m : snapshot.missiles)
+    {
+        if (m.hit == true)
+        {
+            deleteTargetById(m.id);
+            std::cout << "[LCManager] 미사일 ID " << m.id << "가 파괴되어 삭제되었습니다.\n";
+        }
+    }
+
+    for (const auto &t : snapshot.targets)
+    {
+        if (t.hit == true)
+        {
+            deleteTargetById(t.id);
+            std::cout << "[LCManager] 타겟 ID " << t.id << "가 파괴되어 삭제되었습니다.\n";
+        }
+    }
 
     if (consoleSender)
     {
@@ -541,10 +578,6 @@ void LCManager::onRadarDetectionReceived(const Common::RadarDetection &d)
     bool lockedTargetFound = false;
     for (const auto &t : d.targets)
     {
-        if (t.hit == true)
-        {
-            continue;
-        }
         TargetStatus ts;
         ts.id = t.id;
         ts.angle1 = t.angle1;
@@ -557,7 +590,7 @@ void LCManager::onRadarDetectionReceived(const Common::RadarDetection &d)
         ts.priority = t.priority;
         ts.hit = t.hit;
         targets.push_back(ts);
-        if(t.id == locked_target_id)
+        if (t.id == locked_target_id)
         {
             lockedTargetFound = true; // 현재 잠금된 타겟이 탐지됨
         }
@@ -571,35 +604,34 @@ void LCManager::onRadarDetectionReceived(const Common::RadarDetection &d)
         //           << ", Priority=" << static_cast<int>(ts.priority)
         //           << ", Hit=" << static_cast<int>(ts.hit) << "\n";
     }
-    if(lockedTargetFound == false)
+    /*if (lockedTargetFound == false)
     {
         // 현재 잠금된 타겟이 탐지되지 않은 경우, 잠금 해제
         Common::RadarModeCommand radarCmd;
         std::cout << "[MFR] 현재 잠금된 타겟이 탐지되지 않았습니다. 잠금 해제됨.\n";
         radarCmd.radarId = locked_target_id;
-        radarCmd.radarMode = 0x02;  // Rotate
-        radarCmd.flag = 0x00;       // 사용 안 할 경우라도 초기화
+        radarCmd.radarMode = 0x02;       // Rotate
+        radarCmd.flag = 0x00;            // 사용 안 할 경우라도 초기화
         radarCmd.priority_select = 0x02; // targetId 있음
         radarCmd.targetId = 0x00;
         auto radarPacket = Common::Serializer::serializeRadarModeChange(radarCmd);
-        if (hasMFRSender()) 
+        if (hasMFRSender())
         {
             sendToMFR(radarPacket);
             std::cout << "[LC] 레이더 정지모드 전송 → radarId=" << radarCmd.radarId
-                    << ", targetId=" << radarCmd.targetId << "\n";
+                      << ", targetId=" << radarCmd.targetId << "\n";
         }
         locked_target_id = 0;
     }
+        */
     updateStatus(targets);
     std::cout << "[MFR] 타겟 정보 갱신 완료 (총 " << targets.size() << "개)\n";
+
+    // 이후에 hit처리 로그 삭제
 
     std::vector<MissileStatus> missiles;
     for (const auto &m : d.missiles)
     {
-        if (m.hit == true)
-        {
-            continue;
-        }
         MissileStatus ms;
         ms.id = m.id; // struct에 정의된 필드 사용
         ms.posX = m.posX;
@@ -612,8 +644,11 @@ void LCManager::onRadarDetectionReceived(const Common::RadarDetection &d)
         missiles.push_back(ms);
     }
     updateStatus(missiles);
+
     static int detectionCounter = 0;
     detectionCounter++;
+
+    // 이후에 hit처리 로그 삭제
     // 미사일 정보 출력
     // if(detectionCounter%10==0){
     //     std::cout << "[MFR] 미사일 정보 (총 " << missiles.size() << "개)\n";

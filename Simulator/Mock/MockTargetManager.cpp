@@ -98,40 +98,38 @@ void MockTargetManager::addTarget(std::shared_ptr<MockTarget> &target)
 
 void MockTargetManager::removeTarget(const std::vector<TargetInfo> &target_list)
 {
+	// 무효한 타겟 제거
+	targets.erase(
+		std::remove_if(targets.begin(), targets.end(),
+					   [](const std::shared_ptr<MockTarget> &target)
+					   {
+						   return !target;
+					   }),
+		targets.end());
+
 	for (const auto &target : target_list)
 	{
-		auto it = std::remove_if(targets.begin(), targets.end(),
-								 [&target](const std::shared_ptr<MockTarget> &t)
-								 {
-									 return t->getTargetInfo().id == target.id;
-								 });
-		if (it != targets.end())
-		{
-			targets.erase(it, targets.end());
-			std::cout << "Target removed: " << target.id << std::endl;
-		}
-		else
-		{
-			std::cout << "Target not found: " << target.id << std::endl;
-		}
+		targets.erase(
+			std::remove_if(targets.begin(), targets.end(),
+						   [&target](const std::shared_ptr<MockTarget> &t)
+						   {
+							   return t && t->getTargetInfo().id == target.id;
+						   }),
+			targets.end());
 	}
 }
 
 void MockTargetManager::flitghtTarget()
 {
+	// 유효한 타겟만 업데이트
 	for (auto &target : targets)
 	{
-		// std::cout << "update " << std::endl;
-		target->updatePos();
-		// std::cout << "Target ID: " << target->getTargetInfo().id
-		// 		  << " Position: (" << target->getTargetInfo().x << ", "
-		// 		  << target->getTargetInfo().y << ", "
-		// 		  << target->getTargetInfo().z << ")"
-		// 		  << " Speed: " << target->getTargetInfo().speed
-		// 		  << " Angle: " << target->getTargetInfo().angle
-		// 		  << std::endl;
+		if (target)
+		{
+			target->updatePos();
+		}
 	}
-	std::this_thread::sleep_for(std::chrono::milliseconds(100));
+	std::this_thread::sleep_for(std::chrono::milliseconds(10));
 }
 
 int MockTargetManager::downTargetStatus(const MissileInfo &missileInfo)

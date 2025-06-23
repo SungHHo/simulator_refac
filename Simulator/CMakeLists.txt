@@ -16,6 +16,9 @@ if(BUILD_FOR_PETALINUX)
 
     set(CMAKE_C_COMPILER arm-xilinx-linux-gnueabi-gcc)
     set(CMAKE_CXX_COMPILER arm-xilinx-linux-gnueabi-g++)
+
+    set(CMAKE_BUILD_TYPE Debug)  # 기본 빌드 타입을 Debug로 설정
+    set(CMAKE_CXX_FLAGS_DEBUG "-g")  # -g 플래그로 디버깅 정보 포함
 else()
     # Ubuntu(x86) 빌드 환경
     message(STATUS "Building for Ubuntu x86 environment")

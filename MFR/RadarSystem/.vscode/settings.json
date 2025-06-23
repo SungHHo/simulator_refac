@@ -58,6 +58,8 @@
         "variant": "cpp",
         "fstream": "cpp",
         "map": "cpp",
-        "optional": "cpp"
+        "optional": "cpp",
+        "complex": "cpp",
+        "set": "cpp"
     }
 }

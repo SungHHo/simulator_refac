@@ -22,6 +22,9 @@
 #include <chrono>
 #include <sstream>
 #include <iomanip>
+#include <unistd.h>
+#include <arpa/inet.h>
+#include <sys/socket.h>
 #include "MfrConfig.h"
 
 class Mfr : public IReceiver

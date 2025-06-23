@@ -8,6 +8,7 @@
 #include "ECC_TCP.h"
 #include "MessageCommon.h"
 #include "CTargetListDlg.h"
+#include "CMockTrack.h"
 #include <memory>  // ✅ 스마트 포인터
 
 // CSAMtestDlg 대화 상자
@@ -18,10 +19,13 @@ private:
 	CLeftBottomDlg m_leftBottom;
 	CRightPaneDlg m_rightPane;
 	CTargetListDlg m_targetListDlg;
+	CMockTrack m_MockTrackDlg;
 	CStatic m_mapArea; // 지도
 	HICON m_hIcon;
     std::unique_ptr<ECC_TCP> m_tcp;  // ✅ 스마트 포인터로 변경
 	//std::vector<uint8_t> m_receiveBuffer;
+	CMockTrack m_mockTrack;
+	int goalTargetId = -1;
 public:
 	CSAMtestDlg(CWnd* pParent = nullptr);
 

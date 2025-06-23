@@ -18,6 +18,8 @@ public:
 
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV 지원입니다.
+	virtual BOOL OnInitDialog();
+
 	DECLARE_MESSAGE_MAP()
 
 private:
@@ -35,4 +37,7 @@ public:
 	afx_msg void OnStnClickedLcStaticPosx();
 	afx_msg void OnStnClickedLcStaticPosy();
 	afx_msg void OnStnClickedLcStaticPosz();
+private:
+	CListCtrl m_listLcInfo;
+	int coordsScale = 1e7;
 };

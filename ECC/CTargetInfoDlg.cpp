@@ -31,6 +31,7 @@ void CTargetInfoDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_STATIC_TARGET_PRIORITY2, m_staticPriority);
 	DDX_Control(pDX, IDC_STATIC_TARGET_DETECT2, m_staticDetect);
 	DDX_Control(pDX, IDC_STATIC_TARGET_HIT2, m_staticHit);
+	DDX_Control(pDX, IDC_LIST_TARGET_INFO, m_listTargetInfo);
 }
 
 BEGIN_MESSAGE_MAP(CTargetInfoDlg, CDialogEx)
@@ -48,116 +49,77 @@ END_MESSAGE_MAP()
 BOOL CTargetInfoDlg::OnInitDialog()
 {
 	CDialogEx::OnInitDialog();
+
+	m_comboTargetID.MoveWindow(10, 10, 650, 25);
+	m_listTargetInfo.MoveWindow(10, 50, 650, 280);
+
+	m_listTargetInfo.SetExtendedStyle(LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES);
+	m_listTargetInfo.InsertColumn(0, _T("ID"), LVCFMT_LEFT, 50);
+	m_listTargetInfo.InsertColumn(1, _T("위도"), LVCFMT_LEFT, 100);
+	m_listTargetInfo.InsertColumn(2, _T("경도"), LVCFMT_LEFT, 100);
+	m_listTargetInfo.InsertColumn(3, _T("고도"), LVCFMT_LEFT, 50);
+	m_listTargetInfo.InsertColumn(4, _T("속도"), LVCFMT_LEFT, 50);
+	m_listTargetInfo.InsertColumn(5, _T("각도"), LVCFMT_LEFT, 50);
+	m_listTargetInfo.InsertColumn(6, _T("격추"), LVCFMT_LEFT, 50);
+
 	return TRUE;
 }
 
 void CTargetInfoDlg::SetTargetList(const std::vector<TargetStatus>& targets)
 {
-	// 🔴 타겟이 하나도 없는 경우
-	if (targets.empty()) {
-		m_comboTargetID.ResetContent();
-		m_targetList.clear();
+	m_listTargetInfo.DeleteAllItems();
+	m_comboTargetID.ResetContent();
+	m_targetList.clear();
 
-		// 모든 Static 텍스트를 "N/A"로 초기화
-		m_staticID.SetWindowText(_T("N/A"));
-		m_staticPosX.SetWindowText(_T("N/A"));
-		m_staticPosY.SetWindowText(_T("N/A"));
-		m_staticPosZ.SetWindowText(_T("N/A"));
-		m_staticSpeed.SetWindowText(_T("N/A"));
-		m_staticAngle1.SetWindowText(_T("N/A"));
-		m_staticAngle2.SetWindowText(_T("N/A"));
-		m_staticPriority.SetWindowText(_T("N/A"));
-		m_staticDetect.SetWindowText(_T("N/A"));
-		m_staticHit.SetWindowText(_T("N/A"));
+	if (targets.empty())
 		return;
-	}
 
-	// 🔁 기존대로 우선순위 기준 정렬
-	CString selectedIDStr;
-	int selIndex = m_comboTargetID.GetCurSel();
-	if (selIndex != CB_ERR)
-		m_comboTargetID.GetLBText(selIndex, selectedIDStr);
-
+	// 우선순위 정렬
 	std::vector<TargetStatus> sortedTargets = targets;
 	std::sort(sortedTargets.begin(), sortedTargets.end(), [](const TargetStatus& a, const TargetStatus& b) {
 		return a.priority > b.priority;
 		});
 
-	// 🧠 변경 여부 판단
-	bool needUpdate = (sortedTargets.size() != m_targetList.size());
-	if (!needUpdate) {
-		for (size_t i = 0; i < sortedTargets.size(); ++i) {
-			if (sortedTargets[i].id != m_targetList[i].id ||
-				sortedTargets[i].priority != m_targetList[i].priority) {
-				needUpdate = true;
-				break;
-			}
-		}
+	for (size_t i = 0; i < sortedTargets.size(); ++i)
+	{
+		const auto& t = sortedTargets[i];
+		CString str;
+
+		str.Format(_T("%d"), t.id);
+		m_listTargetInfo.InsertItem(static_cast<int>(i), str);
+		m_comboTargetID.AddString(str);
+
+		str.Format(_T("%.8f"), static_cast<double>(t.position.x) / 1e7);
+		m_listTargetInfo.SetItemText(static_cast<int>(i), 1, str);
+		str.Format(_T("%.8f"), static_cast<double>(t.position.y) / 1e7);
+		m_listTargetInfo.SetItemText(static_cast<int>(i), 2, str);
+		str.Format(_T("%lld"), t.position.z);
+		m_listTargetInfo.SetItemText(static_cast<int>(i), 3, str);
+		str.Format(_T("%d"), t.speed);
+		m_listTargetInfo.SetItemText(static_cast<int>(i), 4, str);
+		str.Format(_T("%.1f"), t.angle1);
+		m_listTargetInfo.SetItemText(static_cast<int>(i), 5, str);
+		str.Format(_T("%d"), static_cast<int>(t.hit));
+		m_listTargetInfo.SetItemText(static_cast<int>(i), 6, str);
+
+		m_targetList.push_back(t);
 	}
 
-	if (needUpdate) {
-		m_comboTargetID.ResetContent();
-		int restoreIndex = 0;
-
-		for (size_t i = 0; i < sortedTargets.size(); ++i) {
-			CString idStr;
-			idStr.Format(_T("%d"), sortedTargets[i].id);
-			m_comboTargetID.AddString(idStr);
-			if (idStr == selectedIDStr)
-				restoreIndex = static_cast<int>(i);
-		}
-
-		m_comboTargetID.SetCurSel(restoreIndex);
-		m_targetList = sortedTargets;
-	}
-	else {
-		m_targetList = sortedTargets;
-	}
-
-	UpdateUIFromSelection();  // 현재 선택된 타겟 기준으로 UI 갱신
+	m_comboTargetID.SetCurSel(0);
+	UpdateListSelectionFromCombo();
 }
 
-
-void CTargetInfoDlg::UpdateUIFromSelection()
+void CTargetInfoDlg::UpdateListSelectionFromCombo()
 {
 	int sel = m_comboTargetID.GetCurSel();
-	if (sel == CB_ERR || sel >= m_targetList.size()) return;
-
-	const TargetStatus& t = m_targetList[sel];
-	CString str;
-
-	str.Format(_T("%d"), t.id);
-	m_staticID.SetWindowText(str);
-
-	str.Format(_T("%.8f"), static_cast<double>(t.position.x) / 10000000.0);
-	m_staticPosX.SetWindowText(str);
-
-	str.Format(_T("%.8f"), static_cast<double>(t.position.y) / 10000000.0);
-	m_staticPosY.SetWindowText(str);
-
-	str.Format(_T("%lld"), t.position.z);
-	m_staticPosZ.SetWindowText(str);
-
-	str.Format(_T("%d"), t.speed);
-	m_staticSpeed.SetWindowText(str);
-
-	str.Format(_T("%.1f"), t.angle1);
-	m_staticAngle1.SetWindowText(str);
-
-	str.Format(_T("%.1f"), t.angle2);
-	m_staticAngle2.SetWindowText(str);
-
-	str.Format(_T("%d"), t.priority);
-	m_staticPriority.SetWindowText(str);
-
-	// ✅ UTC → KST 시간 변환
-	str = FormatUtcToKST(t.first_detect_time);
-	//str.Format(_T("%lld"), t.first_detect_time);  // 시간 출력
-	m_staticDetect.SetWindowText(str);
-
-	str.Format(_T("%d"), static_cast<int>(t.hit));
-	m_staticHit.SetWindowText(str);
+	if (sel != CB_ERR)
+	{
+		m_listTargetInfo.SetItemState(-1, 0, LVIS_SELECTED); // 전체 선택 해제
+		m_listTargetInfo.SetItemState(sel, LVIS_SELECTED | LVIS_FOCUSED, LVIS_SELECTED | LVIS_FOCUSED);
+		m_listTargetInfo.EnsureVisible(sel, FALSE);
+	}
 }
+
 
 #include <chrono>
 
@@ -193,7 +155,11 @@ CString FormatUtcToKST(unsigned long long utc_milliseconds)
 }
 
 // 클릭 핸들러 (비워둠 또는 로그 출력용)
-void CTargetInfoDlg::OnCbnSelchangeComboTargetId() { UpdateUIFromSelection(); }
+void CTargetInfoDlg::OnCbnSelchangeComboTargetId() 
+{ 
+	UpdateListSelectionFromCombo();
+}
+
 void CTargetInfoDlg::OnStnClickedStaticTargetId2() {}
 void CTargetInfoDlg::OnStnClickedStaticTargetHeight2() {}
 void CTargetInfoDlg::OnStnClickedStaticTargetSpeed2() {}

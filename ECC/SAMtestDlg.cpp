@@ -85,15 +85,15 @@ BOOL CSAMtestDlg::OnInitDialog()
 {
 	CDialogEx::OnInitDialog();
 
-	SetWindowPos(NULL, 0, 0, 1600, 900, SWP_NOMOVE | SWP_NOZORDER);
+	SetWindowPos(NULL, 0, 0, 2400, 1000, SWP_NOMOVE | SWP_NOZORDER);
 	// 클라이언트 영역 크기 구하기
 	CRect rect;
 	GetClientRect(&rect);
 	int width = rect.Width();
 	int height = rect.Height();
 
-	int leftWidth = 400;
-	int rightWidth = 400;
+	int leftWidth = 700;
+	int rightWidth = 700;
 	int centerWidth = width - leftWidth - rightWidth;
 	int halfHeight = height / 2;
 
@@ -108,10 +108,15 @@ BOOL CSAMtestDlg::OnInitDialog()
 	m_leftBottom.ShowWindow(SW_SHOW);
 	
 
-	// 중앙 지도 영역
+	// 중앙 상단 영역
 	m_targetListDlg.Create(IDD_TARGET_LIST_DLG, this);
-	m_targetListDlg.MoveWindow(leftWidth, 0, centerWidth, height);
+	m_targetListDlg.MoveWindow(leftWidth, 0, centerWidth, halfHeight);
 	m_targetListDlg.ShowWindow(SW_SHOW);
+
+	// 중앙 하단
+	m_MockTrackDlg.Create(IDD_MOCK_TRACK, this);
+	m_MockTrackDlg.MoveWindow(leftWidth, halfHeight, centerWidth, height-500);
+	m_MockTrackDlg.ShowWindow(SW_SHOW);
 
 	// 오른쪽 패널
 	m_rightPane.Create(IDD_RIGHT_PANE_DLG, this);
@@ -242,85 +247,63 @@ void CSAMtestDlg::receive(int len, const char* packet)
 {
 	if (len <= 0 || packet == nullptr) return;
 
-	try {
+	try
+	{
 		ParsedPacket parsed = PacketParser::Parse(packet, static_cast<size_t>(len));
 
 		std::visit([&](auto&& msg) {
 			using T = std::decay_t<decltype(msg)>;
 
-			if constexpr (std::is_same_v<T, ParsedStatusResponse>) {
-				//std::cout << "[수신] 상태 패킷: Radar=" << msg.radarList.size()
-				//	<< ", LS=" << msg.lsList.size()
-				//	<< ", LC=" << msg.lcList.size()
-				//	<< ", Target=" << msg.targetList.size()
-				//	<< ", Missile=" << msg.missileList.size() << "\n";
-
-				// ✅ 구조체 크기 출력 (최초 1회)
+			if constexpr (std::is_same_v<T, ParsedStatusResponse>)
+			{
 				static bool printed = false;
-				if (!printed) {
-					//std::cout << "[DEBUG] sizeof(RadarStatus)   = " << sizeof(RadarStatus) << "\n";
-					//std::cout << "[DEBUG] sizeof(LCStatus)      = " << sizeof(LCStatus) << "\n";
-					//std::cout << "[DEBUG] sizeof(LSStatus)      = " << sizeof(LSStatus) << "\n";
-					//std::cout << "[DEBUG] sizeof(TargetStatus)  = " << sizeof(TargetStatus) << "\n";
-					//std::cout << "[DEBUG] sizeof(MissileStatus) = " << sizeof(MissileStatus) << "\n";
+				if (!printed)
+				{
 					printed = true;
 				}
-
-				/*for (const auto& r : msg.radarList) {
-					std::cout << "  [Radar] ID=" << static_cast<int>(r.id)
-						<< ", Pos=(" << r.position.x << "," << r.position.y << ")"
-						<< ", Mode=" << (int)r.mode
-						<< ", Angle=" << r.angle << "\n";
-				}
-				for (const auto& lc : msg.lcList) {
-					std::cout << "  [LC] ID=" << static_cast<int>(lc.id)
-						<< ", Pos=(" << lc.position.x << "," << lc.position.y << ")\n";
-				}
-				for (const auto& ls : msg.lsList) {
-					std::cout << "  [LS] ID=" << static_cast<int>(ls.id)
-						<< ", Pos=(" << ls.position.x << "," << ls.position.y << ")"
-						<< ", Mode=" << (int)ls.mode
-						<< ", Angle=" << ls.angle << "\n";
-				}
-				for (const auto& m : msg.missileList) {
-					std::cout << "  [Missile] ID=" << (int)m.id
-						<< ", Pos=(" << m.position.x << "," << m.position.y << ")"
-						<< ", Height=" << m.position.z
-						<< ", Speed=" << m.speed
-						<< ", Angle=" << m.angle
-						<< ", PredictedTime=" << m.predicted_time
-						<< ", intercept_time=" << m.intercept_time
-						<< ", Hit=" << static_cast<int>(m.hit) << "\n";
-				}
-				for (const auto& t : msg.targetList) {
-					std::cout << "  [Target] ID=" << (int)t.id
-						<< ", Pos=(" << t.position.x << "," << t.position.y << ")"
-						<< ", Height=" << t.position.z
-						<< ", Speed=" << t.speed
-						<< ", Angle=" << t.angle1
-						<< ", FirstDetected=" << t.first_detect_time
-						<< ", Priority=" << t.priority
-						<< ", Hit=" << static_cast<int>(t.hit) << "\n";
-				}*/
 
 				// UI 반영
 				m_leftTop.SetRadarList(msg.radarList);
 				m_leftTop.SetTargetList(msg.targetList);
+
 				m_leftBottom.SetLSList(msg.lsList);
 				m_leftBottom.SetTargetList(msg.targetList);
+
 				if (!msg.lcList.empty())
+				{
 					m_rightPane.SetLCStatus(msg.lcList[0]);
+				}
+
 				m_rightPane.SetMissileStatus(msg.missileList);
 				m_rightPane.SetTargetList(msg.targetList);
+
 				m_targetListDlg.SetTargetList(msg.targetList);
+
+				if (!msg.missileList.empty() && goalTargetId != -1)
+				{
+					const auto& missile = msg.missileList[0];
+
+					auto it = std::find_if(msg.targetList.begin(), msg.targetList.end(),
+						[=](const TargetStatus& t) { return t.id == goalTargetId; });
+
+					if (it != msg.targetList.end())
+					{
+						const auto& target = *it;
+						auto now = std::chrono::steady_clock::now().time_since_epoch();
+						double timeInSeconds = std::chrono::duration<double>(now).count();
+						m_mockTrack.UpdateFromMock(missile, target, timeInSeconds);
+					}
+				}
 			}
 
-			else {
+			else
+			{
 				//std::cout << "[수신] ACK or 기타 패킷 수신됨\n";
 			}
 			}, parsed);
 	}
-	catch (const std::exception& ex) {
+	catch (const std::exception& ex)
+	{
 		//std::cerr << "[에러] 패킷 파싱 실패: " << ex.what() << "\n";
 	}
 }

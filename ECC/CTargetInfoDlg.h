@@ -47,6 +47,7 @@ private:
 
 	// 콤보박스 선택에 따라 UI 업데이트
 	void UpdateUIFromSelection();
+	void UpdateListSelectionFromCombo();
 
 public:
 	afx_msg void OnCbnSelchangeComboTargetId();
@@ -60,4 +61,7 @@ public:
 	afx_msg void OnStnClickedStaticTargetDetect2();
 	afx_msg void OnStnClickedStaticTargetHit2();
 	afx_msg void OnStnClickedStaticTargetAngle3();
+private:
+	CListCtrl m_listTargetInfo;
+	int coordsScale = 1e7;
 };

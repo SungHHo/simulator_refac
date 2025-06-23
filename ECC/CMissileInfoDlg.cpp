@@ -27,6 +27,7 @@ void CMissileInfoDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_STATIC_MISSILE_SPEED2, m_staticSpeed);
 	DDX_Control(pDX, IDC_STATIC_MISSILE_ANGLE2, m_staticAngle);
 	DDX_Control(pDX, IDC_STATIC_MISSILE_SHOOTDOWNTIME2, m_staticShootTime);
+	DDX_Control(pDX, IDC_LIST_MISSILE_INFO, m_listMissileInfo);
 }
 
 BEGIN_MESSAGE_MAP(CMissileInfoDlg, CDialogEx)
@@ -42,62 +43,83 @@ END_MESSAGE_MAP()
 BOOL CMissileInfoDlg::OnInitDialog()
 {
 	CDialogEx::OnInitDialog();
+
+	m_listMissileInfo.MoveWindow(10, 10, 650, 320);
+
+	m_listMissileInfo.SetExtendedStyle(LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES);
+	m_listMissileInfo.InsertColumn(0, _T("ID"), LVCFMT_LEFT, 50);
+	m_listMissileInfo.InsertColumn(1, _T("위도"), LVCFMT_LEFT, 100);
+	m_listMissileInfo.InsertColumn(2, _T("경도"), LVCFMT_LEFT, 100);
+	m_listMissileInfo.InsertColumn(3, _T("고도"), LVCFMT_LEFT, 50);
+	m_listMissileInfo.InsertColumn(4, _T("속도"), LVCFMT_LEFT, 50);
+	m_listMissileInfo.InsertColumn(5, _T("각도"), LVCFMT_LEFT, 50);
+	m_listMissileInfo.InsertColumn(6, _T("격추"), LVCFMT_LEFT, 50);
+
 	return TRUE;
 }
 
 void CMissileInfoDlg::SetMissileStatus(const MissileStatus& status)
 {
+	// 남은 시간 계산
+	using namespace std::chrono;
+	auto now_ms = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
+	m_secondsRemaining = static_cast<int>((status.predicted_time - now_ms) / 1000);
+	if (m_secondsRemaining < 0) m_secondsRemaining = 0;
+
 	m_missileStatus = status;
 
-	// ✅ 현재 UTC 시간 (초 단위) 구하기
-	using namespace std::chrono;
-	auto now_utc_ms = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
+	// 유효하지 않은 ID는 무시
+	if (status.id == 0)
+	{
+		return;
+	}		
 
-	// ✅ 남은 초 계산
-	m_secondsRemaining = static_cast<int>((status.predicted_time - now_utc_ms) / 1000);
-	if (m_secondsRemaining < 0) m_secondsRemaining = 0;
+	CString str;
+	int rowIndex = m_listMissileInfo.GetItemCount();
+
+	// ID
+	str.Format(_T("%d"), status.id);
+	m_listMissileInfo.InsertItem(rowIndex, str);
+
+	// 위도(x)
+	str.Format(_T("%.8f"), static_cast<double>(status.position.x) / coordsScale);
+	m_listMissileInfo.SetItemText(rowIndex, 1, str);
+
+	// 경도(y)
+	str.Format(_T("%.8f"), static_cast<double>(status.position.y) / coordsScale);
+	m_listMissileInfo.SetItemText(rowIndex, 2, str);
+
+	// 고도(z)
+	str.Format(_T("%.2f"), static_cast<double>(status.position.z) / coordsScale);
+	m_listMissileInfo.SetItemText(rowIndex, 3, str);
+
+	// 각도
+	str.Format(_T("%.1f"), static_cast<double>(status.angle));
+	m_listMissileInfo.SetItemText(rowIndex, 5, str);
+
+	// 연결 상태
+	m_listMissileInfo.SetItemText(rowIndex, 6, status.hit ? _T("격추 성공") : _T("미격추"));
 
 	UpdateUI();
 
-	// ✅ 타이머 시작 (1초 주기)
+	// 타이머 시작
 	SetTimer(TIMER_ID_MISSILE, 1000, nullptr);
 }
+
 
 void CMissileInfoDlg::UpdateUI()
 {
 	CString str;
-	double posX = static_cast<double>(m_missileStatus.position.x) / 10000000.0;
-	double posY = static_cast<double>(m_missileStatus.position.y) / 10000000.0;
-
-	str.Format(_T("%d"), m_missileStatus.id);
-	m_staticID.SetWindowText(str);
-
-	str.Format(_T("%.8f"), posX);
-	m_staticPosX.SetWindowText(str);
-
-	str.Format(_T("%.8f"), posY);
-	m_staticPosY.SetWindowText(str);
-
-	str.Format(_T("%lld"), m_missileStatus.position.z);
-	m_staticPosZ.SetWindowText(str);
-
-	str.Format(_T("%d"), m_missileStatus.speed);
-	m_staticSpeed.SetWindowText(str);
-
-	str.Format(_T("%.1f"), m_missileStatus.angle);
-	m_staticAngle.SetWindowText(str);
-
-	// ✅ 격추까지 남은 시간 출력
+	// 격추까지 남은 시간 출력
 	if (m_secondsRemaining > 0)
 	{
 		int roundedSeconds = (m_secondsRemaining / 3) * 3;
-		str.Format(_T("약%d초 남음"), roundedSeconds+3);
+		str.Format(_T("약%d초 남음"), roundedSeconds + 3);
 	}
 	else
 	{
 		str = _T("격추 완료 또는 시간 초과");
 	}
-	// str.Format(_T("%llu"), m_missileStatus.predicted_time);
 	m_staticShootTime.SetWindowText(str);
 }
 

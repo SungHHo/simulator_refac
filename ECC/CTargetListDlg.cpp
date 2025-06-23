@@ -29,11 +29,13 @@ BOOL CTargetListDlg::OnInitDialog()
 {
 	CDialogEx::OnInitDialog();
 
+	m_listTarget.MoveWindow(10, 10, 950, 420);
+
 	m_listTarget.SetExtendedStyle(LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES);
 
 	m_listTarget.InsertColumn(0, _T("ID"), LVCFMT_CENTER, 70);
-	m_listTarget.InsertColumn(1, _T("X좌표"), LVCFMT_CENTER, 120);
-	m_listTarget.InsertColumn(2, _T("Y좌표"), LVCFMT_CENTER, 120);
+	m_listTarget.InsertColumn(1, _T("위도"), LVCFMT_CENTER, 120);
+	m_listTarget.InsertColumn(2, _T("경도"), LVCFMT_CENTER, 120);
 	m_listTarget.InsertColumn(3, _T("고도"), LVCFMT_CENTER, 70);
 	m_listTarget.InsertColumn(4, _T("속도"), LVCFMT_CENTER, 100);
 	m_listTarget.InsertColumn(5, _T("각도1"), LVCFMT_CENTER, 60);

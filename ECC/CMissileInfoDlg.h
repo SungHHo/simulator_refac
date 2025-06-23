@@ -59,4 +59,7 @@ private:
 
 	// ✅ 타이머 ID
 	static const UINT_PTR TIMER_ID_MISSILE = 3001;
+	CListCtrl m_listMissileInfo;
+
+	int coordsScale = 1e7;
 };

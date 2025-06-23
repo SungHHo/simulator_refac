@@ -263,23 +263,25 @@ void LCManager::sendStatus()
         //           << ", " << snapshot.ls.height << ")\n";
 
         // // LC 상태 출력
-        std::cout << "- [LC] ID: " << snapshot.lc.LCId
-                  << ", Pos: (" << snapshot.lc.position.x << ", " << snapshot.lc.position.y
-                  << ", " << snapshot.lc.height << ")\n";
+        // std::cout << "- [LC] ID: " << snapshot.lc.LCId
+        //           << ", Pos: (" << snapshot.lc.position.x << ", " << snapshot.lc.position.y
+        //           << ", " << snapshot.lc.height << ")\n";
 
-        // 타겟 정보출력
-        for (const auto target : snapshot.targets)
-        {
-            std::cout << "- [Target] ID: " << target.id
-                      << ", Pos: (" << target.posX << ", " << target.posY
-                      << "), Altitude: " << target.altitude
-                      << ", Speed: " << target.speed
-                      << ", Angle1: " << target.angle1
-                      << ", Angle2: " << target.angle2
-                      << ", Detect Time: " << target.detectTime
-                      << ", Priority: " << static_cast<int>(target.priority)
-                      << ", Hit: " << (target.hit ? "Yes" : "No") << "\n";
-        }
+        // // 타겟 정보출력
+        // for (const auto target : snapshot.targets)
+        // {
+        //     std::cout << "- [Target] ID: " << target.id
+        //               << ", Pos: (" << target.posX << ", " << target.posY
+        //               << "), Altitude: " << target.altitude
+        //               << ", Speed: " << target.speed
+        //               << ", Angle1: " << target.angle1
+        //               << ", Angle2: " << target.angle2
+        //               << ", Detect Time: " << target.detectTime
+        //               << ", Priority: " << static_cast<int>(target.priority)
+        //               << ", Hit: " << (target.hit ? "Yes" : "No") << "\n";
+        // }
+
+        std::cout << "Missile Count : " << snapshot.missiles.size() << ", Target Count : " << snapshot.targets.size() << "\n";
     }
 
     // 직렬화 및 전송
@@ -530,6 +532,10 @@ void LCManager::onRadarDetectionReceived(const Common::RadarDetection &d)
     std::vector<TargetStatus> targets;
     for (const auto &t : d.targets)
     {
+        if (t.hit == true)
+        {
+            continue; // 파괴된 타겟은 무시
+        }
         TargetStatus ts;
         ts.id = t.id;
         ts.angle1 = t.angle1;
@@ -559,6 +565,10 @@ void LCManager::onRadarDetectionReceived(const Common::RadarDetection &d)
     std::vector<MissileStatus> missiles;
     for (const auto &m : d.missiles)
     {
+        if (m.hit == true)
+        {
+            continue; // 파괴된 미사일은 무시
+        }
         MissileStatus ms;
         ms.id = m.id; // struct에 정의된 필드 사용
         ms.posX = m.posX;

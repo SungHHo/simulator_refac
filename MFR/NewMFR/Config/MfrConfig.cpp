@@ -91,6 +91,14 @@ bool MfrConfig::loadConfig(const std::string &filepath)
             {
                 uartBaudRate = std::stoi(value);
             }
+            else if(key == "IP")
+            {
+                motorControllerIp = value;
+            }
+            else if(key == "Port")
+            {
+                motorControllerPort = std::stoi(value);
+            }
         }
     }
 

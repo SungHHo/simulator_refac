@@ -32,6 +32,10 @@ public:
     std::string device;
     int uartBaudRate = B9600;
 
+    // 모터 제어 서버
+    std::string motorControllerIp;
+    int motorControllerPort = 0;
+
     // 설정 로드 메서드
     bool loadConfig(const std::string &filepath);
 };

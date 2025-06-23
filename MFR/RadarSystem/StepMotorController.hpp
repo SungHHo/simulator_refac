@@ -29,7 +29,7 @@ private:
     /// @brief Socket 서버 IP
     std::string serverIp;
     /// @brief Socket 서버 Port
-    uint16_t serverPort;
+    int serverPort;
 
 public:
     /// @brief 생성자

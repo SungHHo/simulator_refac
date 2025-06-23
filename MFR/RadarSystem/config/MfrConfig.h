@@ -21,7 +21,7 @@ struct MfrConfig
     /// @brief Socket 서버 IP
     std::string motorServerIp;
     /// @brief Socket 서버 Port
-    uint16_t motorServerPort;
+    int motorServerPort;
 };
 
 // 공백 제거 및 문자열 처리 유틸 함수 선언

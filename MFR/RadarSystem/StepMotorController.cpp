@@ -15,6 +15,7 @@ StepMotorController::StepMotorController()
         }
     }
 #endif
+std::cout <<"here"<<std::endl;
     if (loadMfrConfig("../config/MFR.ini", mfrConfig))
     {
         serverIp = mfrConfig.motorServerIp;

@@ -24,17 +24,20 @@ std::string toLower(const std::string& s) {
     return result;
 }
 
-bool loadMfrConfig(const std::string& filepath, MfrConfig& config) {
+bool loadMfrConfig(const std::string& filepath, MfrConfig& config)
+{
     std::ifstream file(filepath);
-    if (!file.is_open()) {
+    if (!file.is_open())
+    {
         std::cerr << "[loadMfrConfig] INI 파일 열기 실패: " << filepath << std::endl;
         return false;
     }
 
     std::string line;
     std::string currentSection;
-
-    while (std::getline(file, line)) {
+    
+    while (std::getline(file, line))
+    {
         line = trim(line);
         if (line.empty() || line[0] == ';' || line[0] == '#')
             continue;
@@ -52,8 +55,10 @@ bool loadMfrConfig(const std::string& filepath, MfrConfig& config) {
 
         if (currentSection == "MFR")
         {
+            std::cout <<"1" <<std::endl;
             if (key == "Latitude")
             {
+                
                 config.mfrLatitude = std::stod(value);
             }
             else if(key == "Longitude")
@@ -65,25 +70,36 @@ bool loadMfrConfig(const std::string& filepath, MfrConfig& config) {
                 config.mfrAltitude = std::stod(value);
             }
         }
-
-        if (currentSection == "LaunchController") {
-            if (key == "IP") {
+        
+        if (currentSection == "LaunchController")
+        {
+            if (key == "IP")
+            {
                 config.launchControllerIP = value;
-            } else if (key == "Port") {
+            }
+            else if (key == "Port")
+            {
                 config.launchControllerPort = std::stoi(value);
             }
         }
-        else if (currentSection == "Simulator") {
-            if (key == "Port") {
+        else if (currentSection == "Simulator")
+        {
+            if (key == "Port") 
+            {
                 config.simulatorPort = std::stoi(value);
             }
         }
-        else if (currentSection == "Motor") {
-            if (key == "Device") {
+        else if (currentSection == "Motor")
+        {
+            if (key == "Device")
+            {
                 config.device = value;
-            } else if (key == "BaudRate") {
+            }
+            else if (key == "BaudRate")
+            {
                 int baudInt = std::stoi(value);
-                switch (baudInt) {
+                switch (baudInt)
+                {
                     case 9600:    config.uartBaudRate = B9600; break;
                     case 19200:   config.uartBaudRate = B19200; break;
                     case 38400:   config.uartBaudRate = B38400; break;
@@ -94,9 +110,17 @@ bool loadMfrConfig(const std::string& filepath, MfrConfig& config) {
                         config.uartBaudRate = B9600;
                 }
             }
+            else if (key == "IP")
+            {                
+                config.motorServerIp = value;                
+            }            
+            else if(key == "Port")
+            {                
+                config.motorServerPort = std::stoi(value);
+            }
         }
     }
-
+    
     file.close();
     return true;
 }

@@ -22,15 +22,19 @@
 #include <chrono>
 #include <sstream>
 #include <iomanip>
+#include "MfrConfig.h"
 
 class Mfr : public IReceiver
 {
 private:
+    /// @brief MFR INI
+    MfrConfig mfrConfig;
+
     /// MFR(다기능 레이더)의 고유 ID
     const unsigned int mfrId = 101001;
 
     /// @brief  MFR 좌표
-    const Pos3D mfrCoords = {37.5481160, 126.9961166, 244.0};
+    Pos3D mfrCoords;
 
     /// @brief MFR 모드 정보
     RadarMode mfrMode;

@@ -6,6 +6,10 @@
 
 struct MfrConfig
 {
+    double mfrLatitude;
+    double mfrLongitude;
+    double mfrAltitude;
+
     std::string launchControllerIP;
     int launchControllerPort = 0;
 

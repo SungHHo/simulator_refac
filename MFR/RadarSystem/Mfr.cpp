@@ -3,6 +3,18 @@
 
 Mfr::Mfr() : goalTargetId(101001), mfrMode(ROTATION_MODE), goalMotorAngle(135.0)
 {
+    if (loadMfrConfig("../config/MFR.ini", mfrConfig))
+    {
+
+        mfrCoords.latitude = mfrConfig.mfrLatitude;
+        mfrCoords.longitude = mfrConfig.mfrLongitude;
+        mfrCoords.altitude = mfrConfig.mfrAltitude;
+    }
+
+    std::cout << "위도: " << mfrCoords.latitude << std::endl;
+    std::cout << "경도: " << mfrCoords.longitude << std::endl;
+    std::cout << "고도: " << mfrCoords.altitude << std::endl;
+
     stepMotorManager = new StepMotorController();
     lcCommManager = new MfrLcCommManager(this);
     simCommManager = new MfrSimCommManager(this);
@@ -17,6 +29,8 @@ Mfr::~Mfr()
     delete lcCommManager;
     delete simCommManager;
 }
+
+
 
 Pos3D Mfr::decode(const EncodedPos3D &e)
 {

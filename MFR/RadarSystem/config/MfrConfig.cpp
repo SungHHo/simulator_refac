@@ -50,6 +50,22 @@ bool loadMfrConfig(const std::string& filepath, MfrConfig& config) {
         std::string key = trim(line.substr(0, eqPos));
         std::string value = trim(line.substr(eqPos + 1));
 
+        if (currentSection == "MFR")
+        {
+            if (key == "Latitude")
+            {
+                config.mfrLatitude = std::stod(value);
+            }
+            else if(key == "Longitude")
+            {
+                config.mfrLongitude = std::stod(value);
+            }
+            else if(key == "Altitude")
+            {
+                config.mfrAltitude = std::stod(value);
+            }
+        }
+
         if (currentSection == "LaunchController") {
             if (key == "IP") {
                 config.launchControllerIP = value;

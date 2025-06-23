@@ -88,18 +88,20 @@ void CMissileInfoDlg::UpdateUI()
 	m_staticAngle.SetWindowText(str);
 
 	// ✅ 격추까지 남은 시간 출력
-	if (m_secondsRemaining > 0)
+	if (m_secondsRemaining > 0 && m_secondsRemaining<100)
 	{
 		int roundedSeconds = (m_secondsRemaining / 3) * 3;
-		str.Format(_T("약%d초 남음"), roundedSeconds+3);
+		str.Format(_T("약%d초 남음"), roundedSeconds + 3);
 	}
 	else
 	{
 		str = _T("격추 완료 또는 시간 초과");
 	}
-	// str.Format(_T("%llu"), m_missileStatus.predicted_time);
+
 	m_staticShootTime.SetWindowText(str);
 }
+
+
 
 void CMissileInfoDlg::OnTimer(UINT_PTR nIDEvent)
 {

@@ -56,7 +56,9 @@ private:
 
 	// ✅ 격추까지 남은 시간 (초 단위)
 	int m_secondsRemaining = 0;
-
+	int m_lastMissileID = -1;       // 마지막 갱신된 미사일 ID
+	bool m_missileHitConfirmed = false;
+	bool m_timeLocked = false;
 	// ✅ 타이머 ID
 	static const UINT_PTR TIMER_ID_MISSILE = 3001;
 };

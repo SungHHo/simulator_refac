@@ -308,14 +308,6 @@ void CSAMtestDlg::receive(int len, const char* packet)
 	}
 }
 
-
-
-
-
-
-
-
-
 void CSAMtestDlg::sendStatusRequest() {
 	StatusRequest msg{};
 	auto data = SerializeStatusRequest(msg);

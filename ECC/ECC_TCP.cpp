@@ -122,11 +122,7 @@ unsigned __stdcall ECC_TCP::recvThread(void* arg) {
             if (self->map_tcp) {
                 self->map_tcp->send(reinterpret_cast<const char*>(msgData), msgLen);
 
-                std::cout << "first 5 bytes (hex): ";
-                for (int i = 0; i < 5 && i < msgLen; ++i) {
-                    printf("%02X ", msgData[i]);
-                }
-                std::cout << "buf size : " << msgLen << std::endl;
+        
             }
 
             // 처리한 메시지를 버퍼에서 제거

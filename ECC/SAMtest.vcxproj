@@ -193,6 +193,7 @@
     <ClInclude Include="CLSMoveDlg.h" />
     <ClInclude Include="CMFRModeSelectDlg.h" />
     <ClInclude Include="CMissileInfoDlg.h" />
+    <ClInclude Include="CMockTrack.h" />
     <ClInclude Include="Config.h" />
     <ClInclude Include="CRightPaneDlg.h" />
     <ClInclude Include="CTargetInfoDlg.h" />
@@ -228,6 +229,7 @@
     <ClCompile Include="CLSMoveDlg.cpp" />
     <ClCompile Include="CMFRModeSelectDlg.cpp" />
     <ClCompile Include="CMissileInfoDlg.cpp" />
+    <ClCompile Include="CMockTrack.cpp" />
     <ClCompile Include="Config.cpp" />
     <ClCompile Include="CRightPaneDlg.cpp" />
     <ClCompile Include="CTargetInfoDlg.cpp" />

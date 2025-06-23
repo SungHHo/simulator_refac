@@ -3,6 +3,7 @@
 #include "resource.h"
 #include "TargetStatus.h"  // ✅ Target 구조체 포함
 #include <vector>          // ✅ 리스트 저장용
+#include <unordered_map>
 
 // CTargetListDlg 대화 상자
 class CTargetListDlg : public CDialogEx
@@ -26,6 +27,7 @@ private:
 	CListCtrl m_listTarget;                          // 리스트 컨트롤
 	std::vector<TargetStatus> m_targetList;          // 표적 리스트 저장
 	std::vector<TargetStatus> m_prevTargetList;
+	std::unordered_map<int, bool> m_currentHitMap;  // 최신 hit 상태 저장용 (표적 ID → hit 여부)
 public:
 	enum { IDD = IDD_TARGET_LIST_DLG };              // 리소스 ID
 

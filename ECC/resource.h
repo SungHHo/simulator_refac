@@ -18,6 +18,7 @@
 #define IDD_LS_MOVE_DLG                 148
 #define IDD_LS_LAUNCH_DLG               150
 #define IDD_TARGET_LIST_DLG             152
+#define IDD_MOCK_TRACK                  154
 #define IDC_BUTTON1                     1000
 #define IDC_BTN_MODE_SWITCH             1000
 #define IDC_BUTTON_LS_MOVE              1000
@@ -91,19 +92,23 @@
 #define IDC_LC_STATIC_ID2               1040
 #define IDC_LIST1                       1040
 #define IDC_TARGET_LIST                 1040
+#define IDC_LIST_MISSILE_INFO           1040
+#define IDC_LIST_TARGET_INFO            1040
 #define IDC_STATIC_NETWORK_MFR          1041
 #define IDC_LC_STATIC_POSX              1042
 #define IDC_STATIC_NETWORK_LS           1042
 #define IDC_LC_STATIC_POSY              1043
 #define IDC_LC_STATIC_POSZ              1044
+#define IDC_LIST2                       1045
+#define IDC_LIST_LC_INFO                1045
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        154
+#define _APS_NEXT_RESOURCE_VALUE        156
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1043
+#define _APS_NEXT_CONTROL_VALUE         1046
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

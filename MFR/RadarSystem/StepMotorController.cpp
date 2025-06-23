@@ -1,6 +1,5 @@
 #include "StepMotorController.hpp"
 
-
 StepMotorController::StepMotorController()
 {
 #ifdef BUILD_FOR_PETALINUX
@@ -31,7 +30,7 @@ StepMotorController::~StepMotorController()
         close(uart_fd);
     }
 
-    if(sock_fd >= 0)
+    if (sock_fd >= 0)
     {
         close(sock_fd);
     }
@@ -108,11 +107,19 @@ void StepMotorController::connectToServer()
 
     std::cout << "[TCP] Trying to connect to " << serverIp << ":" << serverPort << "...\n";
 
-    while (true)
+    int connect_count = 5;
+    for (int i = 0; i < connect_count; ++i)
     {
-        if (connect(sock_fd, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) == 0)
+        if (sock_fd < 0)
+        {
+            std::cerr << "[TCP] Socket not created\n";
+            return;
+        }
+
+        if (connect(sock_fd, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) == 0)
         {
             std::cout << "[TCP] Connected to server\n";
+            return;
         }
 
         std::cerr << "[TCP] Connection failed. Retrying in 1 second...\n";
@@ -120,7 +127,7 @@ void StepMotorController::connectToServer()
     }
 }
 
-void StepMotorController::sendCmd(const std::string& cmd)
+void StepMotorController::sendCmd(const std::string &cmd)
 {
     if (sock_fd < 0)
     {

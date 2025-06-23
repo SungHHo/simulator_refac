@@ -3,6 +3,7 @@
 
 Mfr::Mfr() : goalTargetId(101001), mfrMode(ROTATION_MODE), goalMotorAngle(135.0)
 {
+<<<<<<< HEAD
     
     // if (loadMfrConfig("../config/MFR.ini", mfrConfig))
     // {
@@ -15,6 +16,8 @@ Mfr::Mfr() : goalTargetId(101001), mfrMode(ROTATION_MODE), goalMotorAngle(135.0)
     std::cout << "경도: " << mfrCoords.longitude << std::endl;
     std::cout << "고도: " << mfrCoords.altitude << std::endl;    
 
+=======
+>>>>>>> 7361cdcaece36960a47e7ebcac343fd94edb7d01
     stepMotorManager = new StepMotorController();
     std::cout <<"hi"<<std::endl;
     lcCommManager = new MfrLcCommManager(this);
@@ -24,15 +27,12 @@ Mfr::Mfr() : goalTargetId(101001), mfrMode(ROTATION_MODE), goalMotorAngle(135.0)
     // requestLcInitData();
 }
 
-
 Mfr::~Mfr()
 {
     delete stepMotorManager;
     delete lcCommManager;
     delete simCommManager;
 }
-
-
 
 Pos3D Mfr::decode(const EncodedPos3D &e)
 {
@@ -636,16 +636,12 @@ void Mfr::mfrDetectionAlgo()
             }
             else
             {
-                if (target.isHit == true)
-                {
-                    std::cout << "타겟 격추정보 수신" << std::endl;
-                }
-                // localDetectedTargets.erase(id);
-                // auto it = std::remove_if(targetDistances.begin(), targetDistances.end(),
-                //                          [id](const std::pair<int, double> &p)
-                //                          { return p.first == id; });
+                localDetectedTargets.erase(id);
+                auto it = std::remove_if(targetDistances.begin(), targetDistances.end(),
+                                         [id](const std::pair<int, double> &p)
+                                         { return p.first == id; });
 
-                // targetDistances.erase(it, targetDistances.end());
+                targetDistances.erase(it, targetDistances.end());
             }
         }
 
@@ -676,12 +672,8 @@ void Mfr::mfrDetectionAlgo()
             }
             else
             {
-                if (missile.isHit == true)
-                {
-                    std::cout << "미사일 격추정보 수신" << std::endl;
-                }
-                // localDetectedMissile.erase(id);
-                // detectedMissile.erase(id);
+                localDetectedMissile.erase(id);
+                detectedMissile.erase(id);
             }
         }
     }
@@ -787,10 +779,10 @@ void Mfr::mfrDetectionAlgo()
 
         if (!removedTargets.empty())
         {
-            std::cout << "[Mfr::mfrDetectionAlgo] Removed Targets: ";
+            // std::cout << "[Mfr::mfrDetectionAlgo] Removed Targets: ";
             for (const auto &id : removedTargets)
             {
-                std::cout << id << " ";
+                // std::cout << id << " ";
                 removeMockTargetById(id);
             }
             std::cout << std::endl;
@@ -798,10 +790,10 @@ void Mfr::mfrDetectionAlgo()
 
         if (!removedMissiles.empty())
         {
-            std::cout << "[Mfr::mfrDetectionAlgo] Removed Missiles: ";
+            // std::cout << "[Mfr::mfrDetectionAlgo] Removed Missiles: ";
             for (const auto &id : removedMissiles)
             {
-                std::cout << id << " ";
+                // std::cout << id << " ";
                 removeMockMissileById(id);
             }
             std::cout << std::endl;
@@ -837,6 +829,7 @@ void Mfr::addMockTarget(const MfrToLcTargetInfo &target)
         tmpTarget.firstDetectionTime = mockTargets[target.id].firstDetectionTime;
     }
 
+    // std::cout << "Real First Mock Target : " << tmpTarget.firstDetectionTime << "!!!!!!!!!!!!!!!" << std::endl;
     mockTargets[target.id] = tmpTarget;
 }
 

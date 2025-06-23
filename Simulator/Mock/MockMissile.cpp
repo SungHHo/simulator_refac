@@ -12,8 +12,9 @@ constexpr double METERS_PER_DEGREE_LAT = 111320.0;
 
 MockMissile::MockMissile(const MissileInfo &missile_info,
 						 std::shared_ptr<MFRSendUDPManager> mfr_send_manager,
-						 std::shared_ptr<MockTargetManager> mock_target_manager)
-	: missile_info_(missile_info), mfr_send_manager_(mfr_send_manager), mock_target_manager_(mock_target_manager) {}
+						 std::shared_ptr<MockTargetManager> mock_target_manager,
+						 std::shared_ptr<MockMissileManager> mock_missile_manager)
+	: missile_info_(missile_info), mfr_send_manager_(mfr_send_manager), mock_target_manager_(mock_target_manager), mock_missile_manager_(mock_missile_manager) {}
 
 void MockMissile::updatePosMissile()
 {
@@ -64,7 +65,8 @@ void MockMissile::updatePosMissile()
 			std::cout << "Missile hit target!" << std::endl;
 			missile_info_.is_hit = true;
 			sendData();
-			break;  // 명중했으면 루프 종료
+			mock_missile_manager_->setFlightStatus(false);
+			return;
 		}
 		else
 		{
@@ -77,7 +79,6 @@ void MockMissile::updatePosMissile()
 		std::this_thread::sleep_for(std::chrono::milliseconds(100));
 	}
 }
-
 
 void MockMissile::sendData()
 {

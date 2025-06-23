@@ -273,7 +273,7 @@ namespace Airsuface_map.Views
             if (vm == null) return;
             foreach (var ls in vm.LSS)
             {
-                var (marker, circle) = CreateLSMarker(ls, 100.0);
+                var (marker, circle) = CreateLSMarker(ls, 40.0);
                 MapControl.Markers.Add(marker);
                 MapControl.Markers.Add(circle);
             }
@@ -291,7 +291,7 @@ namespace Airsuface_map.Views
             if (vm == null) return;
             foreach (var mfr in vm.MFRS)
             {
-                var (marker, circle) = CreateMFRMarker(mfr, 100.0);
+                var (marker, circle) = CreateMFRMarker(mfr, 40.0);
                 MapControl.Markers.Add(marker);
                 MapControl.Markers.Add(circle);
             }

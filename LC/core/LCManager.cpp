@@ -1,22 +1,22 @@
 // LCManager.cpp
-#include "LCManager.h"
 #include <iostream>
 #include <cmath>
-#include "SystemStatus.h"
-#include "shared_mutex"
-#include "INIReader.h"
 #include <limits>
 #include <thread>
 #include <chrono>
+#include <mutex>
+#include <vector>
+#include <chrono>
+#include <iomanip>
+#include "LCManager.h"
+#include "SystemStatus.h"
+#include "shared_mutex"
+#include "INIReader.h"
 #include "Serializer.h"
 #include "SerialLS.h"
 #include "TcpECC.h" // TcpECC 포함 필요
-#include <mutex>
-#include <vector>
-#include <iomanip>
 #include "LCCommandHandler.h"
 #include "LCConfig.h"
-#include <chrono>
 
 void LCManager::run()
 {
@@ -299,6 +299,16 @@ void LCManager::sendStatus()
     }
 }
 
+void LCManager::setTargetLock(unsigned int targetId)
+{
+    locked_target_id = targetId;
+}
+
+void LCManager::getTargetLock(unsigned int &targetId) const
+{
+    targetId = locked_target_id;
+}
+
 void LCManager::initialize(const std::string &iniPath)
 {
     INIReader reader(iniPath);
@@ -528,6 +538,7 @@ void LCManager::onRadarStatusReceived(const Common::RadarStatus &r)
 void LCManager::onRadarDetectionReceived(const Common::RadarDetection &d)
 {
     std::vector<TargetStatus> targets;
+    bool lockedTargetFound = false;
     for (const auto &t : d.targets)
     {
         TargetStatus ts;
@@ -542,7 +553,10 @@ void LCManager::onRadarDetectionReceived(const Common::RadarDetection &d)
         ts.priority = t.priority;
         ts.hit = t.hit;
         targets.push_back(ts);
-
+        if(t.id == locked_target_id)
+        {
+            lockedTargetFound = true; // 현재 잠금된 타겟이 탐지됨
+        }
         // std::cout << "[MFR] 타겟 정보: ID=" << ts.id
         //           << ", Pos=(" << ts.posX << ", " << ts.posY << ")"
         //           << ", Altitude=" << ts.altitude
@@ -552,6 +566,25 @@ void LCManager::onRadarDetectionReceived(const Common::RadarDetection &d)
         //           << ", DetectTime=" << ts.detectTime
         //           << ", Priority=" << static_cast<int>(ts.priority)
         //           << ", Hit=" << static_cast<int>(ts.hit) << "\n";
+    }
+    if(lockedTargetFound == false)
+    {
+        // 현재 잠금된 타겟이 탐지되지 않은 경우, 잠금 해제
+        Common::RadarModeCommand radarCmd;
+        std::cout << "[MFR] 현재 잠금된 타겟이 탐지되지 않았습니다. 잠금 해제됨.\n";
+        radarCmd.radarId = locked_target_id;
+        radarCmd.radarMode = 0x02;  // Rotate
+        radarCmd.flag = 0x00;       // 사용 안 할 경우라도 초기화
+        radarCmd.priority_select = 0x02; // targetId 있음
+        radarCmd.targetId = 0x00;
+        auto radarPacket = Common::Serializer::serializeRadarModeChange(radarCmd);
+        if (hasMFRSender()) 
+        {
+            sendToMFR(radarPacket);
+            std::cout << "[LC] 레이더 정지모드 전송 → radarId=" << radarCmd.radarId
+                    << ", targetId=" << radarCmd.targetId << "\n";
+        }
+        locked_target_id = 0;
     }
     updateStatus(targets);
     std::cout << "[MFR] 타겟 정보 갱신 완료 (총 " << targets.size() << "개)\n";
@@ -686,7 +719,7 @@ void LCManager::onLSStatusReceived(const Common::LSReport &ls)
     internalLS.launchAngle = ls.launchAngle;
     internalLS.position.x = ls.posX;
     internalLS.position.y = ls.posY;
-    internalLS.height = ls.height; // ✅ 정확한 필드에 저장
+    internalLS.height = ls.height;
     internalLS.speed = ls.speed;
 
     updateStatus(internalLS); // SystemStatus 안의 ls 항목 업데이트

@@ -108,6 +108,22 @@ namespace LCCommandHandler
                 break;
             }
             
+            // 레이더 정지모드 전환
+            manager.setTargetLock(selectedTarget.id); // 타겟 잠금
+            RadarModeCommand radarCmd;
+            radarCmd.radarId = snapshot.mfr.mfrId;
+            radarCmd.radarMode = 0x01;  // STOP
+            radarCmd.flag = 0x00;       // 사용 안 할 경우라도 초기화
+            radarCmd.priority_select = 0x02; // targetId 있음
+            radarCmd.targetId = selectedTarget.id;
+            auto radarPacket = Serializer::serializeRadarModeChange(radarCmd);
+            if (manager.hasMFRSender())
+            {
+                manager.sendToMFR(radarPacket);
+                std::cout << "[LC] 레이더 정지모드 전송 → radarId=" << radarCmd.radarId
+                        << ", targetId=" << radarCmd.targetId << "\n";
+            }
+
             LaunchCommand cmd;
             cmd.launcherId = ls.launchSystemId;
 

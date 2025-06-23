@@ -1,6 +1,7 @@
 #pragma once
 #include "SystemStatus.h"
 #include "CommonMessage.h"
+#include "Serializer.h"
 #include "IStatusSender.h"
 #include "IReceiver.h"
 #include "SenderType.h"
@@ -22,6 +23,7 @@ private:
     //수정필요
     std::shared_ptr<SerialLS> serialLS;
 
+    unsigned int locked_target_id = 0; // 현재 잠금된 표적 ID
 public:
     // 실행
     void run();
@@ -85,6 +87,8 @@ public:
 
     void startStatusPrintingLoop();
 
+    void setTargetLock(unsigned int targetId);
+    void getTargetLock(unsigned int& targetId) const;
 
     void printStatus() const ;
 };

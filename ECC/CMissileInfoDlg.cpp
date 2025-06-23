@@ -110,8 +110,30 @@ void CMissileInfoDlg::SetMissileStatus(const MissileStatus& status)
 void CMissileInfoDlg::UpdateUI()
 {
 	CString str;
-	// 격추까지 남은 시간 출력
-	if (m_secondsRemaining > 0)
+
+	double posX = static_cast<double>(m_missileStatus.position.x) / 10000000.0;
+	double posY = static_cast<double>(m_missileStatus.position.y) / 10000000.0;
+
+	str.Format(_T("%d"), m_missileStatus.id);
+	m_staticID.SetWindowText(str);
+
+	str.Format(_T("%.8f"), posX);
+	m_staticPosX.SetWindowText(str);
+
+	str.Format(_T("%.8f"), posY);
+	m_staticPosY.SetWindowText(str);
+
+	str.Format(_T("%lld"), m_missileStatus.position.z);
+	m_staticPosZ.SetWindowText(str);
+
+	str.Format(_T("%d"), m_missileStatus.speed);
+	m_staticSpeed.SetWindowText(str);
+
+	str.Format(_T("%.1f"), m_missileStatus.angle);
+	m_staticAngle.SetWindowText(str);
+
+	// ✅ 격추까지 남은 시간 출력
+	if (m_secondsRemaining > 0 && m_secondsRemaining<100)
 	{
 		int roundedSeconds = (m_secondsRemaining / 3) * 3;
 		str.Format(_T("약%d초 남음"), roundedSeconds + 3);
@@ -122,6 +144,8 @@ void CMissileInfoDlg::UpdateUI()
 	}
 	m_staticShootTime.SetWindowText(str);
 }
+
+
 
 void CMissileInfoDlg::OnTimer(UINT_PTR nIDEvent)
 {

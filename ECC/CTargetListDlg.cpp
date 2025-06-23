@@ -50,17 +50,47 @@ void CTargetListDlg::SetTargetList(const std::vector<TargetStatus>& targets)
 {
 	bool needsUpdate = false;
 
-	// ✅ 1. 크기 비교
-	if (targets.size() != m_prevTargetList.size()) {
+	// 🔹 1. 이번 프레임 기준 최신 hit 상태를 저장
+	m_currentHitMap.clear();
+	for (const auto& newTarget : targets)
+	{
+		m_currentHitMap[newTarget.id] = (newTarget.hit != 0);
+	}
+
+	// 🔹 2. 기존 m_targetList에 새 데이터를 반영
+	for (const auto& newTarget : targets)
+	{
+		auto it = std::find_if(m_targetList.begin(), m_targetList.end(),
+			[&](const TargetStatus& oldTarget) {
+				return oldTarget.id == newTarget.id;
+			});
+
+		if (it != m_targetList.end())
+		{
+			if (it->priority != newTarget.priority || it->hit != newTarget.hit)
+				needsUpdate = true;
+
+			*it = newTarget;  // 값 덮어쓰기
+		}
+		else
+		{
+			m_targetList.push_back(newTarget);
+			needsUpdate = true;
+		}
+	}
+
+	// 🔹 3. 이전 리스트와 비교해 UI 갱신 필요 여부 확인
+	if (m_targetList.size() != m_prevTargetList.size())
+	{
 		needsUpdate = true;
 	}
-	else {
-		// ✅ 2. 개별 항목 비교
-		for (size_t i = 0; i < targets.size(); ++i)
+	else
+	{
+		for (size_t i = 0; i < m_targetList.size(); ++i)
 		{
-			if (targets[i].id != m_prevTargetList[i].id ||
-				targets[i].priority != m_prevTargetList[i].priority ||
-				targets[i].hit != m_prevTargetList[i].hit)
+			if (m_targetList[i].id != m_prevTargetList[i].id ||
+				m_targetList[i].priority != m_prevTargetList[i].priority ||
+				m_targetList[i].hit != m_prevTargetList[i].hit)
 			{
 				needsUpdate = true;
 				break;
@@ -68,24 +98,23 @@ void CTargetListDlg::SetTargetList(const std::vector<TargetStatus>& targets)
 		}
 	}
 
-	// ✅ 3. 변경이 없으면 리턴
 	if (!needsUpdate)
 		return;
 
-	// ✅ 4. 변경됐으니 리스트 갱신
-	m_prevTargetList = targets;
-	m_targetList = targets;
+	// 🔹 4. UI 갱신
+	m_prevTargetList = m_targetList;
 
-	// 🔻 이하 기존 코드 (정렬 + 출력) 그대로 유지
 	m_listTarget.SetRedraw(FALSE);
 	m_listTarget.DeleteAllItems();
 
+	// 🔹 5. 우선순위 내림차순 정렬
 	std::sort(m_targetList.begin(), m_targetList.end(), [](const TargetStatus& a, const TargetStatus& b) {
 		return a.priority > b.priority;
 		});
 
 	int highlightIndex = -1;
 
+	// 🔹 6. 리스트에 출력
 	for (size_t i = 0; i < m_targetList.size(); ++i)
 	{
 		const auto& t = m_targetList[i];
@@ -99,7 +128,13 @@ void CTargetListDlg::SetTargetList(const std::vector<TargetStatus>& targets)
 		aStr1.Format(_T("%.1f"), t.angle1);
 		aStr2.Format(_T("%.1f"), t.angle2);
 		pStr.Format(_T("%d"), t.priority);
-		hitStr = (t.hit != 0) ? _T("O") : _T("X");
+
+		// ✅ hit 상태는 이번 프레임에 들어온 값이 있으면 그 값 사용, 없으면 이전 값 유지
+		auto hitIt = m_currentHitMap.find(t.id);
+		if (hitIt != m_currentHitMap.end())
+			hitStr = hitIt->second ? _T("O") : _T("X");
+		else
+			hitStr = (t.hit != 0) ? _T("O") : _T("X");
 
 		int row = static_cast<int>(i);
 		m_listTarget.InsertItem(row, idStr);
@@ -125,6 +160,8 @@ void CTargetListDlg::SetTargetList(const std::vector<TargetStatus>& targets)
 	m_listTarget.SetRedraw(TRUE);
 	m_listTarget.Invalidate();
 }
+
+
 
 
 void CTargetListDlg::OnLvnItemchangedTargetList(NMHDR* pNMHDR, LRESULT* pResult)

@@ -144,6 +144,7 @@ int MockTargetManager::downTargetStatus(const MissileInfo &missileInfo)
 		{
 			++down_count;
 			down_targets.push_back(target->getTargetInfo());
+			target->updatePos();
 		}
 	}
 

@@ -7,7 +7,7 @@
 #include "MockTargetManager.h"
 #include "MFRSendUDPManager.h"
 
-class MockMissileManager
+class MockMissileManager : public std::enable_shared_from_this<MockMissileManager>
 {
 private:
 	std::shared_ptr<MockTargetManager> mock_target_manager_;
@@ -27,6 +27,8 @@ public:
 
 	// 비행 미사일 관리 함수
 	void flightMissile(const MissileInfo &MissileInfo);
+
+	void setFlightStatus(bool status) { is_flight_ = status; }
 };
 
 #endif // MOCK_MISSILE_MANAGER_H

@@ -8,10 +8,9 @@
 class MotorManagerFactory {
 public:
     static std::unique_ptr<MotorManagerInterface> create(const std::string& type,
-                                                        std::string& device,
-                                                        int uartBaudRate) {
+                                                        const std::string& IP, const int& port) {
         if (type == "REAL") {
-            return std::make_unique<LSMotorManager>(device, uartBaudRate);
+            return std::make_unique<LSMotorManager>(IP, port);
         } else if (type == "TEST") {
             return std::make_unique<TestMotorManager>();
         } else {

@@ -109,14 +109,6 @@ bool loadMfrConfig(const std::string &filepath, MfrConfig &config)
                     config.uartBaudRate = B9600;
                 }
             }
-            else if (key == "IP")
-            {
-                config.motorServerIp = value;
-            }
-            else if (key == "Port")
-            {
-                config.motorServerPort = std::stoi(value);
-            }
         }
     }
     file.close();

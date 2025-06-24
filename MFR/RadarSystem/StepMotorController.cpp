@@ -14,11 +14,15 @@ StepMotorController::StepMotorController()
         }
     }
 #endif
+<<<<<<< HEAD
 std::cout <<"here"<<std::endl;
     // serverIp = mfrConfig.motorServerIp;
     // serverPort = mfrConfig.motorServerPort;
     serverIp = "127.0.0.1";
     serverPort = 8080;
+=======
+
+>>>>>>> 2e72494db2da0a5bbc3b0b7b21ffbd6c40999ffb
     connectToServer();
 }
 
@@ -130,7 +134,7 @@ void StepMotorController::sendCmd(const std::string &cmd)
 {
     if (sock_fd < 0)
     {
-        std::cerr << "[TCP] Socket not connected\n";
+        // std::cerr << "[TCP] Socket not connected\n";
         return;
     }
 

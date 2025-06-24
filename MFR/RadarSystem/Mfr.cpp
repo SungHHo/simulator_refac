@@ -3,11 +3,10 @@
 
 Mfr::Mfr() : goalTargetId(101001), mfrMode(ROTATION_MODE), goalMotorAngle(135.0)
 {
-    // stepMotorManager = new StepMotorController();
-    // std::cout <<"hi"<<std::endl;
+    stepMotorManager = new StepMotorController();
     lcCommManager = new MfrLcCommManager(this);
     simCommManager = new MfrSimCommManager(this);
-    
+
     // startDetectionAlgoThread();
     // requestLcInitData();
 }
@@ -606,7 +605,7 @@ void Mfr::mfrDetectionAlgo()
         // {
         //     stepMotorManager->sendCommand("ROTATION_MODE");
         // }
-        // stepMotorManager->sendCmd("ROTATION_MODE");
+        stepMotorManager->sendCmd("ROTATION_MODE");
         std::vector<std::pair<unsigned int, long long>> targetDistances;
 
         for (const auto &[id, target] : localTargets)
@@ -682,7 +681,7 @@ void Mfr::mfrDetectionAlgo()
 
             std::ostringstream oss;
             oss << std::fixed << std::setprecision(2) << baseAz;
-            // stepMotorManager->sendCmd("STOP_MODE:" + oss.str());
+            stepMotorManager->sendCmd("STOP_MODE:" + oss.str());
 
             for (const auto &[id, target] : localTargets)
             {

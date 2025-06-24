@@ -3,26 +3,10 @@
 
 Mfr::Mfr() : goalTargetId(101001), mfrMode(ROTATION_MODE), goalMotorAngle(135.0)
 {
-<<<<<<< HEAD
-    
-    // if (loadMfrConfig("../config/MFR.ini", mfrConfig))
-    // {
-    //     mfrCoords.latitude = mfrConfig.mfrLatitude;
-    //     mfrCoords.longitude = mfrConfig.mfrLongitude;
-    //     mfrCoords.altitude = mfrConfig.mfrAltitude;
-    // }
-    
-    std::cout << "위도: " << mfrCoords.latitude << std::endl;
-    std::cout << "경도: " << mfrCoords.longitude << std::endl;
-    std::cout << "고도: " << mfrCoords.altitude << std::endl;    
-
-=======
->>>>>>> 7361cdcaece36960a47e7ebcac343fd94edb7d01
     stepMotorManager = new StepMotorController();
-    std::cout <<"hi"<<std::endl;
     lcCommManager = new MfrLcCommManager(this);
     simCommManager = new MfrSimCommManager(this);
-    
+
     // startDetectionAlgoThread();
     // requestLcInitData();
 }
@@ -621,7 +605,7 @@ void Mfr::mfrDetectionAlgo()
         // {
         //     stepMotorManager->sendCommand("ROTATION_MODE");
         // }
-        // stepMotorManager->sendCmd("ROTATION_MODE");
+        stepMotorManager->sendCmd("ROTATION_MODE");
         std::vector<std::pair<unsigned int, long long>> targetDistances;
 
         for (const auto &[id, target] : localTargets)
@@ -697,7 +681,7 @@ void Mfr::mfrDetectionAlgo()
 
             std::ostringstream oss;
             oss << std::fixed << std::setprecision(2) << baseAz;
-            // stepMotorManager->sendCmd("STOP_MODE:" + oss.str());
+            stepMotorManager->sendCmd("STOP_MODE:" + oss.str());
 
             for (const auto &[id, target] : localTargets)
             {

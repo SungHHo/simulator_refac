@@ -14,13 +14,8 @@ StepMotorController::StepMotorController()
         }
     }
 #endif
-std::cout <<"here"<<std::endl;
-    if (loadMfrConfig("../config/MFR.ini", mfrConfig))
-    {
-        serverIp = mfrConfig.motorServerIp;
-        serverPort = mfrConfig.motorServerPort;
-        connectToServer();
-    }
+
+    connectToServer();
 }
 
 StepMotorController::~StepMotorController()
@@ -131,7 +126,7 @@ void StepMotorController::sendCmd(const std::string &cmd)
 {
     if (sock_fd < 0)
     {
-        std::cerr << "[TCP] Socket not connected\n";
+        // std::cerr << "[TCP] Socket not connected\n";
         return;
     }
 

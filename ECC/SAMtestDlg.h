@@ -9,6 +9,9 @@
 #include "MessageCommon.h"
 #include "CTargetListDlg.h"
 #include "CMockTrack.h"
+#include "CLaunchControlDlg.h"
+#include "CTargetInfoDlg.h"
+#include "CMissileInfoDlg.h"
 #include <memory>  // ✅ 스마트 포인터
 
 // CSAMtestDlg 대화 상자
@@ -18,6 +21,9 @@ private:
 	CLeftTopDlg m_leftTop;
 	CLeftBottomDlg m_leftBottom;
 	CRightPaneDlg m_rightPane;
+	CLaunchControlDlg m_launchDlg;
+	CMissileInfoDlg m_missileDlg;
+	CTargetInfoDlg m_targetDlg;
 	CTargetListDlg m_targetListDlg;
 	CMockTrack m_MockTrackDlg;
 	CStatic m_mapArea; // 지도
@@ -35,6 +41,7 @@ public:
 	void sendLSModeChange(unsigned int ls_id, uint8_t mode);
 	void sendMissileLaunch(unsigned int ls_id, unsigned int target_id);
 	void sendLSMove(unsigned int ls_id, Pos2D pos);
+	void SetMissileStatus(const std::vector<MissileStatus>& missiles);
 
 	void receive(int len, const char* packet) override;
 

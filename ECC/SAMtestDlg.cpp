@@ -119,9 +119,26 @@ BOOL CSAMtestDlg::OnInitDialog()
 	m_MockTrackDlg.ShowWindow(SW_SHOW);
 
 	// 오른쪽 패널
-	m_rightPane.Create(IDD_RIGHT_PANE_DLG, this);
+	/*m_rightPane.Create(IDD_RIGHT_PANE_DLG, this);
 	m_rightPane.MoveWindow(leftWidth + centerWidth, 0, rightWidth, height);
-	m_rightPane.ShowWindow(SW_SHOW);
+	m_rightPane.ShowWindow(SW_SHOW);*/
+	// 오른쪽 개별 다이얼로그 생성
+	int rightStartX = leftWidth + centerWidth;
+
+	// 1. 발사통제기
+	m_launchDlg.Create(IDD_LC_INFO_DLG, this);
+	m_launchDlg.MoveWindow(rightStartX, 0, rightWidth, 150);
+	m_launchDlg.ShowWindow(SW_SHOW);
+
+	// 2. 표적 정보
+	m_targetDlg.Create(IDD_TARGET_INFO_DLG, this);
+	m_targetDlg.MoveWindow(rightStartX, 150, rightWidth, 385);
+	m_targetDlg.ShowWindow(SW_SHOW);
+
+	// 3. 미사일 정보
+	m_missileDlg.Create(IDD_MISSILE_INFO_DLG, this);
+	m_missileDlg.MoveWindow(rightStartX, 150 + 385, rightWidth, 385);
+	m_missileDlg.ShowWindow(SW_SHOW);
 
 	m_leftTop.SetParentDlg(this); // CLeftTopDlg에게 부모 다이얼로그를 전달
 	m_leftBottom.SetParentDlg(this); // CLeftBottomDlg에게 부모 다이얼로그를 전달
@@ -199,7 +216,13 @@ HCURSOR CSAMtestDlg::OnQueryDragIcon()
 {
 	return static_cast<HCURSOR>(m_hIcon);
 }
-
+void CSAMtestDlg::SetMissileStatus(const std::vector<MissileStatus>& missiles)
+{
+	if (!missiles.empty())
+	{
+		m_missileDlg.SetMissileStatus(missiles[0]);  // 가장 첫 번째 미사일 정보 표시
+	}
+}
 void CSAMtestDlg::SetGoalTargetId(int id)
 {
 	std::cout << "[setGoalTargetId] goal id: " << goalTargetId << ", " << id << std::endl;
@@ -233,12 +256,12 @@ void CSAMtestDlg::receive(int len, const char* packet)
 				m_leftBottom.SetTargetList(msg.targetList);
 
 				if (!msg.lcList.empty())
-				{
-					m_rightPane.SetLCStatus(msg.lcList[0]);
-				}
+					m_launchDlg.SetLCStatus(msg.lcList[0]);
 
-				m_rightPane.SetMissileStatus(msg.missileList);
-				m_rightPane.SetTargetList(msg.targetList);
+				if (!msg.missileList.empty())
+					m_missileDlg.SetMissileStatus(msg.missileList[0]);  // ✅ 첫 번째 요소 전달
+
+				m_targetDlg.SetTargetList(msg.targetList);
 
 				m_targetListDlg.SetTargetList(msg.targetList);
 

@@ -7,8 +7,8 @@ Mfr::Mfr() : goalTargetId(101001), mfrMode(ROTATION_MODE), goalMotorAngle(135.0)
     lcCommManager = new MfrLcCommManager(this);
     simCommManager = new MfrSimCommManager(this);
 
-    // startDetectionAlgoThread();
-    // requestLcInitData();
+    startDetectionAlgoThread();
+    requestLcInitData();
 }
 
 Mfr::~Mfr()

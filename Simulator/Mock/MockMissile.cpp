@@ -70,13 +70,13 @@ void MockMissile::updatePosMissile()
 		}
 		else
 		{
-			auto now_time = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-			std::cout << "[Current time, MockMissile]: " << std::ctime(&now_time);
-			std::cout << "Missile is still in flight.\n";
+			// auto now_time = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+			// std::cout << "[Current time, MockMissile]: " << std::ctime(&now_time);
+			// std::cout << "Missile is still in flight.\n";
 		}
 
 		sendData();
-		std::this_thread::sleep_for(std::chrono::milliseconds(10));
+		std::this_thread::sleep_for(std::chrono::milliseconds(100));
 	}
 }
 

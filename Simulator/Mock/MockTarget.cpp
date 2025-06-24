@@ -19,7 +19,7 @@ MockTarget::~MockTarget()
 {
 }
 
-void MockTarget::updatePos()
+TargetInfo MockTarget::updatePos()
 {
 	auto now = std::chrono::steady_clock::now();
 	std::chrono::duration<double> elapsed = now - last_time_;
@@ -40,7 +40,7 @@ void MockTarget::updatePos()
 	{
 		sendData();
 		std::cout << "[Target ID " << target_info_.id << "] 격추됨. 전송 및 위치 갱신 중단.\n";
-		return;
+		return target_info_;
 	}
 
 	double elapsed_sec = elapsed.count();
@@ -71,8 +71,11 @@ void MockTarget::updatePos()
 		last_logged = elapsed_sec;
 	}
 
-	sendData();
-	std::this_thread::sleep_for(std::chrono::milliseconds(100));
+	return target_info_;
+
+	// sendData();
+	// std::cout << "send Target data ID : " << target_info_.id << std::endl;
+	// std::this_thread::sleep_for(std::chrono::milliseconds(100));
 }
 
 void MockTarget::sendData()

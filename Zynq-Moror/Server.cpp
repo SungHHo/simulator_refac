@@ -6,6 +6,7 @@
 #include <unistd.h>
 #include <cstring>
 #include <algorithm>
+#include "uart.h"
 
 Server::Server(const std::string &address, int port)
 	: serverAddress(address), port(port), serverSocket(-1), running(false)
@@ -148,6 +149,8 @@ void Server::serverLoop()
 
 void Server::handleClient(int clientSocket)
 {
+	StepMotorController motor;
+	motor.initUart();
 	char buffer[1024];
 
 	while (running)
@@ -168,6 +171,7 @@ void Server::handleClient(int clientSocket)
 
 		// 응답 전송
 		send(clientSocket, message.c_str(), message.length(), 0);
+		motor.sendCommand(message.c_str());
 	}
 
 	std::cout << "Client disconnected" << std::endl;

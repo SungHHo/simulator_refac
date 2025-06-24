@@ -25,7 +25,7 @@ private:
     /// @brief UART Baud Rate
     speed_t uartBaudRate;
     /// @brief Socket 서버 IP
-    std::string serverIp = "169.254.18.161";
+    std::string serverIp = "169.254.18.162";
     /// @brief Socket 서버 Port
     int serverPort = 9000;
 

@@ -44,11 +44,11 @@ void MockTargetManager::RaedTargetIni()
 			{
 				unsigned int id = std::stoul(tokens[0]);
 				long long x = std::stoul(tokens[1]);
-				std::cout << "x : " << x << std::endl;
+				// std::cout << "x : " << x << std::endl;
 				long long y = std::stoul(tokens[2]);
-				std::cout << "y : " << y << std::endl;
+				// std::cout << "y : " << y << std::endl;
 				long long z = std::stoul(tokens[3]);
-				std::cout << "z : " << z << std::endl;
+				// std::cout << "z : " << z << std::endl;
 				double angle = std::stod(tokens[4]);
 				double angle2 = std::stod(tokens[5]);
 				int speed = std::stoi(tokens[6]);
@@ -66,7 +66,6 @@ void MockTargetManager::RaedTargetIni()
 
 				// MockTarget 객체 생성 및 TargetInfo, MFRSendUDPManager 설정
 				std::shared_ptr<MockTarget> target = std::make_shared<MockTarget>(targetInfo, mfr_send_manager_);
-				std::cout << "add " << std::endl;
 
 				// 타겟 추가
 				addTarget(target);
@@ -88,7 +87,7 @@ void MockTargetManager::RaedTargetIni()
 
 	file.close();
 
-	std::cout << "Target list loaded successfully." << std::endl;
+	// std::cout << "Target list loaded successfully." << std::endl;
 }
 
 void MockTargetManager::addTarget(std::shared_ptr<MockTarget> &target)
@@ -121,15 +120,25 @@ void MockTargetManager::removeTarget(const std::vector<TargetInfo> &target_list)
 
 void MockTargetManager::flitghtTarget()
 {
+	std::vector<TargetInfo> target_info_list;
 	// 유효한 타겟만 업데이트
 	for (auto &target : targets)
 	{
 		if (target)
 		{
-			target->updatePos();
+			auto tmp = target->updatePos();
+			target_info_list.push_back(tmp);
 		}
 	}
-	std::this_thread::sleep_for(std::chrono::milliseconds(10));
+
+	for (const auto target_info : target_info_list)
+	{
+		char buffer[1024];
+		std::memcpy(buffer, &target_info, sizeof(target_info));
+		mfr_send_manager_->sendData(buffer, sizeof(target_info));
+		std::cout << "test id : " << target_info.id << std::endl;
+	}
+	std::this_thread::sleep_for(std::chrono::milliseconds(100));
 }
 
 int MockTargetManager::downTargetStatus(const MissileInfo &missileInfo)

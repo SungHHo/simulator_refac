@@ -15,7 +15,7 @@ public:
 	MockTarget(const TargetInfo &target_info, std::shared_ptr<MFRSendUDPManager> mfr_send_manager);
 	~MockTarget();
 
-	void updatePos(); // 위치 업데이트
+	TargetInfo updatePos(); // 위치 업데이트
 	bool downTargetStatus(const MissileInfo &missileInfo);
 	TargetInfo getTargetInfo() const { return target_info_; }
 

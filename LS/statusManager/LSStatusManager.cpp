@@ -48,10 +48,10 @@ void LSStatusManager::init(const std::string &launcherConfigPath)
 
         // Motor 핀 설정 읽기
         std::string motorType = ConfigParser::getValue("Motor", "Type", launcherConfigPath);
-        std::string device = ConfigParser::getValue("Motor", "Device", launcherConfigPath);
-        uint32_t uartBaudRate = static_cast<uint32_t>(ConfigParser::getInt("Motor", "BaudRate", launcherConfigPath));
+        std::string IP = ConfigParser::getValue("Motor", "IP", launcherConfigPath);
+        int port = ConfigParser::getInt("Motor", "Port", launcherConfigPath);
 
-        motorManager = MotorManagerFactory::create(motorType, device, uartBaudRate);
+        motorManager = MotorManagerFactory::create(motorType, IP, port);
 
         std::cout << "[LSStatusManager] Initialized from config: " << launcherConfigPath << "\n";
     }

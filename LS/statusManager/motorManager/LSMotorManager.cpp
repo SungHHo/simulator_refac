@@ -7,69 +7,62 @@
 #include <cstdint>
 #include <sstream>
 #include <iomanip>
-LSMotorManager::LSMotorManager(std::string& device, int& uartBaudRate)
+LSMotorManager::LSMotorManager(const std::string& IP, const int& port)
+    : MotorManagerInterface(), port(port), IP(IP)
 {
-    this->device = device;
-    this->uartBaudRate = static_cast<speed_t>(uartBaudRate);
-    if(!initUart())
-    {
-        std::cerr << "[StepMotorController::initUart] Uart Init Failed" << std::endl;
-    }
+    connectToServer();
 }
 
 LSMotorManager::~LSMotorManager()
 {
-    if (uart_fd >= 0)
+    if (sock_fd >= 0)
     {
-        close(uart_fd);
+        close(sock_fd);
     }
 }
 
-bool LSMotorManager::initUart()
+void LSMotorManager::connectToServer()
 {
-     uart_fd = open(device.c_str(), O_RDWR | O_NOCTTY | O_SYNC);
-    if (uart_fd < 0)
+    sock_fd = socket(AF_INET, SOCK_STREAM, 0);
+    if (sock_fd < 0)
     {
-        std::cerr << "[UART] Failed to open device " << device << std::endl;
-        return false;
+        std::cerr << "[TCP] Socket creation failed\n";
     }
 
-    struct termios tty;
-    if (tcgetattr(uart_fd, &tty) != 0)
+    sockaddr_in serv_addr{};
+    serv_addr.sin_family = AF_INET;
+    serv_addr.sin_port = htons(port);
+
+    if (inet_pton(AF_INET, IP.c_str(), &serv_addr.sin_addr) <= 0)
     {
-        std::cerr << "[UART] Error getting termios attributes" << std::endl;
-        return false;
+        std::cerr << "[TCP] Invalid IP address: " << IP << "\n";
     }
 
-    cfsetospeed(&tty, uartBaudRate);
-    cfsetispeed(&tty, uartBaudRate);
+    std::cout << "[TCP] Trying to connect to " << IP << ":" << port << "...\n";
 
-    tty.c_cflag = (tty.c_cflag & ~CSIZE) | CS8; // 8-bit chars
-    tty.c_iflag &= ~IGNBRK;                     // disable break processing
-    tty.c_lflag = 0;                            // no signaling chars, no echo
-    tty.c_oflag = 0;                            // no remapping, no delays
-    tty.c_cc[VMIN] = 1;                         // read blocks
-    tty.c_cc[VTIME] = 1;                        // timeout 0.1s
-
-    tty.c_iflag &= ~(IXON | IXOFF | IXANY); // shut off xon/xoff ctrl
-    tty.c_cflag |= (CLOCAL | CREAD);        // ignore modem controls
-    tty.c_cflag &= ~(PARENB | PARODD);      // no parity
-    tty.c_cflag &= ~CSTOPB;                 // 1 stop bit
-    tty.c_cflag &= ~CRTSCTS;                // no hardware flow control
-
-    if (tcsetattr(uart_fd, TCSANOW, &tty) != 0)
+    int connect_count = 5;
+    for (int i = 0; i < connect_count; ++i)
     {
-        std::cerr << "[UART] Error setting termios attributes" << std::endl;
-        return false;
-    }
+        if (sock_fd < 0)
+        {
+            std::cerr << "[TCP] Socket not created\n";
+            return;
+        }
 
-    return true;
+        if (connect(sock_fd, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) == 0)
+        {
+            std::cout << "[TCP] Connected to server\n";
+            return;
+        }
+
+        std::cerr << "[TCP] Connection failed. Retrying in 1 second...\n";
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+    }
 }
-
 
 bool LSMotorManager::rotateToAngle(double targetAngle)
 {
-    if (uart_fd < 0)
+    if (sock_fd < 0)
     {
         std::cerr << "[UART] UART not initialized" << std::endl;
         return false;
@@ -77,6 +70,11 @@ bool LSMotorManager::rotateToAngle(double targetAngle)
     std::ostringstream oss;
     oss << std::fixed << std::setprecision(2) << targetAngle;
     std::string cmd = "STOP_MODE:" + oss.str() + "\n";
-    write(uart_fd, cmd.c_str(), cmd.size());
+    ssize_t sent = send(sock_fd, cmd.c_str(), cmd.length(), 0);
+    if (sent < 0)
+    {
+        std::cerr << "[TCP] Failed to send command\n";
+        return false;
+    }
     return true;
 }

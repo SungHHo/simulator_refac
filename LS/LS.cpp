@@ -160,12 +160,12 @@ void LS::launch(const LaunchCommand &command)
     if (simManager && statManager)
     {
         
-        /*if (!statManager->rotateToAngle(command.launch_angle))
+        if (!statManager->rotateToAngle(command.launch_angle_xy))
         {
             std::cerr << "[LS] Failed to rotate to launch angle\n";
             return;
         }
-        */
+        
         simManager->sendMissileInfo(command, *statManager);
     }
     else

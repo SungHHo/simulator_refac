@@ -85,14 +85,14 @@ BOOL CSAMtestDlg::OnInitDialog()
 {
 	CDialogEx::OnInitDialog();
 
-	SetWindowPos(NULL, 0, 0, 2400, 1000, SWP_NOMOVE | SWP_NOZORDER);
+	SetWindowPos(NULL, 0, 0, 2000, 1000, SWP_NOMOVE | SWP_NOZORDER);
 	// 클라이언트 영역 크기 구하기
 	CRect rect;
 	GetClientRect(&rect);
 	int width = rect.Width();
 	int height = rect.Height();
 
-	int leftWidth = 700;
+	int leftWidth = 400;
 	int rightWidth = 700;
 	int centerWidth = width - leftWidth - rightWidth;
 	int halfHeight = height / 2;

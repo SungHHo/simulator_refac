@@ -179,7 +179,7 @@ void CLeftBottomDlg::OnBnClickedButtonMove()
 	dlg.SetParent(m_parent);
 	if (dlg.DoModal() == IDOK)
 	{
-		AfxMessageBox(_T("모드 선택 완료!"));
+		AfxMessageBox(_T("발사대 이동"));
 	}
 }
 
@@ -191,7 +191,7 @@ void CLeftBottomDlg::OnBnClickedButtonLaunch()
 	dlg.SetParent(m_parent);
 	if (dlg.DoModal() == IDOK)
 	{
-		AfxMessageBox(_T("모드 선택 완료!"));
+		AfxMessageBox(_T("미사일 발사"));
 	}
 }
 

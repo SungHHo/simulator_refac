@@ -6,6 +6,7 @@
 #include "CMockTrack.h"
 #include "resource.h"
 #include <ctime>
+#include <iostream>
 
 // CMockTrack 대화 상자
 
@@ -94,11 +95,15 @@ void CMockTrack::OnPaint()
     DrawGrid(dc, graphArea);
     DrawAxis(dc, graphArea);
 
-    if (m_mockData.empty()) return;
+    if (m_mockData.empty())
+    {
+        return;
+    }
 
     const MockPoint& latest = m_mockData.back();
     if (latest.missileHit || latest.targetHit)
     {
+        std::cout << "[CMockTrack::OnPaint()] " << "missile hit? " << latest.missileHit << ", target hit? " << latest.targetHit << std::endl;
         return;
     }
 
@@ -111,10 +116,19 @@ void CMockTrack::OnPaint()
     maxAltitude = 0;
     for (const auto& pt : m_mockData)
     {
-        if (pt.missileAltitude > maxAltitude) maxAltitude = pt.missileAltitude;
-        if (pt.targetAltitude > maxAltitude) maxAltitude = pt.targetAltitude;
+        if (pt.missileAltitude > maxAltitude)
+        {
+            maxAltitude = pt.missileAltitude;
+        }
+        if (pt.targetAltitude > maxAltitude)
+        {
+            maxAltitude = pt.targetAltitude;
+        }
     }
-    if (maxAltitude < 1000) maxAltitude = 1000;
+    if (maxAltitude < 10000)
+    {
+        maxAltitude = 10000;
+    }
 
     // ──────────────── 미사일 고도 곡선 ────────────────
     CPen penMissile(PS_SOLID, 2, RGB(0, 0, 255));  // 파란색

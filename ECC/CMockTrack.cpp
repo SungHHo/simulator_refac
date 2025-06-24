@@ -62,7 +62,6 @@ void CMockTrack::AddMockData(double missileAltitude, double targetAltitude, bool
     {
         m_mockData.pop_front();
     }
-
     Invalidate();
 }
 
@@ -83,6 +82,7 @@ void CMockTrack::OnTimer(UINT_PTR nIDEvent)
 
 void CMockTrack::OnPaint()
 {
+    std::cout << "hi" << std::endl;
     CPaintDC dc(this);
     CRect rect;
     GetClientRect(&rect);
@@ -97,6 +97,7 @@ void CMockTrack::OnPaint()
 
     if (m_mockData.empty())
     {
+        std::cout << "[CMockTrack::OnPaint()] empty" << std::endl;
         return;
     }
 
@@ -107,10 +108,15 @@ void CMockTrack::OnPaint()
         return;
     }
 
+    std::cout << "[CMockTrack::OnPaint()] ok" << std::endl;
+
     double timeStart = m_mockData.front().time;
     double timeEnd = m_mockData.back().time;
     double timeSpan = timeEnd - timeStart;
-    if (timeSpan < 1.0) timeSpan = 1.0;
+    if (timeSpan < 1.0)
+    {
+        timeSpan = 1.0;
+    }
 
     // 최대 고도 계산 (둘 중 큰 값)
     maxAltitude = 0;

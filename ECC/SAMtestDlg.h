@@ -24,12 +24,11 @@ private:
 	HICON m_hIcon;
     std::unique_ptr<ECC_TCP> m_tcp;  // ✅ 스마트 포인터로 변경
 	//std::vector<uint8_t> m_receiveBuffer;
-	CMockTrack m_mockTrack;
+	//CMockTrack m_mockTrack;
 	int goalTargetId = -1;
+
 public:
 	CSAMtestDlg(CWnd* pParent = nullptr);
-
-
 	//void init(ECC_TCP* tcp);  // ❓ 외부에서 주입한다면 여전히 포인터일 수도 있음
 	void sendStatusRequest();
 	void sendRadarModeChange(unsigned int radar_id, uint8_t mode, uint8_t priority_select, unsigned int target_id);
@@ -55,4 +54,6 @@ protected:
 	afx_msg void OnDestroy();                 // ⛔ 타이머 해제 등 다른 자원 해제 용도
 
 	DECLARE_MESSAGE_MAP()
+public:
+	void SetGoalTargetId(int id);
 };

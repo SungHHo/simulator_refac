@@ -6,7 +6,7 @@
 #include "SAMtest.h"
 #include "afxdialogex.h"
 #include "CRightPaneDlg.h"
-
+#include <iostream>
 
 // CRightPaneDlg 대화 상자
 
@@ -77,7 +77,9 @@ void CRightPaneDlg::SetLCStatus(const LCStatus& status) {
 void CRightPaneDlg::SetMissileStatus(const std::vector<MissileStatus>& missiles)
 {
 	if (!missiles.empty())
+	{
 		m_missileDlg.SetMissileStatus(missiles[0]);  // 가장 첫 번째 미사일 정보 표시
+	}
 }
 
 void CRightPaneDlg::SetTargetList(const std::vector<TargetStatus>& targets)

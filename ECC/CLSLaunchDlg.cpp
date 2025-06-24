@@ -69,6 +69,7 @@ void CLSLaunchDlg::OnBnClickedButtonLsLaunch()
 
 		if (m_parent)
 		{
+			m_parent->SetGoalTargetId(m_selectedTargetID);
 			m_parent->sendMissileLaunch(
 				m_lsId,
 				m_selectedTargetID

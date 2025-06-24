@@ -8,7 +8,8 @@
 
 #define IDT_GRAPH_TIMER 1001
 
-struct MockPoint {
+struct MockPoint
+{
 	double missileAltitude;     // m
 	double targetAltitude;      // m
 	bool missileHit;
@@ -26,8 +27,6 @@ public:
 	CMockTrack(CWnd* pParent = nullptr);   // 표준 생성자입니다.
 	virtual ~CMockTrack();
 	void CMockTrack::UpdateFromMock(const MissileStatus&, const TargetStatus&, double);
-	void CMockTrack::UpdateFromMissile(const MissileStatus&, double);
-	void CMockTrack::UpdateFromTarget(const MissileStatus&, double);
 	enum { IDD = IDD_MOCK_TRACK };
 
 // 대화 상자 데이터입니다.
@@ -49,8 +48,6 @@ private:
 	double GetCurrentTimeSeconds() const;
 
 	void AddMockData(double missileAltitude, double targetAltitude, bool missileHit, bool targetHit, double time);
-	void AddMissileData(double time, double altitude);
-	void AddTargetData(double time, double altitude);
 	void ClearData();
 	void DrawGrid(CDC& dc, const CRect& area);
 	void DrawAxis(CDC& dc, const CRect& area);

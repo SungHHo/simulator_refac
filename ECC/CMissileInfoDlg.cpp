@@ -51,9 +51,9 @@ BOOL CMissileInfoDlg::OnInitDialog()
 	m_listMissileInfo.InsertColumn(1, _T("위도"), LVCFMT_LEFT, 100);
 	m_listMissileInfo.InsertColumn(2, _T("경도"), LVCFMT_LEFT, 100);
 	m_listMissileInfo.InsertColumn(3, _T("고도"), LVCFMT_LEFT, 50);
-	m_listMissileInfo.InsertColumn(4, _T("속도"), LVCFMT_LEFT, 50);
+	m_listMissileInfo.InsertColumn(4, _T("속도"), LVCFMT_LEFT, 80);
 	m_listMissileInfo.InsertColumn(5, _T("각도"), LVCFMT_LEFT, 50);
-	m_listMissileInfo.InsertColumn(6, _T("격추"), LVCFMT_LEFT, 50);
+	m_listMissileInfo.InsertColumn(6, _T("격추"), LVCFMT_LEFT, 80);
 	m_listMissileInfo.InsertColumn(7, _T("남은 시간"), LVCFMT_LEFT, 80);
 
 	return TRUE;
@@ -65,7 +65,10 @@ void CMissileInfoDlg::SetMissileStatus(const MissileStatus& status)
 	auto now_ms = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
 
 	int secondsRemaining = static_cast<int>((status.predicted_time - now_ms) / 1000);
-	if (secondsRemaining < 0) secondsRemaining = 0;
+	if (secondsRemaining < 0)
+	{
+		secondsRemaining = 0;
+	}
 
 	m_missileStatus = status;
 

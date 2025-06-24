@@ -15,12 +15,11 @@ StepMotorController::StepMotorController()
     }
 #endif
 std::cout <<"here"<<std::endl;
-    if (loadMfrConfig("../config/MFR.ini", mfrConfig))
-    {
-        serverIp = mfrConfig.motorServerIp;
-        serverPort = mfrConfig.motorServerPort;
-        connectToServer();
-    }
+    // serverIp = mfrConfig.motorServerIp;
+    // serverPort = mfrConfig.motorServerPort;
+    serverIp = "127.0.0.1";
+    serverPort = 8080;
+    connectToServer();
 }
 
 StepMotorController::~StepMotorController()

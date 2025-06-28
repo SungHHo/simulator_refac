@@ -32,7 +32,7 @@ BOOL CMFRModeSelectDlg::OnInitDialog()
 	CDialogEx::OnInitDialog();
 
 	// ✅ 고정 타겟 ID "0000"을 가장 위에 추가
-	m_comboTargetID.AddString(_T("0000"));
+	
 
 	// ✅ 서버에서 전달받은 표적 목록을 콤보박스에 출력
 	for (const auto& target : m_targetList) {

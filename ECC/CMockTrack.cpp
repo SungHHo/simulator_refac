@@ -51,8 +51,16 @@ double CMockTrack::GetCurrentTimeSeconds() const
 
 void CMockTrack::UpdateFromMock(const MissileStatus& missile, const TargetStatus& target, double currentTime)
 {
+    // 🔹 새로운 타겟이 들어오면 이전 곡선을 초기화
+    if (target.id != m_currentTargetId)
+    {
+        ClearData();
+        m_currentTargetId = target.id;
+    }
+
     AddMockData(missile.position.z, target.position.z, missile.hit, target.hit, currentTime);
 }
+
 
 void CMockTrack::AddMockData(double missileAltitude, double targetAltitude, bool missileHit, bool targetHit, double time)
 {

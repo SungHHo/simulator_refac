@@ -299,6 +299,8 @@ namespace Airsuface_map.Views
                 var (marker, circle) = CreateMFRMarker(mfr, 40.0);
                 MapControl.Markers.Add(marker);
                 MapControl.Markers.Add(circle);
+                var targetCircle = CreateCircle(new PointLatLng(mfr.X, mfr.Y), 31.1, 72, Brushes.Blue);
+                MapControl.Markers.Add(targetCircle);
             }
         }
 
@@ -410,7 +412,7 @@ namespace Airsuface_map.Views
             {
                 Text = $"LC {lc.Id}",
                 Foreground = Brushes.Black,
-                Background = Brushes.Transparent, // 반드시 투명!
+                Background = Brushes.White, // 반드시 투명!
                 FontWeight = FontWeights.Bold,
                 FontSize = 11,
                 Margin = new Thickness(0, 2, 0, 0),
@@ -476,7 +478,7 @@ namespace Airsuface_map.Views
             {
                 Text = $"LS {ls.Id}",
                 Foreground = Brushes.Black,
-                Background = Brushes.Transparent, // 반드시 투명으로!
+                Background = Brushes.White, // 반드시 투명으로!
                 FontWeight = FontWeights.Bold,
                 FontSize = 11,
                 Margin = new Thickness(0, 2, 0, 0),

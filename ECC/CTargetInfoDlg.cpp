@@ -67,58 +67,82 @@ BOOL CTargetInfoDlg::OnInitDialog()
 
 void CTargetInfoDlg::SetTargetList(const std::vector<TargetStatus>& targets)
 {
-	m_listTargetInfo.DeleteAllItems();
+	// 🔹 현재 선택된 ID 기억
+	CString selectedIDStr;
+	int selIndex = m_comboTargetID.GetCurSel();
+	if (selIndex != CB_ERR)
+		m_comboTargetID.GetLBText(selIndex, selectedIDStr);
+
 	m_comboTargetID.ResetContent();
 	m_targetList.clear();
 
 	if (targets.empty())
 		return;
 
-	// 우선순위 정렬
 	std::vector<TargetStatus> sortedTargets = targets;
 	std::sort(sortedTargets.begin(), sortedTargets.end(), [](const TargetStatus& a, const TargetStatus& b) {
 		return a.priority > b.priority;
 		});
 
+	int restoreIndex = 0;
 	for (size_t i = 0; i < sortedTargets.size(); ++i)
 	{
-		const auto& t = sortedTargets[i];
 		CString str;
-
-		str.Format(_T("%d"), t.id);
-		m_listTargetInfo.InsertItem(static_cast<int>(i), str);
+		str.Format(_T("%d"), sortedTargets[i].id);
 		m_comboTargetID.AddString(str);
 
-		str.Format(_T("%.8f"), static_cast<double>(t.position.x) / 1e7);
-		m_listTargetInfo.SetItemText(static_cast<int>(i), 1, str);
-		str.Format(_T("%.8f"), static_cast<double>(t.position.y) / 1e7);
-		m_listTargetInfo.SetItemText(static_cast<int>(i), 2, str);
-		str.Format(_T("%lld"), t.position.z);
-		m_listTargetInfo.SetItemText(static_cast<int>(i), 3, str);
-		str.Format(_T("%d"), t.speed);
-		m_listTargetInfo.SetItemText(static_cast<int>(i), 4, str);
-		str.Format(_T("%.1f"), t.angle1);
-		m_listTargetInfo.SetItemText(static_cast<int>(i), 5, str);
-		str.Format(_T("%d"), static_cast<int>(t.hit));
-		m_listTargetInfo.SetItemText(static_cast<int>(i), 6, str);
+		if (str == selectedIDStr)
+			restoreIndex = static_cast<int>(i);
 
-		m_targetList.push_back(t);
+		m_targetList.push_back(sortedTargets[i]);
 	}
 
-	m_comboTargetID.SetCurSel(0);
-	UpdateListSelectionFromCombo();
+	m_comboTargetID.SetCurSel(restoreIndex);
+	UpdateListSelectionFromCombo(); // 콤보 선택된 항목 기준으로 리스트뷰 출력
 }
+
+
 
 void CTargetInfoDlg::UpdateListSelectionFromCombo()
 {
 	int sel = m_comboTargetID.GetCurSel();
-	if (sel != CB_ERR)
+	if (sel == CB_ERR)
+		return;
+
+	CString selectedIDStr;
+	m_comboTargetID.GetLBText(sel, selectedIDStr);
+	int selectedID = _ttoi(selectedIDStr);
+
+	m_listTargetInfo.DeleteAllItems();
+
+	for (const auto& t : m_targetList)
 	{
-		m_listTargetInfo.SetItemState(-1, 0, LVIS_SELECTED); // 전체 선택 해제
-		m_listTargetInfo.SetItemState(sel, LVIS_SELECTED | LVIS_FOCUSED, LVIS_SELECTED | LVIS_FOCUSED);
-		m_listTargetInfo.EnsureVisible(sel, FALSE);
+		if (t.id != selectedID)
+			continue; // 선택된 ID와 다르면 스킵
+
+		CString str;
+		int row = 0; // 하나만 출력
+
+		str.Format(_T("%d"), t.id);
+		m_listTargetInfo.InsertItem(row, str);
+
+		str.Format(_T("%.8f"), static_cast<double>(t.position.x) / 1e7);
+		m_listTargetInfo.SetItemText(row, 1, str);
+		str.Format(_T("%.8f"), static_cast<double>(t.position.y) / 1e7);
+		m_listTargetInfo.SetItemText(row, 2, str);
+		str.Format(_T("%lld"), t.position.z);
+		m_listTargetInfo.SetItemText(row, 3, str);
+		str.Format(_T("%d"), t.speed);
+		m_listTargetInfo.SetItemText(row, 4, str);
+		str.Format(_T("%.1f"), t.angle1);
+		m_listTargetInfo.SetItemText(row, 5, str);
+		str.Format(_T("%d"), static_cast<int>(t.hit));
+		m_listTargetInfo.SetItemText(row, 6, str);
+
+		break; // 한 표적만 표시 후 종료
 	}
 }
+
 
 
 #include <chrono>

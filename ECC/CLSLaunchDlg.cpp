@@ -30,7 +30,7 @@ BOOL CLSLaunchDlg::OnInitDialog()
 	CDialogEx::OnInitDialog();
 
 	// ✅ 고정된 "0000" 타겟을 콤보박스에 가장 먼저 추가
-	m_comboTargetID.AddString(_T("0000"));
+	
 
 	// ✅ 서버에서 전달받은 표적 리스트 삽입
 	for (const auto& target : m_targetList)

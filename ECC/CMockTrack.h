@@ -45,6 +45,7 @@ protected:
 private:
 	std::deque<MockPoint> m_mockData;
 	double m_startTime = 0;
+	int m_currentTargetId = -1;  // 현재 출력 중인 타겟 ID
 	double GetCurrentTimeSeconds() const;
 
 	void AddMockData(double missileAltitude, double targetAltitude, bool missileHit, bool targetHit, double time);

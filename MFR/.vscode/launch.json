@@ -1,0 +1,24 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "C++ debug",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/RadarSystem/build/radar",  // 실행 파일 경로
+      "args": [],  // 실행 인자
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "setupCommands": [
+        {
+          "description": "디버깅 정보를 위한 gdb 설정",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ]
+    }
+  ]
+}

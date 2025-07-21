@@ -1,0 +1,12 @@
+C:\workspace_nex1\SAMtest\CLaunchControlDlg.cpp;C:\workspace_nex1\SAMtest\SAMtest\x64\Debug\CLaunchControlDlg.obj
+C:\workspace_nex1\SAMtest\CLeftBottomDlg.cpp;C:\workspace_nex1\SAMtest\SAMtest\x64\Debug\CLeftBottomDlg.obj
+C:\workspace_nex1\SAMtest\CLeftTopDlg.cpp;C:\workspace_nex1\SAMtest\SAMtest\x64\Debug\CLeftTopDlg.obj
+C:\workspace_nex1\SAMtest\CMissileInfoDlg.cpp;C:\workspace_nex1\SAMtest\SAMtest\x64\Debug\CMissileInfoDlg.obj
+C:\workspace_nex1\SAMtest\CRightPaneDlg.cpp;C:\workspace_nex1\SAMtest\SAMtest\x64\Debug\CRightPaneDlg.obj
+C:\workspace_nex1\SAMtest\CTargetInfoDlg.cpp;C:\workspace_nex1\SAMtest\SAMtest\x64\Debug\CTargetInfoDlg.obj
+C:\workspace_nex1\SAMtest\CTestReceiverDlg.cpp;C:\workspace_nex1\SAMtest\SAMtest\x64\Debug\CTestReceiverDlg.obj
+C:\workspace_nex1\SAMtest\MessageDeserializer.cpp;C:\workspace_nex1\SAMtest\SAMtest\x64\Debug\MessageDeserializer.obj
+C:\workspace_nex1\SAMtest\pch.cpp;C:\workspace_nex1\SAMtest\SAMtest\x64\Debug\pch.obj
+C:\workspace_nex1\SAMtest\SAMtest.cpp;C:\workspace_nex1\SAMtest\SAMtest\x64\Debug\SAMtest.obj
+C:\workspace_nex1\SAMtest\SAMtestDlg.cpp;C:\workspace_nex1\SAMtest\SAMtest\x64\Debug\SAMtestDlg.obj
+C:\workspace_nex1\SAMtest\TcpClient.cpp;C:\workspace_nex1\SAMtest\SAMtest\x64\Debug\TcpClient.obj

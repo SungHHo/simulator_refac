@@ -29,4 +29,3 @@ enum Mode
 #define PACKET_HEADER_SIZE 16
 
 #endif // PACKET_TYPES_H
-

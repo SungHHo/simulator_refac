@@ -1,0 +1,8 @@
+#pragma once
+
+#include "protocol/ByteBuffer.h"
+#include "protocol/Header1.h"
+#include "protocol/Header2.h"
+#include "protocol/Payload2.h"
+#include "protocol/Packet.h"
+#include "protocol/PacketTypes.h"

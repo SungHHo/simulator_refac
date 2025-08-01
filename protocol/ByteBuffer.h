@@ -1,5 +1,5 @@
-#ifndef BYTE_BUFFER_H
-#define BYTE_BUFFER_H
+#ifndef BYTEBUFFER_H
+#define BYTEBUFFER_H
 
 #include <vector>
 #include <stdint.h>

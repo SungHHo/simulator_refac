@@ -1,0 +1,1 @@
+/usr/bin/c++ CMakeFiles/MfrTest.dir/Mfr.cpp.o CMakeFiles/MfrTest.dir/communication/MfrLcCommunicationManager.cpp.o CMakeFiles/MfrTest.dir/config/MfrConfig.cpp.o CMakeFiles/MfrTest.dir/parsing/MfrParsing.cpp.o -o MfrTest 

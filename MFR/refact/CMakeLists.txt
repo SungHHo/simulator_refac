@@ -1,15 +1,18 @@
 cmake_minimum_required(VERSION 3.10)
 project(Mfr)
 
-set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(PROTOCOL_LIB_PATH /usr/local/lib)
+set(PROTOCOL_INCLUDE_PATH /usr/local/include)
 
 include_directories(
-    ../../protocol
+    ${PROTOCOL_INCLUDE_PATH}
+    ../../protocol 
     communication
     config
     parsing
 )
+
+link_directories(${PROTOCOL_LIB_PATH})
 
 add_executable(MfrTest
     Mfr.cpp
@@ -17,3 +20,5 @@ add_executable(MfrTest
     config/MfrConfig.cpp
     parsing/MfrParsing.cpp
 )
+
+target_link_libraries(MfrTest protocol)

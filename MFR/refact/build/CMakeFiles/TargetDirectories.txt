@@ -1,3 +1,0 @@
-/home/ubuntujhiwhoon/github_ws/simulator_refac/MFR/refact/build/CMakeFiles/MfrTest.dir
-/home/ubuntujhiwhoon/github_ws/simulator_refac/MFR/refact/build/CMakeFiles/edit_cache.dir
-/home/ubuntujhiwhoon/github_ws/simulator_refac/MFR/refact/build/CMakeFiles/rebuild_cache.dir

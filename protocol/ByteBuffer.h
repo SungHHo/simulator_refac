@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <stdint.h>
+#include <cstddef>
 
 typedef uint8_t byte;
 
